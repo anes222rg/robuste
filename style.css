@@ -1215,6 +1215,11 @@ body,
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.offer-product:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
 .offer-product::before {
     content: '';
     position: absolute;
