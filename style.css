@@ -1872,7 +1872,6 @@ body,
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        scroll-snap-type: x mandatory !important;
         gap: 10px !important;
         padding-bottom: 15px !important;
         margin: 0 -15px !important;
@@ -1881,7 +1880,6 @@ body,
     .offer-products .col-md-4 {
         flex: 0 0 85% !important;
         max-width: 85% !important;
-        scroll-snap-align: start !important;
     }
 
     /* تعديل حجم بطاقات المنتجات */
@@ -1920,12 +1918,6 @@ body,
 .offer-product:hover {
     transform: scale(1.02);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* تأثير التمرير السلس */
-.offer-products {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
 }
 
 /* أنماط محسنة لزر السلة */
@@ -3651,55 +3643,6 @@ body,
     background: linear-gradient(135deg, #FF8C42, #FF6B35);
 }
 
-/* تحسينات للهاتف (تبقى كما هي) */
-@media (max-width: 768px) {
-    .offers-title {
-        font-size: 2.2rem;
-    }
-    .offer-subtitle {
-        font-size: 1rem;
-        margin-bottom: 30px;
-        padding: 0 15px;
-    }
-    .offer-timer {
-        padding: 20px;
-        margin-bottom: 40px;
-    }
-    .timer-item {
-        min-width: 70px;
-        padding: 15px 10px;
-    }
-    .timer-value {
-        font-size: 2rem;
-    }
-    .timer-label {
-        font-size: 0.8rem;
-    }
-    .offer-products {
-        gap: 15px;
-        padding: 15px 10px 30px;
-    }
-    .offer-product {
-        flex: 0 0 280px;
-    }
-    .offer-product .carousel {
-        height: 200px;
-    }
-    .offer-product-content {
-        padding: 20px;
-    }
-    .offer-product-title {
-        font-size: 1rem;
-        height: 45px;
-    }
-    .offer-product-price {
-        font-size: 1.5rem;
-    }
-    .offer-btn {
-        padding: 14px;
-        font-size: 0.95rem;
-    }
-}
 
 @media (max-width: 576px) {
     .offers-title {
