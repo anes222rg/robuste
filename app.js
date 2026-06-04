@@ -280,7 +280,8 @@ function renderSpecialOffers(offers) {
                     new bootstrap.Carousel(carousel, {
                         interval: 3000,
                         wrap: true,
-                        pause: 'hover'
+                        pause: 'hover',
+                        touch: false
                     });
                 } catch (e) {
                     console.log('Offer carousel error:', e);
