@@ -1260,11 +1260,26 @@ body,
 
 .offer-product .carousel-control-prev:hover,
 .offer-product .carousel-control-next:hover {
-    background: #FF6B35;
-    color: white;
+    opacity: 1;
+    background: rgba(255, 107, 53, 0.3);
 }
 
-/* محتوى المنتج */
+.offer-product-content-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+.offer-product-content-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+.offer-product-content {
+    padding: 25px;
+    background: white;
+    border-radius: 0 0 20px 20px;
+}
+
+/* ===== قسم العروض الثانية ===== */
 .offer-product-content {
     padding: 25px;
     background: white;
