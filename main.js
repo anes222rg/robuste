@@ -103,6 +103,11 @@
             if (product.badge) {
                 productBadge = '<div class="product-badge">' + product.badge + '</div>';
             }
+
+            // حالة المخزون
+            var stockStatus = product.stock > 0 ? 'متوفر' : 'غير متوفر';
+            var stockBadgeClass = product.stock > 0 ? 'stock-available' : 'stock-unavailable';
+            var stockBadge = '<div class="stock-badge ' + stockBadgeClass + '">' + stockStatus + '</div>';
             
             // إنشاء سلايدر للصور
             var carouselIndicators = '';
@@ -138,7 +143,7 @@
             
             var productCard = '<div class="col-6 col-md-4 col-lg-3 mb-4">' +
                 '<div class="product-card card h-100 position-relative" role="link" tabindex="0" data-pid="' + product.id + '">' +
-                productBadge + discountBadge +
+                productBadge + discountBadge + stockBadge +
                 '<div id="carousel-' + product.id + '" class="carousel slide"' + carouselAutoPlay + '>' +
                 '<div class="carousel-indicators">' + carouselIndicators + '</div>' +
                 '<div class="carousel-inner">' + carouselItems + '</div>' +
@@ -150,7 +155,7 @@
                 '<p dir="ltr" class="current-price">' + product.price.toLocaleString() + ' DA</p>' +
                 '</div>' +
                 '<div class="card-footer bg-transparent border-0 mt-auto">' +
-                '<button class="btn btn-orange add-to-cart-btn" data-id="' + product.id + '" aria-label="Ajouter ' + product.title + ' au panier">' +
+                '<button class="btn btn-orange add-to-cart-btn" data-id="' + product.id + '" aria-label="Ajouter ' + product.title + ' au panier"' + (product.stock > 0 ? '' : ' disabled') + '>' +
                 '<i class="bi bi-cart-plus"></i> Ajouter' +
                 '</button>' +
                 '</div>' +
@@ -298,18 +303,110 @@
 
     // ============== إضافة تأثيرات اللمس ==============
     function addTouchEffects() {
-        // تأثير اللمس لأزرار إضافة إلى السلة
+        // تحسين لمس بطاقات المنتجات
+        var productCards = document.querySelectorAll('.product-card');
+        for (var i = 0; i < productCards.length; i++) {
+            var card = productCards[i];
+
+            // رد فعل اللمس
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+                this.style.transition = 'transform 0.1s ease';
+            }, { passive: true });
+
+            card.addEventListener('touchend', function() {
+                this.style.transform = '';
+                this.style.transition = '';
+            }, { passive: true });
+
+            card.addEventListener('touchcancel', function() {
+                this.style.transform = '';
+                this.style.transition = '';
+            }, { passive: true });
+
+            // تحسين ביצוע التمرير
+            card.style.touchAction = 'pan-y pinch-zoom';
+
+            // منع حالات التأرجح العالقة
+            card.addEventListener('touchstart', function(e) {
+                // إزالة أي حالة hover قد تكون عالقة
+                this.classList.remove('hover');
+            }, { passive: true });
+        }
+
+        // تحسين لمس عروض المنتجات الخاصة
+        var offerProducts = document.querySelectorAll('.offer-product');
+        for (var i = 0; i < offerProducts.length; i++) {
+            var offer = offerProducts[i];
+
+            offer.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+                this.style.transition = 'transform 0.1s ease';
+            }, { passive: true });
+
+            offer.addEventListener('touchend', function() {
+                this.style.transform = '';
+                this.style.transition = '';
+            }, { passive: true });
+
+            offer.addEventListener('touchcancel', function() {
+                this.style.transform = '';
+                this.style.transition = '';
+            }, { passive: true });
+
+            offer.style.touchAction = 'pan-y pinch-zoom';
+        }
+
+        // تحسين لمس أزرار الفئات
+        var categoryBtns = document.querySelectorAll('.category-btn');
+        for (var i = 0; i < categoryBtns.length; i++) {
+            var btn = categoryBtns[i];
+
+            btn.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.96)';
+            }, { passive: true });
+
+            btn.addEventListener('touchend', function() {
+                this.style.transform = '';
+            }, { passive: true });
+
+            btn.addEventListener('touchcancel', function() {
+                this.style.transform = '';
+            }, { passive: true });
+        }
+
+        // منع النقر المزدوج العرضي لأزرار الإضافة إلى السلة
         var addToCartBtns = document.querySelectorAll('.add-to-cart-btn, .offer-btn');
         for (var i = 0; i < addToCartBtns.length; i++) {
             addToCartBtns[i].addEventListener('touchstart', function() {
                 this.style.transform = 'scale(0.96)';
             }, { passive: true });
-            
+
             addToCartBtns[i].addEventListener('touchend', function() {
                 this.style.transform = '';
             }, { passive: true });
+
+            addToCartBtns[i].addEventListener('click', function(e) {
+                if (this.dataset.clicked) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                this.dataset.clicked = true;
+                setTimeout(() => delete this.dataset.clicked, 300);
+            }, { passive: false });
         }
-        
+
+        // منع النقرات الشبحية العامة
+        document.addEventListener('click', function(e) {
+            // إذا كان العنصر له بيانات noprocessing، تجاهل النقر
+            if (e.target.hasAttribute('data-noprocessing') ||
+                e.target.closest('[data-noprocessing]')) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
     }
 
     // ============== إعداد أزرار إضافة إلى السلة ==============
@@ -450,19 +547,24 @@
     function renderCart() {
         var cartItems = document.getElementById('cartItems');
         var cartTotal = document.getElementById('cartTotal');
-        
+
         if (!cartItems || !cartTotal) return;
-        
+
         // مسح المحتوى الحالي
         while (cartItems.firstChild) {
             cartItems.removeChild(cartItems.firstChild);
         }
-        
+
         if (cart.length === 0) {
             var emptyDiv = document.createElement('div');
-            emptyDiv.className = 'text-center py-4 text-muted';
+            emptyDiv.className = 'text-center py-5';
             emptyDiv.id = 'emptyCartMessage';
-            emptyDiv.innerHTML = '<i class="bi bi-cart-x display-4 d-block mb-2"></i>سلة المشتريات فارغة';
+            emptyDiv.innerHTML = '<i class="bi bi-cart-x display-4 d-block mb-4" style="font-size: 4rem; opacity: 0.3;"></i>' +
+                                '<h4 class="mb-3">سلة التسوق فارغة</h4>' +
+                                '<p class="text-muted mb-4">لم تقم بإضافة أي منتجات إلى السلة بعد</p>' +
+                                '<a href="#products" class="btn btn-orange btn-lg px-5 py-2" id="emptyCartBtn">' +
+                                '<i class="bi bi-cart-plus me-2"></i> استكشف المنتجات' +
+                                '</a>';
             cartItems.appendChild(emptyDiv);
             cartTotal.textContent = '0 د.ج';
             return;
@@ -1243,41 +1345,108 @@
     function setupProductCardClicks() {
         document.addEventListener('click', function(e) {
             if (isProcessing) return;
-            
+
+            // Handle regular product cards
             var card = e.target.closest('.product-card');
-            if (!card) return;
-            
-            if (e.target.matches('button, a, input, select, textarea, .carousel-control, .carousel-indicators, .carousel-control-prev, .carousel-control-next')) {
-                return;
-            }
-            
-            var pid = card.getAttribute('data-pid') || (card.querySelector('.add-to-cart-btn') && card.querySelector('.add-to-cart-btn').getAttribute('data-id'));
-            if (!pid) return;
-            
-            isProcessing = true;
-            window.location.href = 'product.html?pid=' + encodeURIComponent(pid);
-            
-            setTimeout(function() {
-                isProcessing = false;
-            }, 500);
-        });
-        
-        document.addEventListener('keydown', function(e) {
-            if (isProcessing) return;
-            
-            var focused = document.activeElement;
-            if (!focused || !focused.classList.contains('product-card')) return;
-            
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                var pid = focused.getAttribute('data-pid') || (focused.querySelector('.add-to-cart-btn') && focused.querySelector('.add-to-cart-btn').getAttribute('data-id'));
+            if (card) {
+                if (e.target.matches('button, a, input, select, textarea, .carousel-control, .carousel-indicators, .carousel-control-prev, .carousel-control-next')) {
+                    return;
+                }
+
+                var pid = card.getAttribute('data-pid') || (card.querySelector('.add-to-cart-btn') && card.querySelector('.add-to-cart-btn').getAttribute('data-id'));
                 if (pid) {
                     isProcessing = true;
                     window.location.href = 'product.html?pid=' + encodeURIComponent(pid);
-                    
+
                     setTimeout(function() {
                         isProcessing = false;
                     }, 500);
+                }
+                return;
+            }
+
+            // Handle offer product cards
+            var offerCard = e.target.closest('.offer-product');
+            if (offerCard) {
+                // Exclude carousel controls, add-to-cart buttons, and links
+                if (e.target.matches('button, a, input, select, textarea, .carousel-control, .carousel-indicators, .carousel-control-prev, .carousel-control-next, .offer-btn, .offer-product-content-link')) {
+                    return;
+                }
+
+                // Find the product ID from the first image link or add-to-cart button
+                var pidElement = offerCard.querySelector('a[href*="product.html?pid="], .offer-btn[data-id], .add-to-cart-btn[data-id]');
+                var pid = null;
+
+                if (pidElement) {
+                    if (pidElement.hasAttribute('href') && pidElement.href.includes('product.html?pid=')) {
+                        // Extract PID from href
+                        var match = pidElement.href.match(/pid=(\d+)/);
+                        if (match) pid = match[1];
+                    } else if (pidElement.hasAttribute('data-id')) {
+                        pid = pidElement.getAttribute('data-id');
+                    }
+                }
+
+                if (pid) {
+                    isProcessing = true;
+                    window.location.href = 'product.html?pid=' + encodeURIComponent(pid);
+
+                    setTimeout(function() {
+                        isProcessing = false;
+                    }, 500);
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (isProcessing) return;
+
+            var focused = document.activeElement;
+            if (!focused) return;
+
+            // Handle regular product cards
+            if (focused.classList.contains('product-card')) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    var pid = focused.getAttribute('data-pid') || (focused.querySelector('.add-to-cart-btn') && focused.querySelector('.add-to-cart-btn').getAttribute('data-id'));
+                    if (pid) {
+                        isProcessing = true;
+                        window.location.href = 'product.html?pid=' + encodeURIComponent(pid);
+
+                        setTimeout(function() {
+                            isProcessing = false;
+                        }, 500);
+                    }
+                }
+                return;
+            }
+
+            // Handle offer product cards
+            if (focused.classList.contains('offer-product')) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    // Find the product ID from the first image link or add-to-cart button
+                    var pidElement = focused.querySelector('a[href*="product.html?pid="], .offer-btn[data-id], .add-to-cart-btn[data-id]');
+                    var pid = null;
+
+                    if (pidElement) {
+                        if (pidElement.hasAttribute('href') && pidElement.href.includes('product.html?pid=')) {
+                            // Extract PID from href
+                            var match = pidElement.href.match(/pid=(\d+)/);
+                            if (match) pid = match[1];
+                        } else if (pidElement.hasAttribute('data-id')) {
+                            pid = pidElement.getAttribute('data-id');
+                        }
+                    }
+
+                    if (pid) {
+                        isProcessing = true;
+                        window.location.href = 'product.html?pid=' + encodeURIComponent(pid);
+
+                        setTimeout(function() {
+                            isProcessing = false;
+                        }, 500);
+                    }
                 }
             }
         });

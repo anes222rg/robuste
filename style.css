@@ -201,6 +201,46 @@ body {
     box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
 }
 
+/* حالة المخزون للمنتجات */
+.stock-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stock-available {
+    background: var(--success);
+    color: white;
+}
+
+.stock-unavailable {
+    background: var(--danger);
+    color: white;
+}
+
+/* حالة المخطط للمنتج غير متوفر */
+[data-theme="dark"] .stock-available {
+    background: #4CAF50;
+}
+
+[data-theme="dark"] .stock-unavailable {
+    background: #f44336;
+}
+
+/* تعديل زر الإضافة للمنتج غير متوفر */
+.product-card .add-to-cart-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
 /* سلة المشتريات */
 [data-theme="dark"] .offcanvas {
     background: var(--light) !important;
