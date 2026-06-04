@@ -761,13 +761,24 @@
     }
 
     // إظهار/إخفاء السلة
+    var cartOffcanvasInstance = null;
+
     function toggleCart(forceOpen) {
         try {
             var cartElement = document.getElementById('cartOffcanvas');
             if (!cartElement) return;
             if (typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
-                var cartOffcanvas = new bootstrap.Offcanvas(cartElement);
-                cartOffcanvas.show();
+                if (!cartOffcanvasInstance) {
+                    cartOffcanvasInstance = new bootstrap.Offcanvas(cartElement);
+                    cartElement.addEventListener('hidden.bs.offcanvas', function() {
+                        var backdrops = document.querySelectorAll('.offcanvas-backdrop');
+                        for (var i = 0; i < backdrops.length; i++) {
+                            backdrops[i].remove();
+                        }
+                        document.body.classList.remove('offcanvas-open', 'modal-open');
+                    });
+                }
+                cartOffcanvasInstance.show();
             } else {
                 cartElement.classList.add('show');
                 document.body.classList.add('offcanvas-open');
