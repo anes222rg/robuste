@@ -204,7 +204,7 @@ body {
 /* حالة المخزون للمنتجات */
 .stock-badge {
     position: absolute;
-    top: 10px;
+    top: 42px;
     left: 10px;
     padding: 2px 8px;
     border-radius: 12px;
