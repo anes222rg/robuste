@@ -321,16 +321,18 @@
     "price": 5100,
     "old_price": 6500,
     "images": [
-      "images/aspirateur a main 1.jpg",
-      "images/aspirateur a main 2.jpg"
+      "images/ASPIRATEUR SOUFFLEUR A MAIN.png",
+      "images/ASPIRATEUR SOUFFLEUR A MAIN 2.png",
+      "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png"
     ],
-    "description_short": "Aspirateur-souffleur portable 800W",
-    "description_long": "Aspirateur-souffleur à main AM80 portable avec puissance 800W. Idéal pour petits espaces et voiture.",
+    "description_short": "Aspirateur-souffleur portable 80W",
+    "description_long": "Aspirateur-souffleur à main AM80 portable avec puissance 80W. Idéal pour petits espaces et voiture.",
     "features": [
-      "Puissance 800W",
+      "Puissance 80W",
       "Double fonction",
       "Filtre lavable",
-      "Compact et léger"
+      "Compact et léger",
+      "Poids 0.5 kg"
     ],
     "stock": 14,
     "category": "jardin",
@@ -607,17 +609,18 @@
     "price": 5100,
     "old_price": 5500,
     "images": [
-      "images/aspirateur a main 1.jpg",
-      "images/aspirateur a main 2.jpg"
+      "images/ASPIRATEUR SOUFFLEUR A MAIN.png",
+      "images/ASPIRATEUR SOUFFLEUR A MAIN 2.png",
+      "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png"
     ],
     "description_short": "Aspirateur-souffleur portable pratique pour toutes les surfaces",
     "description_long": "L'aspirateur-souffleur à main Robuste est l'accessoire indispensable pour un nettoyage rapide et efficace. Compact et puissant, il vous accompagne partout pour maintenir votre intérieur impeccable. Parfait pour les petites surfaces, la voiture et les endroits difficiles d'accès.",
     "features": [
       "Double fonction aspiration/soufflage",
-      "Moteur puissant 800W",
+      "Moteur puissant 80W",
       "Filtre lavable et réutilisable",
       "Cordon d'alimentation 4m",
-      "Poids léger 1.2kg"
+      "Poids 0.5 kg"
     ],
     "stock": 8,
     "category": "maison",
