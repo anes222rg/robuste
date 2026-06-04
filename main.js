@@ -1270,8 +1270,7 @@
                     new bootstrap.Carousel(carousel, {
                         interval: 3000,
                         wrap: true,
-                        pause: 'hover',
-                        touch: false
+                        pause: 'hover'
                     });
                 } catch (e) {
                     console.log('Offer carousel error:', e);
