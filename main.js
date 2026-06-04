@@ -522,17 +522,15 @@
 
     // تحديث عداد السلة
     function updateCartCount() {
-        var cartCount = document.getElementById('cartCount');
         var cartCountFloat = document.getElementById('cartCountFloat');
         var checkoutBtn = document.getElementById('checkoutBtn');
         
-        if (!cartCount || !checkoutBtn) return;
+        if (!checkoutBtn) return;
         
         var count = 0;
         for (var i = 0; i < cart.length; i++) {
             count += cart[i].quantity || 0;
         }
-        cartCount.textContent = count;
         if (cartCountFloat) cartCountFloat.textContent = count;
         checkoutBtn.disabled = count === 0;
         
