@@ -666,6 +666,7 @@
         
         try {
             var cartElement = document.getElementById('cartOffcanvas');
+            if (!cartElement) return;
             if (typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
                 var cartOffcanvas = new bootstrap.Offcanvas(cartElement);
                 cartOffcanvas.show();
@@ -738,9 +739,6 @@
 
     // إرسال الطلب
     function submitOrder() {
-        var productName = document.getElementById('productName').value;
-        var productPrice = document.getElementById('productPriceValue').value;
-        var productImage = document.getElementById('productImageUrl').value;
         var fullName = document.getElementById('fullName').value;
         var phone = document.getElementById('phone').value;
         var email = document.getElementById('email').value || 'لم يتم تقديمه';
@@ -791,8 +789,10 @@
         
         // تعطيل زر الإرسال أثناء المعالجة
         var submitBtn = document.getElementById('submitOrderBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>جاري المعالجة...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>جاري المعالجة...';
+        }
         
         var orderId = 'ORD-' + Date.now();
         
@@ -884,8 +884,10 @@
         
         // إعادة تعيين زر الإرسال
         var submitBtn = document.getElementById('submitOrderBtn');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'تأكيد الطلب';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'تأكيد الطلب';
+        }
     }
 
     function clearCartAndResetForm() {
@@ -913,18 +915,26 @@
         showStatus('حدث خطأ أثناء إرسال الطلب: ' + errorMessage, 'error');
         
         // إعادة تمكين زر الإرسال
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'تأكيد الطلب';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'تأكيد الطلب';
+        }
     }
 
     // ============== وظائف الاتصال ==============
 
     // إرسال رسالة الاتصال
     function sendContactMessage() {
-        var name = document.getElementById('contactName').value;
-        var email = document.getElementById('contactEmail').value;
-        var phone = document.getElementById('contactPhone').value || 'لم يتم تقديمه';
-        var message = document.getElementById('contactMessage').value;
+        var nameEl = document.getElementById('contactName');
+        var emailEl = document.getElementById('contactEmail');
+        var phoneEl = document.getElementById('contactPhone');
+        var messageEl = document.getElementById('contactMessage');
+        if (!nameEl || !emailEl || !messageEl) return;
+        
+        var name = nameEl.value;
+        var email = emailEl.value;
+        var phone = phoneEl.value || 'لم يتم تقديمه';
+        var message = messageEl.value;
         
         if (!name || !email || !message) {
             showStatus('الرجاء ملء جميع الحقول المطلوبة', 'error');
@@ -937,8 +947,8 @@
         // عرض حالة التحميل
         var contactSpinner = document.getElementById('contactSpinner');
         var contactSubmitText = document.getElementById('contactSubmitText');
-        contactSpinner.classList.remove('d-none');
-        contactSubmitText.textContent = 'جاري الإرسال...';
+        if (contactSpinner) contactSpinner.classList.remove('d-none');
+        if (contactSubmitText) contactSubmitText.textContent = 'جاري الإرسال...';
         
         if (typeof emailjs !== 'undefined') {
             // إرسال رسالة الاتصال عبر EmailJS
@@ -966,14 +976,14 @@
                 showStatus('حدث خطأ أثناء إرسال الرسالة: ' + errorMessage, 'error');
             })
             .finally(function() {
-                contactSpinner.classList.add('d-none');
-                contactSubmitText.textContent = 'إرسال الرسالة';
+                if (contactSpinner) contactSpinner.classList.add('d-none');
+                if (contactSubmitText) contactSubmitText.textContent = 'إرسال الرسالة';
                 isProcessing = false;
             });
         } else {
             showStatus('تعذر إرسال الرسالة. يرجى المحاولة لاحقاً.', 'error');
-            contactSpinner.classList.add('d-none');
-            contactSubmitText.textContent = 'إرسال الرسالة';
+            if (contactSpinner) contactSpinner.classList.add('d-none');
+            if (contactSubmitText) contactSubmitText.textContent = 'إرسال الرسالة';
             isProcessing = false;
         }
     }
@@ -1502,7 +1512,8 @@ function scrollOffers(direction) {
 }
 // أضفه داخل علامة <script> في نهاية الملف أو في main.js
 window.addEventListener('scroll', function() {
-    const navbar = document.querySelector('.glass-navbar');
+    var navbar = document.querySelector('.glass-navbar');
+    if (!navbar) return;
     if (window.scrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
