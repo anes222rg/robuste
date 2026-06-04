@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Robuste eulma - أجهزة منزلية فاخرة، ضمان سنتان، توصيل سريع في الجزائر">
+<title>ROBUSTE | تفاصيل المنتج</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<!-- Bootstrap RTL + Icons + AOS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<!-- EmailJS & Firebase -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/product.css">
+<link rel="stylesheet" href="assets/css/cart.css">
+</head>
+<body>
+
+<!-- نافبار زجاجي مطابق لـ index -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" alt="Robuste" style="width: 160px;">
+            <span class="d-none d-lg-inline fw-bold fs-4 ms-2" style="color: var(--primary);">ROBUSTE eulma</span>
+        </a>
+        <div class="d-flex align-items-center">
+            <button class="theme-toggle" id="themeToggle"><i class="bi bi-moon"></i></button>
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">الرئيسية</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#products">المنتجات</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#contact">اتصل بنا</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- سلة عائمة قابلة للسحب -->
+<div class="floating-cart" id="floatingCart">
+    <div class="cart-icon-container">
+        <button class="cart-btn-drag" id="dragCartBtn">
+            <i class="bi bi-cart3"></i>
+            <span id="cartCountFloat">0</span>
+        </button>
+        <span class="cart-label-float">السلة</span>
+    </div>
+</div>
+
+<!-- Toast للمنبهات -->
+<div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
+
+<!-- محتوى المنتج -->
+<div class="container my-5" data-aos="fade-up">
+    <div class="row g-5" id="productDetailRow"></div>
+    <div class="description-section mt-4 p-4 bg-light rounded-3" id="descriptionSection"></div>
+    <div class="related-section mt-5" id="relatedSection"></div>
+</div>
+
+<footer class="py-4 mt-5" style="background: var(--light); border-top:1px solid var(--border-color);">
+    <div class="container text-center"><small class="text-muted">© 2025 ROBUSTE — جميع الحقوق محفوظة</small></div>
+</footer>
+
+<!-- أوف كانفس السلة -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">سلة التسوق</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div id="cartItemsList"></div>
+        <div class="cart-summary mt-3">
+            <div class="d-flex justify-content-between mb-2">
+                <span>المجموع:</span>
+                <strong id="cartTotalAmount" class="text-primary">0 د.ج</strong>
+            </div>
+            <button class="btn btn-orange w-100" id="checkoutBtnCart" onclick="checkoutFromCart()">إتمام الشراء</button>
+        </div>
+    </div>
+</div>
+
+<!-- مودال الطلب -->
+<div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">تأكيد الطلب</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="order-summary mb-4 d-flex gap-3 align-items-center">
+                    <img id="modalProductImg" width="70" class="rounded-3">
+                    <div><h6 id="modalProductTitle"></h6><p id="modalProductPrice" class="text-primary fw-bold"></p></div>
+                </div>
+                <form id="orderForm">
+                    <input type="hidden" id="orderProductName">
+                    <input type="hidden" id="orderProductPrice">
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">الاسم الكامل *</label><input type="text" id="fullName" class="form-control" required></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">رقم الهاتف *</label><input type="tel" id="phone" class="form-control" required></div>
+                    </div>
+                    <div class="mb-3"><label>الولاية *</label><select id="wilayaSelect" class="form-select" required></select></div>
+                    <div class="mb-3"><label>العنوان</label><textarea id="address" class="form-control" rows="2"></textarea></div>
+                    <div class="form-check mb-2"><input class="form-check-input" type="radio" name="payMethod" value="الدفع عند الاستلام" checked> <label>الدفع عند الاستلام</label></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button class="btn btn-orange" id="submitOrderFinal">تأكيد الطلب</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="https://wa.me/213656360457" class="whatsapp-float" target="_blank"><i class="bi bi-whatsapp"></i></a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<!-- Store Config & Services -->
+<script src="assets/config/store-config.js"></script>
+<script src="assets/firebase/firebase-config.js"></script>
+<script src="assets/firebase/emailjs-config.js"></script>
+
+<!-- Utilities -->
+<script src="assets/js/utils/domUtils.js"></script>
+<script src="assets/js/utils/validators.js"></script>
+<script src="assets/js/utils/wilayas.js"></script>
+<script src="assets/js/utils/storageService.js"></script>
+<script src="assets/js/utils/toast.js"></script>
+
+<!-- Services -->
+<script src="assets/js/services/productService.js"></script>
+<script src="assets/js/services/orderService.js"></script>
+<script src="assets/js/services/contactService.js"></script>
+
+<!-- State -->
+<script src="assets/js/state/cartState.js"></script>
+<script src="assets/js/state/themeState.js"></script>
+
+<!-- Components -->
+<script src="assets/js/components/productCard.js"></script>
+<script src="assets/js/components/offerSection.js"></script>
+<script src="assets/js/components/cartUI.js"></script>
+<script src="assets/js/components/slideshow.js"></script>
+<script src="assets/js/components/offerTimer.js"></script>
+<script src="assets/js/components/categoryFilter.js"></script>
+<script src="assets/js/components/carouselManager.js"></script>
+<script src="assets/js/components/touchEffects.js"></script>
+<script src="assets/js/components/floatingCart.js"></script>
+<script src="assets/js/components/productPageUI.js"></script>
+
+<!-- Page -->
+<script src="assets/js/pages/productPage.js"></script>
+
+<script>
+AOS.init({ duration: 800, once: true });
+</script>
+</body>
+</html>
