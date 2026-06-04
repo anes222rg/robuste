@@ -1136,7 +1136,6 @@ body,
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #FF6B35 #ddd;
-    touch-action: pan-y;
 }
 
 .offer-products::-webkit-scrollbar {
