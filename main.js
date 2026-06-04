@@ -252,6 +252,7 @@
             
             offersContainer.innerHTML += offerHTML;
         }
+        initOfferProducts();
     }
 
     // ============== إعداد نظام الفئات ==============

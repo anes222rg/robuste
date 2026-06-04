@@ -270,6 +270,24 @@ function renderSpecialOffers(offers) {
             </div>
         `;
     }).join('');
+
+    // تفعيل التمرير التلقائي للعروض
+    setTimeout(function() {
+        var offerCarousels = document.querySelectorAll('.offer-product .carousel');
+        if (typeof bootstrap !== 'undefined' && bootstrap.Carousel) {
+            offerCarousels.forEach(function(carousel) {
+                try {
+                    new bootstrap.Carousel(carousel, {
+                        interval: 3000,
+                        wrap: true,
+                        pause: 'hover'
+                    });
+                } catch (e) {
+                    console.log('Offer carousel error:', e);
+                }
+            });
+        }
+    }, 100);
 }
         // متغيرات عامة
         let orderModal = null;
