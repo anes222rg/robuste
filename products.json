@@ -642,5 +642,28 @@
     "stock": 5,
     "category": "maison",
     "badge": "Exclusivité"
+  },
+  {
+    "id": 103,
+    "title": "ROBUSTE PANINEUSE ET GRILL 1000W",
+    "price": 6900,
+    "old_price": 8000,
+    "images": [
+      "images/PANINEUSE ET GRILL 1000W.jpg",
+      "images/PANINEUSE ET GRILL 1000W 2.jpg",
+      "images/PANINEUSE ET GRILL 1000W 3.jpg"
+    ],
+    "description_short": "Panineuse et grill 1000W pour des sandwiches grillés et plus",
+    "description_long": "La panineuse et grill Robuste 1000W vous permet de préparer des sandwiches grillés, paninis et bien plus encore. Surface antiadhésive, chauffe rapide et facile à nettoyer.",
+    "features": [
+      "Puissance 1000W",
+      "Surface antiadhésive",
+      "Voyant lumineux de chauffe",
+      "Poignée isolée",
+      "Nettoyage facile"
+    ],
+    "stock": 10,
+    "category": "cuisine",
+    "badge": "Promotion"
   }
 ]
