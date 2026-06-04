@@ -674,6 +674,66 @@ body,
     transform: scale(1.1);
 }
 
+/* ========== زر السلة العائمة ========== */
+.floating-cart {
+    position: fixed;
+    bottom: 100px;
+    left: 20px;
+    z-index: 1100;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+.cart-btn-drag {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transition: var(--transition);
+    position: relative;
+}
+.cart-btn-drag:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+.cart-btn-drag i { font-size: 1.5rem; }
+#cartCountFloat {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--danger);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border: 2px solid white;
+}
+.cart-label-float {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--dark);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px var(--shadow-color);
+}
+[data-theme="dark"] .cart-label-float {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+}
+
 /* بقية الأنماط تبقى كما هي */
 .status-indicator {
     position: fixed;
