@@ -334,26 +334,10 @@
             }, { passive: true });
         }
 
-        // تحسين لمس عروض المنتجات الخاصة
+        // تحسين لمس عروض المنتجات الخاصة - مقاومة للتمرير
         var offerProducts = document.querySelectorAll('.offer-product');
         for (var i = 0; i < offerProducts.length; i++) {
             var offer = offerProducts[i];
-
-            offer.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.98)';
-                this.style.transition = 'transform 0.1s ease';
-            }, { passive: true });
-
-            offer.addEventListener('touchend', function() {
-                this.style.transform = '';
-                this.style.transition = '';
-            }, { passive: true });
-
-            offer.addEventListener('touchcancel', function() {
-                this.style.transform = '';
-                this.style.transition = '';
-            }, { passive: true });
-
             offer.style.touchAction = 'pan-y pinch-zoom';
         }
 

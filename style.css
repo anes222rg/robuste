@@ -1132,9 +1132,11 @@ body,
     gap: 30px;
     padding: 20px 10px 40px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #FF6B35 #ddd;
+    touch-action: pan-y;
 }
 
 .offer-products::-webkit-scrollbar {
@@ -3406,40 +3408,6 @@ body,
 }
 
 /* ===== بطاقات المنتجات في العروض ===== */
-.offer-products {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 30px;
-    padding: 20px 10px 40px;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #FF6B35 #ddd;
-}
-
-.offer-products::-webkit-scrollbar {
-    height: 8px;
-}
-
-.offer-products::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 10px;
-}
-
-.offer-products::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #FF6B35, #FF8C42);
-    border-radius: 10px;
-}
-
-.offer-product {
-    flex: 0 0 360px;
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
-    transition: all 0.4s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
 
 .offer-product:hover {
     transform: translateY(-15px) scale(1.02);
