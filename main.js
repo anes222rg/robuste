@@ -1353,7 +1353,7 @@
             // Handle regular product cards
             var card = e.target.closest('.product-card');
             if (card) {
-                if (e.target.matches('button, a, input, select, textarea, .carousel-control, .carousel-indicators, .carousel-control-prev, .carousel-control-next')) {
+                if (e.target.closest('button, a, input, select, textarea, .carousel-control, .carousel-indicators, .carousel-control-prev, .carousel-control-next')) {
                     return;
                 }
 
@@ -1373,7 +1373,7 @@
             var offerCard = e.target.closest('.offer-product');
             if (offerCard) {
                 // Exclude carousel controls, add-to-cart buttons, and links
-                if (e.target.matches('button, a, input, select, textarea, .carousel-control, .carousel-indicators, .carousel-control-prev, .carousel-control-next, .offer-btn, .offer-product-content-link')) {
+                if (e.target.closest('button, a, input, select, textarea, .carousel-control, .carousel-indicators, .carousel-control-prev, .carousel-control-next, .offer-btn, .offer-product-content-link')) {
                     return;
                 }
 
