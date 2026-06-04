@@ -522,7 +522,6 @@
     // تحديث عداد السلة
     function updateCartCount() {
         var cartCount = document.getElementById('cartCount');
-        var cartCountFloat = document.getElementById('cartCountFloat');
         var checkoutBtn = document.getElementById('checkoutBtn');
         
         if (!cartCount || !checkoutBtn) return;
@@ -532,7 +531,6 @@
             count += cart[i].quantity || 0;
         }
         cartCount.textContent = count;
-        if (cartCountFloat) cartCountFloat.textContent = count;
         checkoutBtn.disabled = count === 0;
         
         // إضافة فئة للزر إذا كان فارغاً
@@ -762,7 +760,12 @@
     }
 
     // إظهار/إخفاء السلة
-    function toggleCart(forceOpen) {
+    function toggleCart() {
+        if (cart.length === 0) {
+            showStatus('سلة المشتريات فارغة', 'info');
+            return;
+        }
+        
         try {
             var cartElement = document.getElementById('cartOffcanvas');
             if (!cartElement) return;
@@ -1685,40 +1688,4 @@ window.addEventListener('scroll', function() {
     } else {
         navbar.classList.remove('scrolled');
     }
-});
-
-// سلة عائمة قابلة للسحب
-document.addEventListener('DOMContentLoaded', function() {
-    var floatingCartElem = document.getElementById('floatingCart');
-    if (!floatingCartElem) return;
-    var isDragging = false, dragOccurred = false, startX, startY, startLeft, startBottom;
-    
-    floatingCartElem.addEventListener('pointerdown', function(e) {
-        isDragging = true; dragOccurred = false;
-        var rect = floatingCartElem.getBoundingClientRect();
-        startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
-        startX = e.clientX; startY = e.clientY;
-        floatingCartElem.style.transition = 'none';
-        e.preventDefault();
-    });
-    
-    window.addEventListener('pointermove', function(e) {
-        if (!isDragging) return;
-        var dx = e.clientX - startX, dy = e.clientY - startY;
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragOccurred = true;
-        var newLeft = startLeft + dx, newBottom = startBottom - dy;
-        newLeft = Math.min(window.innerWidth - 80, Math.max(8, newLeft));
-        newBottom = Math.min(window.innerHeight - 40, Math.max(60, newBottom));
-        floatingCartElem.style.left = newLeft + 'px';
-        floatingCartElem.style.bottom = newBottom + 'px';
-        floatingCartElem.style.top = 'auto'; floatingCartElem.style.right = 'auto';
-    });
-    
-    window.addEventListener('pointerup', function() {
-        if (!isDragging) return;
-        isDragging = false;
-        floatingCartElem.style.transition = '';
-        if (!dragOccurred) toggleCart();
-        dragOccurred = false;
-    });
 });
