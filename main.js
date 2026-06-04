@@ -1486,11 +1486,54 @@
     window.submitOrder = submitOrder;
     window.toggleDarkMode = toggleDarkMode;
     window.addToCart = addToCart;
+    window.toggleCart = toggleCart;
     window.updateQuantity = updateQuantity;
     window.removeFromCart = removeFromCart;
     window.plusSlides1 = plusSlides1;
     window.currentSlide1 = currentSlide1;
     window.hideStatus = hideStatus;
+
+    // سلة عائمة قابلة للسحب
+    function initFloatingCart() {
+        var floatingCartElem = document.getElementById('floatingCart');
+        if (!floatingCartElem) return;
+        var isDragging = false, dragOccurred = false, startX, startY, startLeft, startBottom;
+        
+        floatingCartElem.addEventListener('pointerdown', function(e) {
+            isDragging = true; dragOccurred = false;
+            var rect = floatingCartElem.getBoundingClientRect();
+            startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
+            startX = e.clientX; startY = e.clientY;
+            floatingCartElem.style.transition = 'none';
+            e.preventDefault();
+        });
+        
+        window.addEventListener('pointermove', function(e) {
+            if (!isDragging) return;
+            var dx = e.clientX - startX, dy = e.clientY - startY;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragOccurred = true;
+            var newLeft = startLeft + dx, newBottom = startBottom - dy;
+            newLeft = Math.min(window.innerWidth - 80, Math.max(8, newLeft));
+            newBottom = Math.min(window.innerHeight - 40, Math.max(60, newBottom));
+            floatingCartElem.style.left = newLeft + 'px';
+            floatingCartElem.style.bottom = newBottom + 'px';
+            floatingCartElem.style.top = 'auto'; floatingCartElem.style.right = 'auto';
+        });
+        
+        window.addEventListener('pointerup', function() {
+            if (!isDragging) return;
+            isDragging = false;
+            floatingCartElem.style.transition = '';
+            if (!dragOccurred) toggleCart();
+            dragOccurred = false;
+        });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFloatingCart);
+    } else {
+        initFloatingCart();
+    }
 
 })();
 
@@ -1519,37 +1562,3 @@ window.addEventListener('scroll', function() {
 });
 
 // سلة عائمة قابلة للسحب
-document.addEventListener('DOMContentLoaded', function() {
-    var floatingCartElem = document.getElementById('floatingCart');
-    if (!floatingCartElem) return;
-    var isDragging = false, dragOccurred = false, startX, startY, startLeft, startBottom;
-    
-    floatingCartElem.addEventListener('pointerdown', function(e) {
-        isDragging = true; dragOccurred = false;
-        var rect = floatingCartElem.getBoundingClientRect();
-        startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
-        startX = e.clientX; startY = e.clientY;
-        floatingCartElem.style.transition = 'none';
-        e.preventDefault();
-    });
-    
-    window.addEventListener('pointermove', function(e) {
-        if (!isDragging) return;
-        var dx = e.clientX - startX, dy = e.clientY - startY;
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragOccurred = true;
-        var newLeft = startLeft + dx, newBottom = startBottom - dy;
-        newLeft = Math.min(window.innerWidth - 80, Math.max(8, newLeft));
-        newBottom = Math.min(window.innerHeight - 40, Math.max(60, newBottom));
-        floatingCartElem.style.left = newLeft + 'px';
-        floatingCartElem.style.bottom = newBottom + 'px';
-        floatingCartElem.style.top = 'auto'; floatingCartElem.style.right = 'auto';
-    });
-    
-    window.addEventListener('pointerup', function() {
-        if (!isDragging) return;
-        isDragging = false;
-        floatingCartElem.style.transition = '';
-        if (!dragOccurred) toggleCart();
-        dragOccurred = false;
-    });
-});
