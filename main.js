@@ -1260,11 +1260,29 @@
         }, { passive: true });
     }
 
+    function fitSlideshowToImage() {
+        var c = document.querySelector('.slideshow-container1');
+        if (!c) return;
+        function apply() {
+            var act = c.querySelector('.mySlides1[style*="block"] img') || c.querySelector('.mySlides1 img');
+            if (act && act.naturalWidth && act.naturalHeight) {
+                c.style.aspectRatio = act.naturalWidth + ' / ' + act.naturalHeight;
+                c.style.maxHeight = 'none';
+            }
+        }
+        var imgs = c.querySelectorAll('.mySlides1 img');
+        for (var i = 0; i < imgs.length; i++) {
+            if (imgs[i].complete) { apply(); }
+            imgs[i].addEventListener('load', apply);
+        }
+    }
+
     function initSlides() {
         slideIndex1 = 1;
         showSlides1(slideIndex1);
         resetSlideshowTimer();
         setupSlideshowSwipe();
+        fitSlideshowToImage();
         
         // التأكد من وجود نقاط كافية
         var slides = document.getElementsByClassName("mySlides1");
