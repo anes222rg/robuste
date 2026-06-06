@@ -271,7 +271,7 @@ body {
 /* lightbox */
 .ph-lightbox{ position:fixed; inset:0; z-index:30000; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
 .ph-lightbox.open{ display:flex; }
-.ph-lightbox img{ max-width:95%; max-height:90%; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+.ph-lightbox img{ max-width:92vw; max-height:88vh; width:auto; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.5); background:#fff; }
 .ph-lightbox .ph-close{ position:absolute; top:16px; left:18px; color:#fff; font-size:36px; line-height:1; cursor:pointer; background:none; border:none; }
 #mainProductImg{ cursor:zoom-in; }
 
@@ -520,7 +520,6 @@ body {
       </div>
     </div>
     <div class="description-section mt-4 p-4 bg-light rounded-3" id="descriptionSection"></div>
-    <div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
     <div class="related-section mt-5" id="relatedSection"></div>
 </div>
 
@@ -879,5 +878,6 @@ function closeLightbox(){ try{ var lb=document.getElementById('phLightbox'); if(
 window.openLightbox = openLightbox; window.closeLightbox = closeLightbox;
 window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; window.goToProduct = goToProduct;
 </script>
+<div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
 </body>
 </html>
