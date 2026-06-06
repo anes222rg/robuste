@@ -1106,13 +1106,21 @@
         
         if (!daysElement || !hoursElement || !minutesElement || !secondsElement) return;
         
-        // تاريخ انتهاء العرض (3 أيام من الآن)
-        var endDate = new Date();
-        endDate.setDate(endDate.getDate() + 3);
+        // Real recurring deadline: end of every Sunday 23:59:59 Algeria time (UTC+1); renews weekly
+        function getNextDeadline() {
+            var TZ = 60; // UTC+1 (Algeria, no DST)
+            var nowMs = Date.now();
+            var alg = new Date(nowMs + TZ * 60000);
+            var daysUntilSunday = (7 - alg.getUTCDay()) % 7;
+            var dl = Date.UTC(alg.getUTCFullYear(), alg.getUTCMonth(), alg.getUTCDate() + daysUntilSunday, 23, 59, 59) - TZ * 60000;
+            if (dl - nowMs <= 0) { dl += 7 * 24 * 60 * 60 * 1000; }
+            return dl;
+        }
+        var deadlineMs = getNextDeadline();
         
         function updateTimer() {
-            var now = new Date();
-            var difference = endDate.getTime() - now.getTime();
+            var difference = deadlineMs - Date.now();
+            if (difference <= 0) { deadlineMs = getNextDeadline(); difference = deadlineMs - Date.now(); }
             
             if (difference <= 0) {
                 daysElement.textContent = '00';
