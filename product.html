@@ -559,18 +559,18 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-AOS.init({ duration: 800, once: true });
+if (typeof AOS !== 'undefined') { try { AOS.init({ duration: 800, once: true }); } catch(e){} }
 
 // Firebase + EmailJS
 const firebaseConfig = { apiKey: "AIzaSyBTrnKCYOtfSSDYtmVQbzP2HcwgkLT565Y", authDomain: "robuste-c8e0f.firebaseapp.com", projectId: "robuste-c8e0f", storageBucket: "robuste-c8e0f.appspot.com", messagingSenderId: "975609984963", appId: "1:975609984963:web:a481efb493a88d7bc7af76" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-emailjs.init("k77vdaUWPpnLrfTnS");
+try { if (typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig); } catch(e){ console.warn('Firebase init failed', e); }
+let db = null; try { if (typeof firebase !== 'undefined') db = firebase.firestore(); } catch(e){}
+try { if (typeof emailjs !== "undefined") emailjs.init("k77vdaUWPpnLrfTnS"); } catch(e){}
 
 // قائمة الولايات
 const wilayas = ["أدرار","الشلف","الأغواط","أم البواقي","باتنة","بجاية","بسكرة","بشار","البليدة","البويرة","تمنراست","تبسة","تلمسان","تيارت","تيزي وزو","الجزائر","الجلفة","جيجل","سطيف","سعيدة","سكيكدة","سيدي بلعباس","عنابة","قالمة","قسنطينة","المدية","مستغانم","المسيلة","معسكر","ورقلة","وهران","البيض","إليزي","برج بوعريريج","بومرداس","الطارف","تيندوف","تيسمسيلت","الوادي","خنشلة","سوق أهراس","تيبازة","ميلة","عين الدفلى","النعامة","عين تموشنت","غرداية","غليزان"];
 const wilayaSelect = document.getElementById('wilayaSelect');
-wilayas.forEach(w => { let opt = document.createElement('option'); opt.value = w; opt.textContent = w; wilayaSelect.appendChild(opt); });
+if (wilayaSelect) wilayas.forEach(w => { let opt = document.createElement('option'); opt.value = w; opt.textContent = w; wilayaSelect.appendChild(opt); });
 
 // إدارة السلة
 let cart = [];
@@ -800,7 +800,7 @@ function goToProduct(pid) { window.location.href = `product.html?pid=${pid}`; }
 // سلة قابلة للسحب
 const floatingCartElem = document.getElementById('floatingCart');
 let isDragging = false, dragOccurred = false, startX, startY, startLeft, startBottom;
-floatingCartElem.addEventListener('pointerdown', (e) => {
+if (floatingCartElem) floatingCartElem.addEventListener('pointerdown', (e) => {
     isDragging = true; dragOccurred = false;
     const rect = floatingCartElem.getBoundingClientRect();
     startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
@@ -843,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDarkMode();
     loadCart();
     loadProduct();
-    document.getElementById('submitOrderFinal').addEventListener('click', submitOrderFinal);
+    var __sf = document.getElementById('submitOrderFinal'); if (__sf) __sf.addEventListener('click', submitOrderFinal);
 });
 window.addToCart = addToCart; window.toggleCart = toggleCart; window.checkoutFromCart = checkoutFromCart;
 window.updateQty = updateQty; window.removeCartItem = removeCartItem; window.changeMainImage = changeMainImage;
