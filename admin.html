@@ -146,7 +146,7 @@
       <div class="col-6 col-lg-3">
         <div class="stat-card d-flex align-items-center gap-3">
           <div class="stat-icon" style="background:#fff7ed;color:#c2410c;"><i class="bi bi-cash-coin"></i></div>
-          <div><div class="label">الإيراد التقديري</div><div class="value" id="statRevenue">—</div></div>
+          <div><div class="label">إجمالي قيمة الطلبات</div><div class="value" id="statRevenue">—</div></div>
         </div>
       </div>
     </div>
@@ -161,7 +161,7 @@
       </div>
       <div class="col-12 col-lg-6">
         <div class="chart-card">
-          <h6 class="mb-3"><i class="bi bi-graph-up"></i> الطلبات آخر 14 يوم</h6>
+          <h6 class="mb-3"><i class="bi bi-graph-up"></i> الطلبات آخر 12 شهر</h6>
           <div class="daybars" id="chartDays"></div>
         </div>
       </div>
@@ -461,27 +461,28 @@
       $("chartStatus").innerHTML = bars;
     }
 
-    // --- Orders over the last 14 days (vertical bars) ---
-    var days = [];
-    var today = new Date(); today.setHours(0,0,0,0);
-    for (var i=13;i>=0;i--){ var dd = new Date(today); dd.setDate(today.getDate()-i); days.push({ date: dd, count: 0 }); }
+    // --- Orders over the last 12 months (vertical bars) ---
+    var MONTHS_AR = ["جانفي","فيفري","مارس","أفريل","ماي","جوان","جويلية","أوت","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+    var months = [];
+    var firstOfThisMonth = new Date(); firstOfThisMonth.setDate(1); firstOfThisMonth.setHours(0,0,0,0);
+    for (var i=11;i>=0;i--){ var mm = new Date(firstOfThisMonth.getFullYear(), firstOfThisMonth.getMonth()-i, 1); months.push({ y: mm.getFullYear(), m: mm.getMonth(), count: 0 }); }
     active.forEach(function(o){
       var dt = orderDate(o.data); if (!dt) return;
-      var ds = new Date(dt); ds.setHours(0,0,0,0);
-      for (var j=0;j<days.length;j++){ if (days[j].date.getTime() === ds.getTime()){ days[j].count++; break; } }
+      var oy = dt.getFullYear(), om = dt.getMonth();
+      for (var j=0;j<months.length;j++){ if (months[j].y === oy && months[j].m === om){ months[j].count++; break; } }
     });
-    var dayVals = days.map(function(d){ return d.count; });
-    var maxDay = maxOf(dayVals); if (maxDay < 1) maxDay = 1;
-    var hasDayData = false; for (var k=0;k<dayVals.length;k++){ if (dayVals[k] > 0){ hasDayData = true; break; } }
-    if (!hasDayData){
-      $("chartDays").innerHTML = '<div class="chart-empty" style="width:100%;">لا توجد طلبات في آخر 14 يوم.</div>';
+    var monthVals = months.map(function(d){ return d.count; });
+    var maxMonth = maxOf(monthVals); if (maxMonth < 1) maxMonth = 1;
+    var hasMonthData = false; for (var k=0;k<monthVals.length;k++){ if (monthVals[k] > 0){ hasMonthData = true; break; } }
+    if (!hasMonthData){
+      $("chartDays").innerHTML = '<div class="chart-empty" style="width:100%;">لا توجد طلبات في آخر 12 شهر.</div>';
     } else {
-      var cols = days.map(function(d){
-        var h = Math.round((d.count / maxDay) * 100);
-        var lbl = d.date.getDate() + '/' + (d.date.getMonth()+1);
+      var cols = months.map(function(d){
+        var h = Math.round((d.count / maxMonth) * 100);
+        var lbl = MONTHS_AR[d.m] + ' ' + d.y;
         return '<div class="daybar" title="'+lbl+' — '+d.count+' طلب">'
           + '<div class="col" style="height:'+h+'%;"></div>'
-          + '<span class="d-label">'+d.date.getDate()+'</span>'
+          + '<span class="d-label">'+MONTHS_AR[d.m].slice(0,3)+'</span>'
           + '</div>';
       }).join('');
       $("chartDays").innerHTML = cols;
