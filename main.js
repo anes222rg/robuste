@@ -1804,6 +1804,14 @@ window.addEventListener('scroll', function() {
         for(var i=0;i<slides.length;i++){ track.appendChild(slides[i]); }
         container.insertBefore(track, container.firstChild);
 
+        // 1b) blurred backdrop fill (removes black bars; image stays uncropped)
+        for(var b=0;b<slides.length;b++){
+            var im = slides[b].getElementsByTagName('img')[0];
+            if(im && im.getAttribute('src')){
+                slides[b].style.setProperty('--mhs-bg', "url('" + im.getAttribute('src') + "')");
+            }
+        }
+
         // 2) inject text overlays from config
         for(var s=0;s<slides.length;s++){
             var cfg = HERO_SLIDES[s] || {};
