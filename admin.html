@@ -10,8 +10,9 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<!-- Firebase (same compat SDK version as the rest of the site) -->
+<!-- Firebase (same compat SDK version as the rest of the site) + Auth -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
@@ -20,7 +21,7 @@
   body { font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:var(--bg); color:var(--ink); margin:0; }
 
   #loginGate { position:fixed; inset:0; background:linear-gradient(135deg,#1f2937,#374151); display:flex; align-items:center; justify-content:center; z-index:2000; }
-  #loginGate .card { width:min(92vw,380px); border:none; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+  #loginGate .card { width:min(92vw,400px); border:none; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.35); }
   #loginGate .brand-dot { width:54px;height:54px;border-radius:14px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.6rem; }
 
   .navbar-admin { background:#fff; border-bottom:1px solid var(--line); }
@@ -70,21 +71,23 @@
 </head>
 <body>
 
-<!-- ===================== LOGIN GATE ===================== -->
+<!-- ===================== LOGIN GATE (Firebase Auth) ===================== -->
 <div id="loginGate">
   <div class="card p-4">
     <div class="d-flex align-items-center gap-3 mb-3">
       <div class="brand-dot"><i class="bi bi-shield-lock"></i></div>
       <div>
-        <div class="fw-bold" style="font-size:1.1rem;">لوحة الإدارة</div>
+        <div class="fw-bold" style="font-size:1.1rem;">تسجيل دخول الإدارة</div>
         <div class="text-muted" style="font-size:.85rem;">ROBUSTE · إدارة الطلبات</div>
       </div>
     </div>
+    <label class="form-label fw-semibold">البريد الإلكتروني</label>
+    <input type="email" id="adminEmail" class="form-control form-control-lg mb-2" dir="ltr" placeholder="admin@example.com" autocomplete="username">
     <label class="form-label fw-semibold">كلمة المرور</label>
     <input type="password" id="adminPass" class="form-control form-control-lg" placeholder="••••••••" autocomplete="current-password">
-    <div id="loginError" class="text-danger mt-2" style="font-size:.85rem; display:none;"><i class="bi bi-exclamation-circle"></i> كلمة المرور غير صحيحة</div>
+    <div id="loginError" class="text-danger mt-2" style="font-size:.85rem; display:none;"></div>
     <button id="loginBtn" class="btn btn-brand btn-lg w-100 mt-3"><i class="bi bi-box-arrow-in-left"></i> دخول</button>
-    <p class="text-muted mt-3 mb-0" style="font-size:.72rem; line-height:1.5;">ملاحظة: هذا حاجز حماية بسيط من جانب العميل وليس حماية كاملة. لتأمين حقيقي استخدم Firebase Auth وقواعد Firestore.</p>
+    <p class="text-muted mt-3 mb-0" style="font-size:.72rem; line-height:1.5;">يتم التحقق عبر Firebase Authentication. فقط الحسابات المصرّح لها يمكنها عرض الطلبات.</p>
   </div>
 </div>
 
@@ -94,7 +97,8 @@
   <nav class="navbar navbar-admin py-3">
     <div class="container-xl d-flex justify-content-between align-items-center">
       <span class="logo fs-5"><i class="bi bi-box-seam"></i> ROBUSTE · لوحة الطلبات</span>
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 align-items-center">
+        <span id="adminWho" class="text-muted d-none d-md-inline" style="font-size:.82rem;" dir="ltr"></span>
         <button id="refreshBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> تحديث</button>
         <button id="logoutBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> خروج</button>
       </div>
@@ -185,13 +189,9 @@
   'use strict';
 
   /* =========================================================
-     CONFIG
-     ⚠️ غيّر كلمة المرور أدناه قبل النشر.
-     This is a lightweight client-side gate only.
+     CONFIG — same Firebase project as the storefront.
+     Login now uses Firebase Authentication (Email/Password).
      ========================================================= */
-  var ADMIN_PASSWORD = "robuste2026";
-
-  // Same Firebase project as the storefront (reuse of existing config).
   var firebaseConfig = {
     apiKey: "AIzaSyBTrnKCYOtfSSDYtmVQbzP2HcwgkLT565Y",
     authDomain: "robuste-c8e0f.firebaseapp.com",
@@ -209,7 +209,7 @@
     { key: "تم التسليم",    css: "s-delivered" },
     { key: "ملغى",          css: "s-cancelled" }
   ];
-  var DEFAULT_STATUS = "جديد"; // orders missing a status are treated as New
+  var DEFAULT_STATUS = "جديد";
 
   function statusMeta(raw){
     var s = (raw == null || String(raw).trim() === "") ? DEFAULT_STATUS : String(raw).trim();
@@ -218,9 +218,10 @@
   }
 
   /* ===== State ===== */
-  var db = null;
+  var auth = null, db = null;
   var allOrders = [];
   var modalInstance = null;
+  var ordersLoaded = false;
 
   /* ===== Helpers ===== */
   function $(id){ return document.getElementById(id); }
@@ -260,46 +261,75 @@
     return t;
   }
 
-  /* ===== Login gate ===== */
-  function tryLogin(){
-    var val = $("adminPass").value;
-    if (val === ADMIN_PASSWORD){
-      try { sessionStorage.setItem('robuste_admin', '1'); } catch(e){}
-      showApp();
-    } else {
-      $("loginError").style.display = 'block';
-    }
-  }
-  function showApp(){
-    $("loginGate").style.display = 'none';
-    $("app").style.display = 'block';
-    initFirebase();
-  }
-  function logout(){
-    try { sessionStorage.removeItem('robuste_admin'); } catch(e){}
-    location.reload();
-  }
-
-  /* ===== Firebase init ===== */
+  /* ===== Firebase init (runs immediately) ===== */
   function initFirebase(){
     if (typeof firebase === 'undefined' || !firebase.initializeApp){
-      showTableError("تعذر تحميل Firebase. تحقق من اتصال الإنترنت.");
-      return;
+      showLoginError("تعذر تحميل Firebase. تحقق من اتصال الإنترنت.");
+      return false;
     }
     try {
       if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
       db = firebase.firestore();
+      return true;
     } catch(e){
       console.error('Firebase init error', e);
-      showTableError("خطأ في تهيئة Firebase.");
-      return;
+      showLoginError("خطأ في تهيئة Firebase.");
+      return false;
     }
-    buildStatusFilter();
-    loadOrders();
+  }
+
+  /* ===== Auth ===== */
+  function showLoginError(msg){
+    var el = $("loginError");
+    el.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + esc(msg);
+    el.style.display = 'block';
+  }
+  function tryLogin(){
+    if (!auth) { if (!initFirebase()) return; }
+    var email = ($("adminEmail").value || "").trim();
+    var pass = $("adminPass").value;
+    if (!email || !pass){ showLoginError("أدخل البريد وكلمة المرور."); return; }
+    $("loginError").style.display = 'none';
+    var btn = $("loginBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري الدخول...';
+    auth.signInWithEmailAndPassword(email, pass)
+      .catch(function(err){
+        console.error('Auth error', err);
+        var map = {
+          'auth/invalid-email': "البريد الإلكتروني غير صالح.",
+          'auth/user-not-found': "لا يوجد حساب بهذا البريد.",
+          'auth/wrong-password': "كلمة المرور غير صحيحة.",
+          'auth/invalid-credential': "بيانات الدخول غير صحيحة.",
+          'auth/too-many-requests': "محاولات كثيرة. حاول لاحقاً."
+        };
+        showLoginError(map[err && err.code] || "تعذر تسجيل الدخول. تحقق من بياناتك.");
+      })
+      .finally(function(){
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-box-arrow-in-left"></i> دخول';
+      });
+  }
+  function logout(){ if (auth) auth.signOut(); }
+
+  function onAuth(user){
+    if (user){
+      $("loginGate").style.display = 'none';
+      $("app").style.display = 'block';
+      var who = $("adminWho"); if (who) who.textContent = user.email || '';
+      if (!ordersLoaded){ buildStatusFilter(); loadOrders(); }
+    } else {
+      ordersLoaded = false;
+      $("app").style.display = 'none';
+      $("loginGate").style.display = 'flex';
+      var p = $("adminPass"); if (p) p.value = '';
+    }
   }
 
   function buildStatusFilter(){
     var sel = $("statusFilter");
+    if (sel.options.length > 1) return; // already built
     STATUSES.forEach(function(s){
       var o = document.createElement('option');
       o.value = s.key; o.textContent = s.key;
@@ -312,6 +342,7 @@
     $("tableContent").innerHTML = '<div class="spin-wrap"><div class="spinner-border text-warning" role="status"></div><div class="mt-2">جاري تحميل الطلبات...</div></div>';
     db.collection('orders').get()
       .then(function(snap){
+        ordersLoaded = true;
         allOrders = [];
         snap.forEach(function(doc){ allOrders.push({ id: doc.id, data: doc.data() || {} }); });
         allOrders.sort(function(a,b){
@@ -325,7 +356,7 @@
       .catch(function(err){
         console.error('Load error', err);
         var msg = (err && err.code === 'permission-denied')
-          ? "لا توجد صلاحية لقراءة الطلبات. تحقق من قواعد Firestore."
+          ? "لا توجد صلاحية لقراءة الطلبات. تأكد من نشر قواعد Firestore وأن حسابك مسجّل الدخول."
           : "تعذر تحميل الطلبات. حاول مجدداً.";
         showTableError(msg);
       });
@@ -485,12 +516,10 @@
 
     db.collection('orders').doc(id).update({ status: newStatus })
       .then(function(){
-        // Update local cache (no full reload needed)
         for (var i=0;i<allOrders.length;i++){ if (allOrders[i].id === id){ allOrders[i].data.status = newStatus; break; } }
         var sm = statusMeta(newStatus);
         var cur = $("modalCurrentStatus");
         if (cur){ cur.className = 'badge-status ' + sm.css; cur.textContent = sm.key; }
-        // Refresh button styles
         for (var j=0;j<btns.length;j++){
           var bs = btns[j].getAttribute('data-status');
           btns[j].className = 'btn btn-sm ' + (bs === newStatus ? 'btn-brand' : 'btn-outline-secondary') + ' status-set-btn';
@@ -512,8 +541,12 @@
 
   /* ===== Wire up events ===== */
   document.addEventListener('DOMContentLoaded', function(){
+    initFirebase();
+    if (auth){ auth.onAuthStateChanged(onAuth); }
+
     $("loginBtn").addEventListener('click', tryLogin);
     $("adminPass").addEventListener('keydown', function(e){ if (e.key === 'Enter') tryLogin(); });
+    $("adminEmail").addEventListener('keydown', function(e){ if (e.key === 'Enter') $("adminPass").focus(); });
     $("logoutBtn").addEventListener('click', logout);
     $("refreshBtn").addEventListener('click', loadOrders);
     $("searchInput").addEventListener('input', applyFilters);
@@ -525,10 +558,6 @@
       $("dateFrom").value = ''; $("dateTo").value = '';
       applyFilters();
     });
-
-    // Stay logged in for the session
-    var ok = false; try { ok = sessionStorage.getItem('robuste_admin') === '1'; } catch(e){}
-    if (ok) showApp(); else $("adminPass").focus();
   });
 
 })();
