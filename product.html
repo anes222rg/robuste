@@ -575,7 +575,7 @@ if (wilayaSelect) wilayas.forEach(w => { let opt = document.createElement('optio
 // إدارة السلة
 let cart = [];
 function loadCart() { try { const c = localStorage.getItem('robuste_cart'); if(c) cart = JSON.parse(c); } catch(e){} updateCartUI(); }
-function saveCart() { localStorage.setItem('robuste_cart', JSON.stringify(cart)); updateCartUI(); }
+function saveCart() { try { localStorage.setItem('robuste_cart', JSON.stringify(cart)); } catch(e){} updateCartUI(); }
 function updateCartUI() { 
     const totalItems = cart.reduce((s,i)=> s + (i.quantity||1), 0);
     document.getElementById('cartCountFloat').innerText = totalItems;
@@ -829,21 +829,23 @@ window.addEventListener('pointerup', () => {
 
 // الوضع المظلم
 function initDarkMode() {
-    const saved = localStorage.getItem('theme');
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch(e){}
     if(saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-    document.getElementById('themeToggle').addEventListener('click', () => {
+    var tt = document.getElementById('themeToggle');
+    if(tt) tt.addEventListener('click', () => {
         const cur = document.documentElement.getAttribute('data-theme');
         const nxt = cur === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', nxt);
-        localStorage.setItem('theme', nxt);
+        try { localStorage.setItem('theme', nxt); } catch(e){}
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    initDarkMode();
-    loadCart();
-    loadProduct();
-    var __sf = document.getElementById('submitOrderFinal'); if (__sf) __sf.addEventListener('click', submitOrderFinal);
+    try { initDarkMode(); } catch(e){ console.warn('darkmode', e); }
+    try { loadCart(); } catch(e){ console.warn('cart', e); }
+    try { loadProduct(); } catch(e){ console.warn('product', e); }
+    try { var __sf = document.getElementById('submitOrderFinal'); if (__sf) __sf.addEventListener('click', submitOrderFinal); } catch(e){}
 });
 window.addToCart = addToCart; window.toggleCart = toggleCart; window.checkoutFromCart = checkoutFromCart;
 window.updateQty = updateQty; window.removeCartItem = removeCartItem; window.changeMainImage = changeMainImage;
