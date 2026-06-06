@@ -630,13 +630,40 @@ function checkoutFromCart() {
     document.getElementById('modalProductImg').src = first.image;
     new bootstrap.Modal(document.getElementById('orderModal')).show();
 }
+function showOrderSuccess(orderId, phone, total) {
+    var ex = document.getElementById('orderSuccessOverlay');
+    if (ex) ex.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'orderSuccessOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;';
+    var phoneHtml = phone ? '<p style="font-size:1.05rem;font-weight:700;color:#1b5e20;margin:0 0 4px;direction:ltr;">' + phone + '</p>' : '';
+    var orderHtml = orderId ? '<div><strong>رقم الطلب:</strong> ' + orderId + '</div>' : '';
+    var totalHtml = (total || total === 0) ? '<div><strong>المبلغ الإجمالي:</strong> ' + total.toLocaleString() + ' د.ج</div>' : '';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:20px;max-width:420px;width:100%;padding:28px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);border-top:6px solid #2e7d32;">' +
+        '<div style="font-size:3.4rem;line-height:1;color:#2e7d32;"><i class="bi bi-check-circle-fill"></i></div>' +
+        '<h3 style="margin-top:10px;font-weight:800;color:#2e7d32;font-size:clamp(1.4rem,5vw,2rem);">تم تأكيد طلبكم</h3>' +
+        '<p style="font-size:clamp(1rem,3vw,1.2rem);font-weight:600;color:#2e7d32;margin:8px 0 2px;">سنتواصل معكم قريباً على رقمكم الخاص</p>' +
+        phoneHtml +
+        '<p style="font-size:1.1rem;font-weight:700;color:#2e7d32;margin:6px 0 14px;">شكراً لثقتكم بنا</p>' +
+        '<div style="background:rgba(46,125,50,.08);border-radius:12px;padding:10px 14px;font-size:.92rem;color:#444;display:inline-block;text-align:start;">' + orderHtml + totalHtml + '</div>' +
+        '<div style="margin-top:16px;"><a href="https://wa.me/213656360457" target="_blank" style="display:inline-block;background:#25d366;color:#fff;text-decoration:none;font-weight:700;padding:10px 18px;border-radius:10px;"><i class="bi bi-whatsapp"></i> تواصل عبر واتساب</a></div>' +
+        '<div style="margin-top:10px;"><button type="button" id="orderSuccessClose" style="background:transparent;border:none;color:#888;font-size:.9rem;cursor:pointer;">إغلاق</button></div>' +
+        '</div>';
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+    var closeBtn = document.getElementById('orderSuccessClose');
+    if(closeBtn){ closeBtn.addEventListener('click', function(){ overlay.remove(); }); }
+    setTimeout(function(){ var o = document.getElementById('orderSuccessOverlay'); if(o) o.remove(); }, 9000);
+}
 function showToast(msg, type) {
     const toastDiv = document.getElementById('statusToast');
     const bg = type === 'success' ? '#28a745' : '#dc3545';
     toastDiv.innerHTML = `<div class="alert shadow rounded-4 p-2 text-white" style="background:${bg};">${msg}</div>`;
     setTimeout(() => toastDiv.innerHTML = '', 2500);
 }
+let isSubmittingFinal = false;
 async function submitOrderFinal() {
+    if(isSubmittingFinal) return;
     const fullName = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
     const wilaya = document.getElementById('wilayaSelect').value;
@@ -644,16 +671,21 @@ async function submitOrderFinal() {
     const totalPrice = parseFloat(document.getElementById('orderProductPrice').value);
     if(!fullName || !phone || !wilaya) { showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    isSubmittingFinal = true;
+    var finalBtn = document.getElementById('submitOrderFinal');
+    var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
+    if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
     const orderData = { customer: fullName, phone, wilaya, address, products: cart, totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
     try {
         const docRef = await db.collection('orders').add(orderData);
         const productsList = cart.map(p => `${p.name} x${p.quantity}`).join(', ');
         await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id: docRef.id, customer_name: fullName, customer_phone: phone, wilaya, address, total_price: totalPrice.toLocaleString(), products: productsList });
-        showToast(`✅ تم تأكيد الطلب #${docRef.id.slice(-6)}`, "success");
+        showOrderSuccess(docRef.id, phone, totalPrice);
         cart = []; saveCart();
         bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
         document.getElementById('orderForm').reset();
     } catch(err) { showToast("حدث خطأ، حاول مجدداً", "error"); }
+    finally { isSubmittingFinal = false; if(finalBtn){ finalBtn.disabled = false; finalBtn.innerHTML = finalBtnOrig; } }
 }
 
 // تحميل المنتج
@@ -722,7 +754,9 @@ function changeMainImage(src, el) {
     el.classList.add('active');
 }
 function directBuy(name, price, img, id) { addToCart(name, price, img, id); checkoutFromCart(); }
+let isSubmittingExpress = false;
 async function submitExpressOrder() {
+    if(isSubmittingExpress) return;
     if(!currentProduct) return;
     const name = document.getElementById('expressName').value.trim();
     const phone = document.getElementById('expressPhone').value.trim();
@@ -730,14 +764,19 @@ async function submitExpressOrder() {
     const qty = parseInt(document.getElementById('expressQty').value) || 1;
     if(!name || !phone || !wilaya) { showToast("يرجى ملء البيانات", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    isSubmittingExpress = true;
+    var expressBtn = document.querySelector('.btn-submit-express');
+    var expressBtnOrig = expressBtn ? expressBtn.innerHTML : '';
+    if(expressBtn){ expressBtn.disabled = true; expressBtn.innerHTML = 'جاري المعالجة...'; }
     const total = currentProduct.price * qty;
     try {
         const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:"", payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString() };
         const docRef = await db.collection('orders').add(orderData);
         await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
-        showToast(`تم تأكيد طلبك`, "success");
+        showOrderSuccess(docRef.id, phone, total);
         document.getElementById('expressForm').reset();
     } catch(e) { showToast("حدث خطأ", "error"); }
+    finally { isSubmittingExpress = false; if(expressBtn){ expressBtn.disabled = false; expressBtn.innerHTML = expressBtnOrig; } }
 }
 function loadRelatedProducts(all, currentId) {
     const related = all.filter(p => p.id !== currentId).slice(0,4);

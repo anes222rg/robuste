@@ -826,7 +826,9 @@
     // ============== وظائف الطلب ==============
 
     // إرسال الطلب
+    var isSubmittingOrder = false;
     function submitOrder() {
+        if (isSubmittingOrder) { return; }
         var fullName = document.getElementById('fullName').value;
         var phone = document.getElementById('phone').value;
         var email = document.getElementById('email').value || 'لم يتم تقديمه';
@@ -876,6 +878,7 @@
         showStatus('جاري معالجة طلبك...', 'loading');
         
         // تعطيل زر الإرسال أثناء المعالجة
+        isSubmittingOrder = true;
         var submitBtn = document.getElementById('submitOrderBtn');
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -951,15 +954,15 @@
     }
 
     function showSuccessMessage(orderId, fullName, phone, total) {
-        var successMessage = '<div class="text-center">' +
-            '<i class="bi bi-check-circle-fill text-success fs-1"></i>' +
-            '<h5 class="mt-2">تم تأكيد طلبك بنجاح!</h5>' +
-            '<div class="text-start mt-3">' +
-            '<p><strong>رقم الطلب:</strong> ' + orderId + '</p>' +
-            '<p><strong>الاسم:</strong> ' + fullName + '</p>' +
-            '<p><strong>عدد المنتجات:</strong> ' + cart.length + ' منتجات</p>' +
-            '<p><strong>المبلغ الإجمالي:</strong> ' + total.toLocaleString() + ' د.ج</p>' +
-            '<p class="mt-3">سيتم التواصل معك على الرقم <strong>' + phone + '</strong> خلال 24 ساعة لتأكيد الشحن.</p>' +
+        var successMessage = '<div class="text-center" style="padding:6px 4px;">' +
+            '<div style="font-size:3.2rem;line-height:1;color:#2e7d32;"><i class="bi bi-check-circle-fill"></i></div>' +
+            '<h3 style="margin-top:10px;font-weight:800;color:#2e7d32;font-size:clamp(1.4rem,5vw,2rem);">تم تأكيد طلبكم</h3>' +
+            '<p style="font-size:clamp(1rem,3vw,1.2rem);font-weight:600;color:#2e7d32;margin:8px 0 2px;">سنتواصل معكم قريباً على رقمكم الخاص</p>' +
+            '<p style="font-size:1.05rem;font-weight:700;color:#1b5e20;margin:0 0 4px;direction:ltr;">' + phone + '</p>' +
+            '<p style="font-size:1.1rem;font-weight:700;color:#2e7d32;margin:4px 0 12px;">شكراً لثقتكم بنا</p>' +
+            '<div style="background:rgba(46,125,50,.08);border-radius:12px;padding:10px 14px;text-align:start;font-size:.92rem;color:#444;display:inline-block;">' +
+            '<div><strong>رقم الطلب:</strong> ' + orderId + '</div>' +
+            '<div><strong>المبلغ الإجمالي:</strong> ' + total.toLocaleString() + ' د.ج</div>' +
             '</div>' +
             '<a href="https://wa.me/213656360457?text=' + encodeURIComponent(
                 'استفسار عن الطلب ' + orderId + '\nالاسم: ' + fullName + '\nعدد المنتجات: ' + cart.length + '\nالمجموع: ' + total.toLocaleString() + ' د.ج\nرقم الهاتف: ' + phone
@@ -971,6 +974,7 @@
         showStatus(successMessage, 'success');
         
         // إعادة تعيين زر الإرسال
+        isSubmittingOrder = false;
         var submitBtn = document.getElementById('submitOrderBtn');
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -989,6 +993,7 @@
     }
 
     function handleOrderError(error, submitBtn) {
+        isSubmittingOrder = false;
         console.error('حدث خطأ:', error);
         
         var errorMessage = 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
@@ -1167,7 +1172,7 @@
         indicator.style.display = 'block';
         
         if (type === 'success') {
-            setTimeout(hideStatus, 5000);
+            setTimeout(hideStatus, 9000);
         }
     }
 
