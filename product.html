@@ -258,6 +258,22 @@ body {
     border-color: var(--primary);
 }
 .thumbnail img { width: 100%; height: 100%; object-fit: contain; }
+/* trust bar (product page) */
+.ph-trust{ margin-top:26px; }
+.ph-trust .ph-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.ph-trust .ph-item{ background:var(--light); border:1px solid var(--shadow-color); border-radius:14px; padding:18px 14px; text-align:center; transition:var(--transition); }
+.ph-trust .ph-item:hover{ transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,.10); }
+.ph-trust .ph-ic{ width:48px; height:48px; margin:0 auto 10px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(255,107,53,.12); color:var(--primary); font-size:22px; }
+.ph-trust .ph-t{ font-weight:700; font-size:15px; }
+.ph-trust .ph-s{ font-size:12px; color:#8a8a8a; margin-top:2px; }
+@media (max-width:768px){ .ph-trust .ph-grid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:400px){ .ph-trust .ph-grid{ grid-template-columns:1fr; } }
+/* lightbox */
+.ph-lightbox{ position:fixed; inset:0; z-index:30000; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
+.ph-lightbox.open{ display:flex; }
+.ph-lightbox img{ max-width:95%; max-height:90%; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+.ph-lightbox .ph-close{ position:absolute; top:16px; left:18px; color:#fff; font-size:36px; line-height:1; cursor:pointer; background:none; border:none; }
+#mainProductImg{ cursor:zoom-in; }
 
 /* ========== بطاقة المنتج الرئيسية ========== */
 .product-info-card {
@@ -495,7 +511,16 @@ body {
 <!-- محتوى المنتج -->
 <div class="container my-5" data-aos="fade-up">
     <div class="row g-5" id="productDetailRow"></div>
+    <div class="ph-trust" data-aos="fade-up">
+      <div class="ph-grid">
+        <div class="ph-item"><div class="ph-ic"><i class="bi bi-truck"></i></div><div class="ph-t">توصيل حتى باب البيت</div><div class="ph-s">إلى 58 ولاية</div></div>
+        <div class="ph-item"><div class="ph-ic"><i class="bi bi-shield-check"></i></div><div class="ph-t">ضمان عام</div><div class="ph-s">منتجات أصلية</div></div>
+        <div class="ph-item"><div class="ph-ic"><i class="bi bi-headset"></i></div><div class="ph-t">خدمة ما بعد الشراء</div><div class="ph-s">دعم متواصل</div></div>
+        <div class="ph-item"><div class="ph-ic"><i class="bi bi-cash-coin"></i></div><div class="ph-t">دفع يد بيد</div><div class="ph-s">عند الاستلام</div></div>
+      </div>
+    </div>
     <div class="description-section mt-4 p-4 bg-light rounded-3" id="descriptionSection"></div>
+    <div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
     <div class="related-section mt-5" id="relatedSection"></div>
 </div>
 
@@ -711,7 +736,7 @@ function renderProductLayout(p) {
     const featuresHtml = (p.features || ['جودة عالية', 'ضمان سنتان', 'توصيل سريع']).map(f => `<li><i class="bi bi-check-circle-fill"></i> ${f}</li>`).join('');
     const html = `
         <div class="col-lg-5 mb-4">
-            <div class="main-image-wrapper"><img id="mainProductImg" src="${p.images[0]}"></div>
+            <div class="main-image-wrapper"><img id="mainProductImg" src="${p.images[0]}" onclick="openLightbox(this.src)"></div>
             <div class="thumbnail-strip">${thumbHtml}</div>
         </div>
         <div class="col-lg-4 mb-4">
@@ -849,6 +874,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 window.addToCart = addToCart; window.toggleCart = toggleCart; window.checkoutFromCart = checkoutFromCart;
 window.updateQty = updateQty; window.removeCartItem = removeCartItem; window.changeMainImage = changeMainImage;
+function openLightbox(src){ try{ var lb=document.getElementById('phLightbox'); var im=document.getElementById('phLightboxImg'); if(!lb||!im) return; im.src=src; lb.classList.add('open'); document.body.style.overflow='hidden'; }catch(e){} }
+function closeLightbox(){ try{ var lb=document.getElementById('phLightbox'); if(!lb) return; lb.classList.remove('open'); document.body.style.overflow=''; }catch(e){} }
+window.openLightbox = openLightbox; window.closeLightbox = closeLightbox;
 window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; window.goToProduct = goToProduct;
 </script>
 </body>
