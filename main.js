@@ -1776,10 +1776,11 @@ window.addEventListener('scroll', function() {
     // ✏️ عدّل نصوص كل شريحة هنا (اتركها فارغة '' إذا أردت الصورة فقط)
     // الترتيب يطابق ترتيب الصور في .slideshow-container1
     var HERO_SLIDES = [
-        { title:'توصيل حتى باب البيت', subtitle:'', cta:'اشتري الآن', link:'#products' },
-        { title:'ضمان عام', subtitle:'', cta:'اشتري الآن', link:'#products' },
-        { title:'خدمة ما بعد الشراء', subtitle:'', cta:'اشتري الآن', link:'#products' },
-        { title:'دفع يد بيد', subtitle:'', cta:'اشتري الآن', link:'#products' },
+        // النصوص موقوفة ليبرز تصميم صور الإعلانات. املأ title/cta لإعادة تفعيلها.
+        { title:'', subtitle:'', cta:'', link:'#products' }, // توصيل حتى باب البيت | اشتري الآن
+        { title:'', subtitle:'', cta:'', link:'#products' }, // ضمان عام | اشتري الآن
+        { title:'', subtitle:'', cta:'', link:'#products' }, // خدمة ما بعد الشراء | اشتري الآن
+        { title:'', subtitle:'', cta:'', link:'#products' }, // دفع يد بيد | اشتري الآن
         { title:'', subtitle:'', cta:'', link:'#products' }
     ];
 
