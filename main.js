@@ -1234,10 +1234,32 @@
         }, 4000);
     }
 
+    function setupSlideshowSwipe() {
+        var container = document.querySelector('.slideshow-container1');
+        if (!container || container.dataset.swipeBound) return;
+        container.dataset.swipeBound = '1';
+        var sx = 0, sy = 0, tracking = false;
+        container.addEventListener('touchstart', function(e) {
+            if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
+            sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true;
+        }, { passive: true });
+        container.addEventListener('touchend', function(e) {
+            if (!tracking) return;
+            tracking = false;
+            var t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+            if (!t) return;
+            var dx = t.clientX - sx, dy = t.clientY - sy;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                if (dx < 0) { plusSlides1(1); } else { plusSlides1(-1); }
+            }
+        }, { passive: true });
+    }
+
     function initSlides() {
         slideIndex1 = 1;
         showSlides1(slideIndex1);
         resetSlideshowTimer();
+        setupSlideshowSwipe();
         
         // التأكد من وجود نقاط كافية
         var slides = document.getElementsByClassName("mySlides1");
@@ -1333,7 +1355,26 @@
 
     // ============== المنتجات القابلة للنقر ==============
     function setupProductCardClicks() {
+        // touch tap-vs-scroll guard
+        var touchStartX = 0, touchStartY = 0, touchMoved = false;
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches && e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchMoved = false;
+            }
+        }, { passive: true });
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches && e.touches.length === 1) {
+                if (Math.abs(e.touches[0].clientX - touchStartX) > 10 ||
+                    Math.abs(e.touches[0].clientY - touchStartY) > 10) {
+                    touchMoved = true;
+                }
+            }
+        }, { passive: true });
+
         document.addEventListener('click', function(e) {
+            if (touchMoved) { touchMoved = false; return; }
             if (isProcessing) return;
 
             // Handle regular product cards
@@ -1655,7 +1696,8 @@
     function initFloatingCart() {
         var floatingCartElem = document.getElementById('floatingCart');
         if (!floatingCartElem) return;
-        var isDragging = false, dragOccurred = false, startX, startY, startLeft, startBottom;
+        var isDragging = false, dragOccurred = false, startX, startY, startLeft, startBottom, activePointerId = null;
+        floatingCartElem.style.touchAction = 'none';
         
         floatingCartElem.addEventListener('pointerdown', function(e) {
             isDragging = true; dragOccurred = false;
@@ -1663,13 +1705,15 @@
             startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
             startX = e.clientX; startY = e.clientY;
             floatingCartElem.style.transition = 'none';
+            activePointerId = e.pointerId;
+            try { floatingCartElem.setPointerCapture(e.pointerId); } catch (err) {}
             e.preventDefault();
         });
         
         window.addEventListener('pointermove', function(e) {
             if (!isDragging) return;
             var dx = e.clientX - startX, dy = e.clientY - startY;
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragOccurred = true;
+            if (Math.abs(dx) > 8 || Math.abs(dy) > 8) dragOccurred = true;
             var newLeft = startLeft + dx, newBottom = startBottom - dy;
             newLeft = Math.min(window.innerWidth - 80, Math.max(8, newLeft));
             newBottom = Math.min(window.innerHeight - 40, Math.max(60, newBottom));
@@ -1682,6 +1726,10 @@
             if (!isDragging) return;
             isDragging = false;
             floatingCartElem.style.transition = '';
+            if (activePointerId !== null) {
+                try { floatingCartElem.releasePointerCapture(activePointerId); } catch (err) {}
+                activePointerId = null;
+            }
             if (!dragOccurred) toggleCart();
             dragOccurred = false;
         });
