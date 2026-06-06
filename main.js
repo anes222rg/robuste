@@ -871,6 +871,7 @@
             payment: paymentMethod,
             totalPrice: total,
             timestamp: new Date().toISOString(),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'جديد'
         };
         
