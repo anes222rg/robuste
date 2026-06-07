@@ -1076,7 +1076,7 @@
                 isProcessing = false;
             });
         } else {
-            showStatus('تعذر إرسال الرسالة. يرجى المحاولة لاحقاً.', 'error');
+            showStatus('تعذ�� إرسال الرسالة. يرجى المحاولة لاحقاً.', 'error');
             if (contactSpinner) contactSpinner.classList.add('d-none');
             if (contactSubmitText) contactSubmitText.textContent = 'إرسال الرسالة';
             isProcessing = false;
@@ -1315,21 +1315,63 @@
 
     // ============== تفعيل التمرير التلقائي للعروض ==============
     function initOfferProducts() {
-        var offerProducts = document.querySelectorAll('.offer-product .carousel');
-        if (typeof bootstrap !== 'undefined' && bootstrap.Carousel) {
-            offerProducts.forEach(function(carousel) {
-                try {
-                    new bootstrap.Carousel(carousel, {
-                        interval: 3000,
-                        wrap: true,
-                        pause: 'hover',
-                        touch: false
-                    });
-                } catch (e) {
-                    console.log('Offer carousel error:', e);
+        var carousels = document.querySelectorAll('.offer-product .carousel');
+        if (!carousels.length || typeof bootstrap === 'undefined' || !bootstrap.Carousel) return;
+
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var items = [];
+
+        carousels.forEach(function(carousel, index) {
+            // نتحكم بالتوقيت يدوياً، لذا نُلغي التشغيل التلقائي من Bootstrap
+            carousel.removeAttribute('data-bs-ride');
+            carousel.removeAttribute('data-bs-interval');
+            var bs;
+            try {
+                var existing = bootstrap.Carousel.getInstance(carousel);
+                if (existing) existing.dispose();
+                bs = new bootstrap.Carousel(carousel, { interval: false, ride: false, wrap: true, pause: 'hover', touch: true });
+            } catch (e) { return; }
+            // توقيت متدرّج حتى لا تتبدّل كل البطاقات في نفس اللحظة
+            var entry = { el: carousel, bs: bs, delay: 5000 + index * 1200, timer: null, visible: false, hovered: false };
+            carousel.addEventListener('mouseenter', function(){ entry.hovered = true; });
+            carousel.addEventListener('mouseleave', function(){ entry.hovered = false; });
+            items.push(entry);
+        });
+
+        function start(entry) {
+            if (entry.timer || reduceMotion) return;
+            entry.timer = setInterval(function() {
+                if (entry.visible && !entry.hovered && !document.hidden) {
+                    try { entry.bs.next(); } catch (e) {}
                 }
-            });
+            }, entry.delay);
         }
+        function stop(entry) {
+            if (entry.timer) { clearInterval(entry.timer); entry.timer = null; }
+        }
+
+        if ('IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function(obs) {
+                obs.forEach(function(o) {
+                    var entry = null;
+                    for (var k = 0; k < items.length; k++) { if (items[k].el === o.target) { entry = items[k]; break; } }
+                    if (!entry) return;
+                    if (o.isIntersecting && o.intersectionRatio >= 0.5) {
+                        entry.visible = true; start(entry);
+                    } else {
+                        entry.visible = false; stop(entry);
+                    }
+                });
+            }, { threshold: [0, 0.5, 1] });
+            items.forEach(function(entry) { io.observe(entry.el); });
+        } else {
+            items.forEach(function(entry) { entry.visible = true; start(entry); });
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) { items.forEach(stop); }
+            else { items.forEach(function(entry) { if (entry.visible) start(entry); }); }
+        });
     }
 
     // ============== وظيفة تبديل وضع الظلام ==============
@@ -1524,6 +1566,8 @@
             
             for (var i = 0; i < carousels.length; i++) {
                 var carousel = carousels[i];
+                // العروض الخاصة تُدار بشكل منفصل في initOfferProducts (تمرير أبطأ + فقط عند الظهور)
+                if (carousel.closest && carousel.closest('.offer-product')) continue;
                 var items = carousel.querySelectorAll('.carousel-item');
                 
                 // إذا كان يحتوي على أكثر من صورة واحدة
