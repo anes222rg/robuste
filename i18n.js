@@ -30,7 +30,7 @@
 
     // ---- Hero ----
     [`أجهزة منزلية تجعل حياتك أسهل`, `Home appliances that make your life easier`, `Des appareils ménagers qui vous simplifient la vie`],
-    [`جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة وضمان سنتين`, `High quality at competitive prices for every Algerian home, with fast delivery and a 2-year warranty`, `Une haute qualité à prix compétitifs pour chaque foyer algérien, avec livraison rapide et garantie de 2 ans`],
+    [`جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة وضمان سنة واحدة`, `High quality at competitive prices for every Algerian home, with fast delivery and a 1-year warranty`, `Une haute qualité à prix compétitifs pour chaque foyer algérien, avec livraison rapide et garantie de 1 an`],
     [`تسوق الآن`, `Shop now`, `Acheter maintenant`],
 
     // ---- Trust bar ----
@@ -189,6 +189,7 @@
   var bsLink = null, bsOrigHref = null;
 
   function detect() {
+    // Returning visitors keep their explicit choice; otherwise follow the browser language (fallback Arabic).
     try { var s = localStorage.getItem("site_lang"); if (s === "ar" || s === "en" || s === "fr") return s; } catch (e) {}
     var n = (navigator.language || "ar").toLowerCase();
     if (n.indexOf("fr") === 0) return "fr";
