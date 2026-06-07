@@ -269,9 +269,9 @@ body {
 @media (max-width:768px){ .ph-trust .ph-grid{ grid-template-columns:repeat(2,1fr); } }
 @media (max-width:400px){ .ph-trust .ph-grid{ grid-template-columns:1fr; } }
 /* lightbox */
-.ph-lightbox{ position:fixed; inset:0; top:0; right:0; bottom:0; left:0; width:100%; height:100%; z-index:30000; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; -webkit-overflow-scrolling:touch; }
+.ph-lightbox{ position:fixed; inset:0; z-index:30000; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
 .ph-lightbox.open{ display:flex; }
-.ph-lightbox img{ max-width:95vw; max-height:90vh; width:auto; height:auto; object-fit:contain; display:block; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+.ph-lightbox img{ max-width:92vw; max-height:88vh; width:auto; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.5); background:#fff; }
 .ph-lightbox .ph-close{ position:absolute; top:16px; left:18px; color:#fff; font-size:36px; line-height:1; cursor:pointer; background:none; border:none; }
 #mainProductImg{ cursor:zoom-in; }
 
@@ -520,7 +520,6 @@ body {
       </div>
     </div>
     <div class="description-section mt-4 p-4 bg-light rounded-3" id="descriptionSection"></div>
-    <div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
     <div class="related-section mt-5" id="relatedSection"></div>
 </div>
 
@@ -700,7 +699,7 @@ async function submitOrderFinal() {
     var finalBtn = document.getElementById('submitOrderFinal');
     var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
     if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
-    const orderData = { customer: fullName, phone, wilaya, address, products: cart, totalPrice, timestamp: new Date().toISOString(), createdAt: firebase.firestore.FieldValue.serverTimestamp(), status: "جديد" };
+    const orderData = { customer: fullName, phone, wilaya, address, products: cart, totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
     try {
         const docRef = await db.collection('orders').add(orderData);
         const productsList = cart.map(p => `${p.name} x${p.quantity}`).join(', ');
@@ -795,7 +794,7 @@ async function submitExpressOrder() {
     if(expressBtn){ expressBtn.disabled = true; expressBtn.innerHTML = 'جاري المعالجة...'; }
     const total = currentProduct.price * qty;
     try {
-        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:"", payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString(), createdAt:firebase.firestore.FieldValue.serverTimestamp() };
+        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:"", payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString() };
         const docRef = await db.collection('orders').add(orderData);
         await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
         showOrderSuccess(docRef.id, phone, total);
@@ -874,10 +873,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 window.addToCart = addToCart; window.toggleCart = toggleCart; window.checkoutFromCart = checkoutFromCart;
 window.updateQty = updateQty; window.removeCartItem = removeCartItem; window.changeMainImage = changeMainImage;
-function openLightbox(src){ try{ var lb=document.getElementById('phLightbox'); var im=document.getElementById('phLightboxImg'); if(!lb||!im) return; if(!src){ var mp=document.getElementById('mainProductImg'); if(mp) src=mp.src; } im.style.maxWidth='95vw'; im.style.maxHeight='90vh'; im.style.width='auto'; im.style.height='auto'; im.style.objectFit='contain'; im.style.display='block'; im.style.margin='auto'; im.src=src; lb.style.display='flex'; lb.style.alignItems='center'; lb.style.justifyContent='center'; lb.classList.add('open'); document.body.style.overflow='hidden'; }catch(e){} }
-function closeLightbox(){ try{ var lb=document.getElementById('phLightbox'); if(!lb) return; lb.classList.remove('open'); lb.style.display='none'; document.body.style.overflow=''; }catch(e){} }
+function openLightbox(src){ try{ var lb=document.getElementById('phLightbox'); var im=document.getElementById('phLightboxImg'); if(!lb||!im) return; im.src=src; lb.classList.add('open'); document.body.style.overflow='hidden'; }catch(e){} }
+function closeLightbox(){ try{ var lb=document.getElementById('phLightbox'); if(!lb) return; lb.classList.remove('open'); document.body.style.overflow=''; }catch(e){} }
 window.openLightbox = openLightbox; window.closeLightbox = closeLightbox;
 window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; window.goToProduct = goToProduct;
 </script>
+<div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
 </body>
 </html>
