@@ -874,8 +874,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 window.addToCart = addToCart; window.toggleCart = toggleCart; window.checkoutFromCart = checkoutFromCart;
 window.updateQty = updateQty; window.removeCartItem = removeCartItem; window.changeMainImage = changeMainImage;
-function openLightbox(src){ try{ var lb=document.getElementById('phLightbox'); var im=document.getElementById('phLightboxImg'); if(!lb||!im) return; im.src=src; lb.classList.add('open'); document.body.style.overflow='hidden'; }catch(e){} }
-function closeLightbox(){ try{ var lb=document.getElementById('phLightbox'); if(!lb) return; lb.classList.remove('open'); document.body.style.overflow=''; }catch(e){} }
+function openLightbox(src){ try{ var lb=document.getElementById('phLightbox'); var im=document.getElementById('phLightboxImg'); if(!lb||!im) return; if(!src){ var mp=document.getElementById('mainProductImg'); if(mp) src=mp.src; } im.style.maxWidth='95vw'; im.style.maxHeight='90vh'; im.style.width='auto'; im.style.height='auto'; im.style.objectFit='contain'; im.style.display='block'; im.style.margin='auto'; im.src=src; lb.style.display='flex'; lb.style.alignItems='center'; lb.style.justifyContent='center'; lb.classList.add('open'); document.body.style.overflow='hidden'; }catch(e){} }
+function closeLightbox(){ try{ var lb=document.getElementById('phLightbox'); if(!lb) return; lb.classList.remove('open'); lb.style.display='none'; document.body.style.overflow=''; }catch(e){} }
 window.openLightbox = openLightbox; window.closeLightbox = closeLightbox;
 window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; window.goToProduct = goToProduct;
 </script>
