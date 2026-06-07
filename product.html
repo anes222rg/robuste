@@ -708,6 +708,7 @@ async function submitOrderFinal() {
     var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
     if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
     const orderData = { customer: fullName, phone, wilaya, address, products: cart, totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
+    try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
     try {
         const docRef = await db.collection('orders').add(orderData);
         const productsList = cart.map(p => `${p.name} x${p.quantity}`).join(', ');
@@ -803,6 +804,7 @@ async function submitExpressOrder() {
     const total = currentProduct.price * qty;
     try {
         const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:"", payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString() };
+        try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         const docRef = await db.collection('orders').add(orderData);
         await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
         showOrderSuccess(docRef.id, phone, total);
@@ -889,5 +891,6 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
 <div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
 <script src="i18n.js"></script>
 <script src="analytics.js"></script>
+<script src="telegram.js"></script>
 </body>
 </html>
