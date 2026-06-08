@@ -1076,7 +1076,7 @@
                 isProcessing = false;
             });
         } else {
-            showStatus('تعذ�� إرسال الرسالة. يرجى المحاولة لاحقاً.', 'error');
+            showStatus('تعذ���� إرسال الرسالة. يرجى المحاولة لاحقاً.', 'error');
             if (contactSpinner) contactSpinner.classList.add('d-none');
             if (contactSubmitText) contactSubmitText.textContent = 'إرسال الرسالة';
             isProcessing = false;
@@ -1841,5 +1841,20 @@ window.addEventListener('scroll', function() {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
+    }
+    // عند التمرير: أعد القوائم المفتوحة إلى وضعها الطبيعي
+    var sw = document.getElementById('i18nSwitcher');
+    if (sw && sw.classList.contains('open')) {
+        sw.classList.remove('open');
+        var i18nBtn = document.getElementById('i18nBtn');
+        if (i18nBtn) i18nBtn.setAttribute('aria-expanded', 'false');
+    }
+    var navCollapse = document.getElementById('navbarNav');
+    if (navCollapse && navCollapse.classList.contains('show')) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+            try { bootstrap.Collapse.getOrCreateInstance(navCollapse, { toggle: false }).hide(); } catch (e) { navCollapse.classList.remove('show'); }
+        } else {
+            navCollapse.classList.remove('show');
+        }
     }
 });
