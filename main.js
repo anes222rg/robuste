@@ -149,10 +149,12 @@
                 '<div class="carousel-inner">' + carouselItems + '</div>' +
                 carouselControls +
                 '</div>' +
-                '<h5 class="product-title card-title">' + product.title + '</h5>' +
+                '<div class="product-info">' +
+                '<h5 class="product-title">' + product.title + '</h5>' +
                 '<div class="price-section">' +
                 oldPrice +
                 '<p dir="ltr" class="current-price">' + product.price.toLocaleString() + ' DA</p>' +
+                '</div>' +
                 '</div>' +
                 '<div class="card-footer bg-transparent border-0 mt-auto">' +
                 '<button class="btn btn-orange add-to-cart-btn" data-id="' + product.id + '" aria-label="Ajouter ' + product.title + ' au panier"' + (product.stock > 0 ? '' : ' disabled') + '>' +
