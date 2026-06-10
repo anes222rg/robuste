@@ -58,41 +58,6 @@ button:focus:not(:focus-visible),
 a:focus:not(:focus-visible) { outline: none !important; }
 
 /* ============================================================
-   ANNOUNCEMENT BAR — international stores always have one
-   ============================================================ */
-.promo-bar {
-  background: linear-gradient(90deg, var(--primary-dark), var(--primary), var(--primary-dark));
-  background-size: 200% 100%;
-  animation: promoShimmer 4s linear infinite;
-  color: #fff;
-  text-align: center;
-  font-size: .82rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  padding: 8px 16px;
-  position: relative;
-  z-index: 1040;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.promo-bar .promo-dot {
-  width: 6px;
-  height: 6px;
-  background: rgba(255,255,255,.6);
-  border-radius: 50%;
-  display: inline-block;
-}
-
-@keyframes promoShimmer {
-  0% { background-position: 0 0; }
-  100% { background-position: 200% 0; }
-}
-
-/* ============================================================
    NAVBAR — polish only, NO layout change
    ============================================================ */
 .glass-navbar {
