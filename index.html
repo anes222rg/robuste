@@ -40,6 +40,12 @@ gtag('config', 'G-GREM5BTR7T');
 <link rel="stylesheet" href="premium.css">
 </head>
 <body>
+<div id="p-progress"></div>
+<div class="promo-bar">
+  <span class="promo-dot"></span>
+  توصيل مجاني لكل لولايا	•	دفع عند الاستلام • ضمان سنة كاملة
+  <span class="promo-dot"></span>
+</div>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
     <div class="container">
         <a class="navbar-brand" href="index.html">
@@ -790,37 +796,56 @@ gtag('config', 'G-GREM5BTR7T');
 <!-- لا توجد أية سكربتات لترجمة أسماء المنتجات أو العلامة التجارية -->
 
 <script>
-/* Premium UX micro-enhancements */
+/* ROBUSTE — Premium UX v2 */
 (function() {
+  'use strict';
+
+  /* Navbar scroll shadow */
   var nav = document.querySelector('.glass-navbar');
   if (nav) {
     window.addEventListener('scroll', function() {
-      if (window.scrollY > 20) nav.classList.add('scrolled');
-      else nav.classList.remove('scrolled');
+      nav.classList.toggle('p-scrolled', window.scrollY > 20);
     }, { passive: true });
   }
+
+  /* Scroll progress bar */
+  var progressBar = document.getElementById('p-progress');
+  if (progressBar) {
+    window.addEventListener('scroll', function() {
+      var h = document.documentElement;
+      var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      progressBar.style.width = Math.min(pct, 100) + '%';
+    }, { passive: true });
+  }
+
+  /* Cart bounce on add */
   document.addEventListener('click', function(e) {
-    if (e.target.closest('.add-to-cart-btn, .offer-btn')) {
+    if (e.target.closest('.add-to-cart-btn:not([disabled]), .offer-btn')) {
       var cartBtn = document.getElementById('dragCartBtn');
       if (cartBtn) {
-        cartBtn.classList.remove('just-added');
+        cartBtn.classList.remove('p-bounce');
         void cartBtn.offsetWidth;
-        cartBtn.classList.add('just-added');
+        cartBtn.classList.add('p-bounce');
+        cartBtn.addEventListener('animationend', function() {
+          cartBtn.classList.remove('p-bounce');
+        }, { once: true });
       }
     }
   });
+
+  /* Add-to-cart success flash */
   document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.add-to-cart-btn');
-    if (btn && !btn.disabled) {
-      var orig = btn.innerHTML;
-      btn.classList.add('success-state');
-      btn.innerHTML = '<i class="bi bi-check2"></i> تمت الإضافة';
-      setTimeout(function() {
-        btn.classList.remove('success-state');
-        btn.innerHTML = orig;
-      }, 1400);
-    }
+    var btn = e.target.closest('.add-to-cart-btn:not([disabled])');
+    if (!btn) return;
+    var orig = btn.innerHTML;
+    btn.classList.add('p-success');
+    btn.innerHTML = '<i class="bi bi-check2-circle"></i> تمت الإضافة';
+    setTimeout(function() {
+      btn.classList.remove('p-success');
+      btn.innerHTML = orig;
+    }, 1400);
   });
+
 })();
 </script>
 </body>

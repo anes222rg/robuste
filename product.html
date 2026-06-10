@@ -479,6 +479,7 @@ body {
 }
 </style>
 <body>
+<div id="p-progress"></div>
 
 <!-- نافبار زجاجي مطابق لـ index -->
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
@@ -899,8 +900,15 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
   var nav = document.querySelector('.glass-navbar');
   if (nav) {
     window.addEventListener('scroll', function() {
-      if (window.scrollY > 20) nav.classList.add('scrolled');
-      else nav.classList.remove('scrolled');
+      nav.classList.toggle('p-scrolled', window.scrollY > 20);
+    }, { passive: true });
+  }
+  var progressBar = document.getElementById('p-progress');
+  if (progressBar) {
+    window.addEventListener('scroll', function() {
+      var h = document.documentElement;
+      var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      progressBar.style.width = Math.min(pct, 100) + '%';
     }, { passive: true });
   }
 })();
