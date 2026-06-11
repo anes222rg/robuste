@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
+<meta charset="UTF-8">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GREM5BTR7T"></script>
 <script>
@@ -9,8 +10,12 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-GREM5BTR7T');
 </script>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<meta name="theme-color" content="#ff6600">
 <meta name="description" content="Robuste eulma - أجهزة منزلية فاخرة، ضمان سنتان، توصيل سريع في الجزائر">
 <title>ROBUSTE | تفاصيل المنتج</title>
 <!-- Canonical + SEO (added; updated dynamically per product) -->
@@ -657,7 +662,7 @@ body {
             </div>
             <div class="modal-body">
                 <div class="order-summary mb-4 d-flex gap-3 align-items-center">
-                    <img loading="lazy" decoding="async" id="modalProductImg" width="70" class="rounded-3">
+                    <img loading="lazy" decoding="async" id="modalProductImg" width="70" class="rounded-3" alt="صورة المنتج">
                     <div><h6 id="modalProductTitle"></h6><p id="modalProductPrice" class="text-primary fw-bold"></p></div>
                 </div>
                 <form id="orderForm">
@@ -752,7 +757,7 @@ function renderCartItems() {
     cart.forEach((item, idx) => {
         total += item.price * item.quantity;
         html += `<div class="cart-item d-flex gap-3">
-            <img loading="lazy" decoding="async" src="${item.image}" width="60" class="rounded-3">
+            <img loading="lazy" decoding="async" src="${item.image}" width="60" class="rounded-3" alt="منتج في السلة">
             <div class="flex-grow-1">
                 <h6 class="mb-1">${item.name}</h6>
                 <div class="text-primary fw-bold">${item.price.toLocaleString()} د.ج</div>
@@ -898,13 +903,13 @@ async function loadProduct() {
 }
 function renderProductLayout(p) {
     let thumbHtml = '';
-    p.images.forEach((img, idx) => { thumbHtml += `<div class="thumbnail ${idx===0?'active':''}" onclick="changeMainImage('${img}', this)"><img loading="lazy" decoding="async" src="${img}"></div>`; });
+    p.images.forEach((img, idx) => { thumbHtml += `<div class="thumbnail ${idx===0?'active':''}" onclick="changeMainImage('${img}', this)"><img loading="lazy" decoding="async" src="${img}" alt="صورة مصغرة للمنتج"></div>`; });
     const discount = p.old_price ? Math.round(((p.old_price - p.price)/p.old_price)*100) : 0;
     const discountHtml = discount ? `<span class="discount-badge ms-2">-${discount}%</span>` : '';
     const featuresHtml = (p.features || ['جودة عالية', 'ضمان سنتان', 'توصيل سريع']).map(f => `<li><i class="bi bi-check-circle-fill"></i> ${f}</li>`).join('');
     const html = `
         <div class="col-lg-5 mb-4">
-            <div class="main-image-wrapper"><img fetchpriority="high" decoding="async" id="mainProductImg" src="${p.images[0]}" onclick="openLightbox(this.src)"></div>
+            <div class="main-image-wrapper"><img fetchpriority="high" decoding="async" id="mainProductImg" src="${p.images[0]}" onclick="openLightbox(this.src)" alt="${p.title}"></div>
             <div class="thumbnail-strip">${thumbHtml}</div>
         </div>
         <div class="col-lg-4 mb-4">
@@ -933,7 +938,7 @@ function renderProductLayout(p) {
         <div class="col-lg-3 mb-4">
             <div class="quick-order-card">
                 <div class="quick-order-title">طلب سريع</div>
-                <div class="product-mini"><img loading="lazy" decoding="async" src="${p.images[0]}" width="50"><div><strong>${p.title.substring(0,35)}</strong><div class="text-primary fw-bold">${p.price} د.ج</div></div></div>
+                <div class="product-mini"><img loading="lazy" decoding="async" src="${p.images[0]}" width="50" alt="${p.title}"><div><strong>${p.title.substring(0,35)}</strong><div class="text-primary fw-bold">${p.price} د.ج</div></div></div>
                 <form id="expressForm">
                     <input type="text" id="expressName" class="form-control-premium mb-2" placeholder="الاسم الكامل *">
                     <input type="tel" id="expressPhone" class="form-control-premium mb-2" placeholder="رقم الهاتف *">
@@ -985,7 +990,7 @@ function loadRelatedProducts(all, currentId) {
     related.forEach(p => {
         html += `<div class="col-md-3 col-6">
             <div class="related-card" onclick="goToProduct(${p.id})">
-                <img loading="lazy" decoding="async" src="${p.images[0]}">
+                <img loading="lazy" decoding="async" src="${p.images[0]}" alt="${p.title}">
                 <div class="related-title">${p.title.substring(0,35)}</div>
                 <div class="related-price">${p.price.toLocaleString()} د.ج</div>
                 <button class="btn btn-orange w-100 mt-2" onclick="event.stopPropagation(); addToCart('${p.title.replace(/'/g, "\\'")}', ${p.price}, '${p.images[0]}', ${p.id})">أضف للسلة</button>
