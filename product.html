@@ -291,6 +291,14 @@ body {
     border-color: var(--primary);
 }
 .thumbnail img { width: 100%; height: 100%; object-fit: contain; }
+/* CLS fix: reserve space for JS-injected blocks while still empty; auto-clears once filled */
+#productDetailRow:empty { min-height: 1400px; }
+#descriptionSection:empty { min-height: 140px; }
+#relatedSection:empty { min-height: 360px; }
+@media (min-width: 992px){
+  #productDetailRow:empty { min-height: 600px; }
+  #relatedSection:empty { min-height: 320px; }
+}
 /* trust bar (product page) */
 .ph-trust{ margin-top:26px; }
 .ph-trust .ph-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
@@ -579,7 +587,7 @@ body {
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
     <div class="container">
         <a class="navbar-brand" href="index.html">
-            <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" alt="Robuste" style="width: 160px;">
+            <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" alt="Robuste" width="160" height="51" style="width: 160px;height:51px;">
             <span class="d-none d-lg-inline fw-bold fs-4 ms-2" style="color: var(--primary);">ROBUSTE eulma</span>
         </a>
         <div class="d-flex align-items-center">
