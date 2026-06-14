@@ -486,7 +486,9 @@
     "price": 14000,
     "old_price": 16000,
     "images": [
-      "images/air fryer friture max 5.7l.jpg"
+      "images/air fryer friture max 5.7l.webp",
+      "images/air fryer friture max 5.7l 2.webp",
+      "images/air fryer friture max 5.7l 3.webp"
     ],
     "description_short": "Friteuse à air chaud sans huile 5.7L tactile",
     "description_long": "Friteuse à air chaud 5.7L avec écran tactile et multiple programmes de cuisson. Moderne et facile d'utilisation.",
