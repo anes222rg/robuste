@@ -672,5 +672,27 @@
     "stock": 10,
     "category": "cuisine",
     "badge": "Promotion"
+  },
+  {
+    "id": 104,
+    "title": "Robuste Autocuiseur & Marmite – 2 en 1. 6 litres",
+    "price": 12500,
+    "old_price": 15000,
+    "images": [
+      "images/AUTOCUISEUR MARMITE 2EN1 6L.webp",
+      "images/AUTOCUISEUR MARMITE 2EN1 6L 2.webp"
+    ],
+    "description_short": "Autocuiseur & marmite 2 en 1, 6 litres, multifonction",
+    "description_long": "L'autocuiseur et marmite Robuste 2 en 1 d'une capacité de 6 litres est l'outil parfait pour toutes vos préparations culinaires. Cuisson rapide, préservation des nutriments et facilité d'utilisation.",
+    "features": [
+      "Capacité 6 litres",
+      "Fonction autocuiseur et marmite",
+      "Cuisson rapide sous pression",
+      "Préservation des nutriments",
+      "Facile à nettoyer"
+    ],
+    "stock": 8,
+    "category": "cuisine",
+    "badge": "Nouveau"
   }
 ]
