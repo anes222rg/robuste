@@ -675,21 +675,27 @@
   },
   {
     "id": 104,
-    "title": "Robuste Autocuiseur & Marmite – 2 en 1. 6 litres",
+    "title": "طنجرة ضغط 2 في 1 بغطاءين – 6 لترات",
     "price": 12500,
     "old_price": 15000,
     "images": [
       "images/AUTOCUISEUR MARMITE 2EN1 6L.webp",
       "images/AUTOCUISEUR MARMITE 2EN1 6L 2.webp"
     ],
-    "description_short": "Autocuiseur & marmite 2 en 1, 6 litres, multifonction",
-    "description_long": "L'autocuiseur et marmite Robuste 2 en 1 d'une capacité de 6 litres est l'outil parfait pour toutes vos préparations culinaires. Cuisson rapide, préservation des nutriments et facilité d'utilisation.",
+    "description_short": "طنجرة ضغط 2 في 1، سعة 6 لترات، فولاذ مقاوم للصدأ 18/10",
+    "description_long": "طنجرة ضغط 2 في 1 بغطاءين مصنوعة من الفولاذ المقاوم للصدأ عالي الجودة 18/10 بسعة 6 لترات وقطر 22 سم. مزودة بمقابض مضادة للحرارة وسلة بخار من الفولاذ. تضغط على مستويين (60 و 100 كيلوباسكال) مع 2 برنامج طهي. الغطاء من الزجاج مع حلقتين من السيليكون. قفل تلقائي وضمان 10 سنوات.",
     "features": [
-      "Capacité 6 litres",
-      "Fonction autocuiseur et marmite",
-      "Cuisson rapide sous pression",
-      "Préservation des nutriments",
-      "Facile à nettoyer"
+      "سعة 6 لترات / 7 لترات",
+      "فولاذ مقاوم للصدأ 18/10",
+      "2 مستوي ضغط: 60 و 100 كيلوباسكال",
+      "2 برنامج طهي",
+      "سلة بخار من الفولاذ المقاوم للصدأ",
+      "غطاء من الزجاج مع حلقتين سيليكون",
+      "قفل تلقائي",
+      "مقابض مضادة للحرارة",
+      "متوافقة مع جميع أنواع الطهي: الحث، الزجاج، السيراميك، الكهرباء، الغاز",
+      "متوافقة مع غسالة الصحون",
+      "ضمان 10 سنوات"
     ],
     "stock": 8,
     "category": "cuisine",
