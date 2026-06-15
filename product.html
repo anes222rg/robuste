@@ -27,11 +27,11 @@ gtag('config', 'G-GREM5BTR7T');
 <meta property="og:title" content="ROBUSTE — تفاصيل المنتج">
 <meta property="og:description" content="أجهزة منزلية فاخرة بأسعار تنافسية، ضمان وتوصيل سريع. الدفع عند الاستلام.">
 <meta property="og:url" content="https://www.robustedz.store/product.html">
-<meta property="og:image" content="https://i.postimg.cc/bY06X2YN/logo-round.png">
+<meta property="og:image" content="https://www.robustedz.store/images/og-default-product.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ROBUSTE — تفاصيل المنتج">
 <meta name="twitter:description" content="أجهزة منزلية فاخرة بأسعار تنافسية، توصيل سريع.">
-<meta name="twitter:image" content="https://i.postimg.cc/bY06X2YN/logo-round.png">
+<meta name="twitter:image" content="https://www.robustedz.store/images/og-default-product.jpg">
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -913,7 +913,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const productId = parseInt(urlParams.get('pid'));
 let currentProduct = null;
 const SEO_DOMAIN = "https://www.robustedz.store";
-function seoAbsUrl(u){ if(!u) return "https://i.postimg.cc/bY06X2YN/logo-round.png"; if(/^https?:\/\//i.test(u)) return u; return SEO_DOMAIN + "/" + encodeURI(String(u).replace(/^\/+/, "")); }
+function seoAbsUrl(u){ if(!u) return "https://www.robustedz.store/images/og-default-product.jpg"; if(/^https?:\/\//i.test(u)) return u; return SEO_DOMAIN + "/" + encodeURI(String(u).replace(/^\/+/, "")); }
 function seoSetMeta(attr, key, val){ var el=document.querySelector("meta["+attr+"='"+key+"']"); if(!el){ el=document.createElement("meta"); el.setAttribute(attr,key); document.head.appendChild(el); } el.setAttribute("content", val); }
 function seoSetCanonical(href){ var el=document.querySelector("link[rel='canonical']"); if(!el){ el=document.createElement("link"); el.setAttribute("rel","canonical"); document.head.appendChild(el); } el.setAttribute("href", href); }
 function applyProductSEO(p){
