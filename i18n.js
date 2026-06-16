@@ -189,11 +189,9 @@
   var bsLink = null, bsOrigHref = null;
 
   function detect() {
-    // Returning visitors keep their explicit choice; otherwise follow the browser language (fallback Arabic).
+    // Arabic-first: every new visitor opens in Arabic. Returning visitors who
+    // explicitly switched language keep their choice via the globe switcher.
     try { var s = localStorage.getItem("site_lang"); if (s === "ar" || s === "en" || s === "fr") return s; } catch (e) {}
-    var n = (navigator.language || "ar").toLowerCase();
-    if (n.indexOf("fr") === 0) return "fr";
-    if (n.indexOf("en") === 0) return "en";
     return "ar";
   }
 

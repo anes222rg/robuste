@@ -1,4 +1,10 @@
-[
+/* DEMO MOCK BACKEND — no real network, keys or tokens. Safe stubs + offline data. */
+(function(){
+  "use strict";
+  window.__ROBUSTE_DEMO__ = true;
+
+  // Products embedded so the demo works even when the file is opened directly (file://)
+  var DEMO_PRODUCTS = [
   {
     "id": 1,
     "title": "SECHE CHEVEUX PRO2000",
@@ -674,3 +680,35 @@
     "badge": "Promotion"
   }
 ]
+;
+
+  // Intercept fetch("products.json") so products load offline / on file://
+  var _fetch = (typeof window.fetch === "function") ? window.fetch.bind(window) : null;
+  window.fetch = function(input, init){
+    try {
+      var url = (typeof input === "string") ? input : (input && input.url) || "";
+      if (/products\.json(\?|$)/i.test(url)) {
+        var body = JSON.stringify(DEMO_PRODUCTS);
+        if (typeof Response === "function") {
+          return Promise.resolve(new Response(body, { status: 200, headers: { "Content-Type": "application/json" } }));
+        }
+        return Promise.resolve({ ok: true, status: 200, json: function(){ return Promise.resolve(DEMO_PRODUCTS); }, text: function(){ return Promise.resolve(body); } });
+      }
+    } catch (e) {}
+    if (_fetch) return _fetch(input, init);
+    return Promise.reject(new Error("fetch unavailable in demo"));
+  };
+
+  // Mock EmailJS so the order flow "succeeds" in the demo (then the Telegram demo fires)
+  window.emailjs = {
+    init: function(){},
+    send: function(){ return Promise.resolve({ status: 200, text: "OK (demo)" }); },
+    sendForm: function(){ return Promise.resolve({ status: 200, text: "OK (demo)" }); }
+  };
+
+  // firebase intentionally left undefined (main.js guards with typeof checks)
+
+  // Keep analytics calls harmless
+  window.dataLayer = window.dataLayer || [];
+  if (typeof window.gtag !== "function") { window.gtag = function(){ window.dataLayer.push(arguments); }; }
+})();

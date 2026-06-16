@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
+<!-- DEMO BUILD: mock backend, no real API keys/tokens or network calls -->
+<script src="demo-mock.js"></script>
+<link rel="stylesheet" href="demo-tour.css">
+
 <meta charset="UTF-8">
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GREM5BTR7T"></script>
+<!-- removed for demo: external service replaced by demo-mock.js -->
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-GREM5BTR7T');
+gtag('config', 'G-DEMO000000');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="shortcut icon" href="https://www.robustedz.store/images/favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.robustedz.store/images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.robustedz.store/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.robustedz.store/images/favicon-16x16.png">
 <meta name="theme-color" content="#ff6600">
 <meta name="description" content="Robuste eulma - أجهزة منزلية فاخرة، ضمان سنتان، توصيل سريع في الجزائر">
 <title>ROBUSTE | تفاصيل المنتج</title>
@@ -27,11 +31,11 @@ gtag('config', 'G-GREM5BTR7T');
 <meta property="og:title" content="ROBUSTE — تفاصيل المنتج">
 <meta property="og:description" content="أجهزة منزلية فاخرة بأسعار تنافسية، ضمان وتوصيل سريع. الدفع عند الاستلام.">
 <meta property="og:url" content="https://www.robustedz.store/product.html">
-<meta property="og:image" content="https://www.robustedz.store/images/og-default-product.jpg">
+<meta property="og:image" content="https://i.postimg.cc/bY06X2YN/logo-round.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ROBUSTE — تفاصيل المنتج">
 <meta name="twitter:description" content="أجهزة منزلية فاخرة بأسعار تنافسية، توصيل سريع.">
-<meta name="twitter:image" content="https://www.robustedz.store/images/og-default-product.jpg">
+<meta name="twitter:image" content="https://i.postimg.cc/bY06X2YN/logo-round.png">
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,14 +47,14 @@ gtag('config', 'G-GREM5BTR7T');
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"></noscript>
 
 <!-- Bootstrap RTL + Icons + AOS -->
-<link href="bootstrap.rtl.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
 <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"></noscript>
 
 <!-- EmailJS & Firebase -->
-<script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<!-- removed for demo: external service replaced by demo-mock.js -->
+<!-- removed for demo: external service replaced by demo-mock.js -->
+<!-- removed for demo: external service replaced by demo-mock.js -->
 
 <style>
 /* ---------- نفس متغيرات index.html (متطابقة) ---------- */
@@ -72,14 +76,14 @@ gtag('config', 'G-GREM5BTR7T');
 [data-theme="dark"] {
     --primary: #FF8C42;
     --primary-dark: #FF6B35;
-    --secondary: #1e2128;
-    --light: #2a2e37;
-    --dark: #ececee;
-    --gray: #9aa0aa;
+    --secondary: #121212;
+    --light: #1e1e1e;
+    --dark: #f5f5f5;
+    --gray: #a0a0a0;
     --success: #4CAF50;
     --danger: #f44336;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --shadow-color: rgba(0, 0, 0, 0.25);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -111,7 +115,7 @@ body {
     transition: var(--transition);
 }
 [data-theme="dark"] .glass-navbar {
-    background: rgba(34, 38, 46, 0.88) !important;
+    background: rgba(18, 18, 18, 0.85) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .navbar-brand img { transition: transform 0.2s; }
@@ -416,125 +420,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* ===== honeypot anti-spam (hidden from humans) ===== */
-.hp-field {
-    position: absolute !important;
-    left: -9999px !important;
-    top: auto !important;
-    width: 1px !important;
-    height: 1px !important;
-    opacity: 0 !important;
-    overflow: hidden !important;
-    pointer-events: none !important;
-}
-
-/* ===== Confirm order modal (branded) ===== */
-#orderModal .modal-content {
-    border: none;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 24px 70px rgba(0,0,0,.28);
-}
-#orderModal .modal-header {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border-bottom: none;
-    padding: 18px 22px;
-    align-items: center;
-}
-#orderModal .modal-header .modal-title {
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.15rem;
-    color: #fff;
-}
-#orderModal .modal-body { padding: 22px; background: var(--light); }
-#orderModal .modal-footer { border-top: 1px solid var(--border-color); padding: 14px 22px; background: var(--light); gap: 10px; }
-.order-summary-card {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    background: linear-gradient(135deg, rgba(255,107,53,.08), rgba(255,107,53,.02));
-    border: 1px solid rgba(255,107,53,.18);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin-bottom: 20px;
-}
-.order-summary-card img { border-radius: 10px; object-fit: cover; width: 64px; height: 64px; }
-.order-summary-card .os-title { font-weight: 700; margin: 0 0 2px; font-size: .98rem; }
-.order-summary-card .os-price { color: var(--primary); font-weight: 800; margin: 0; }
-.order-field { margin-bottom: 14px; }
-.order-field label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    font-size: .9rem;
-    margin-bottom: 6px;
-    color: var(--dark);
-}
-.order-field label i { color: var(--primary); }
-.order-input {
-    width: 100%;
-    border: 1.5px solid var(--border-color);
-    border-radius: 10px;
-    padding: 11px 13px;
-    background: var(--light);
-    color: var(--dark);
-    transition: var(--transition);
-    font-size: .95rem;
-}
-.order-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(255,107,53,.12);
-    outline: none;
-}
-.order-pay-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1.5px solid rgba(255,107,53,.35);
-    background: rgba(255,107,53,.05);
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-.order-pay-option i { color: var(--primary); font-size: 1.2rem; }
-.order-trust {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    margin-top: 14px;
-    font-size: .82rem;
-    color: var(--gray);
-}
-.order-trust span { display: inline-flex; align-items: center; gap: 5px; }
-.order-trust i { color: var(--success); }
-.btn-confirm-order {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border: none;
-    color: #fff;
-    font-weight: 800;
-    padding: 12px 26px;
-    border-radius: 12px;
-    transition: var(--transition);
-    box-shadow: 0 8px 20px rgba(255,107,53,.32);
-}
-.btn-confirm-order:hover { transform: translateY(-2px); color: #fff; box-shadow: 0 12px 26px rgba(255,107,53,.4); }
-.btn-confirm-order:disabled { opacity: .7; transform: none; cursor: not-allowed; }
-.btn-cancel-order {
-    background: transparent;
-    border: 1.5px solid var(--border-color);
-    color: var(--gray);
-    font-weight: 600;
-    padding: 11px 20px;
-    border-radius: 12px;
-    transition: var(--transition);
-}
-.btn-cancel-order:hover { background: rgba(0,0,0,.04); }
-
 /* ========== المنتجات المقترحة (كروت مثل index) ========== */
 .related-card {
     background: var(--light);
@@ -652,30 +537,6 @@ body {
 .star-input i.active{ color:#ffc107; }
 .star-input i:hover{ transform:scale(1.15); }
 .add-review-cta .btn-orange i{ margin-inline-end:6px; }
-
-/* ===== Sticky COD announcement bar (inlined) ===== */
-.top-cod-bar{ position:fixed; top:0; left:0; right:0; z-index:1040; height:40px; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--primary,#FF6B35); color:#fff; font-weight:700; font-size:14px; text-align:center; padding:0 12px; line-height:1.2; white-space:nowrap; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.12); }
-body.has-cod-bar .navbar.fixed-top{ top:40px !important; }
-body.has-cod-bar{ padding-top:96px !important; }
-@media (max-width:768px){ .top-cod-bar{ height:36px; font-size:12.5px; } body.has-cod-bar .navbar.fixed-top{ top:36px !important; } body.has-cod-bar{ padding-top:92px !important; } }
-/* ===== Delivery + order summary (inlined) ===== */
-.order-summary-box{ background:#FFF8F0; border:1px solid var(--border-color,#e7e7e7); border-radius:10px; padding:12px 14px; margin:14px 0; }
-.osb-row{ display:flex; justify-content:space-between; align-items:center; font-size:14px; padding:4px 0; color:var(--dark,#444); }
-.osb-row.osb-total{ border-top:1px dashed rgba(255,107,53,.35); margin-top:6px; padding-top:8px; font-weight:800; font-size:16px; color:var(--primary,#FF6B35); }
-.delivery-type-group{ display:flex; gap:10px; margin-top:6px; }
-.delivery-type-group .dt-opt{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--border-color,#e7e7e7); border-radius:8px; padding:8px 10px; cursor:pointer; font-size:13px; font-weight:600; transition:all .15s; }
-.delivery-type-group .dt-opt:has(input:checked){ border-color:var(--primary,#FF6B35); background:rgba(255,107,53,.12); color:var(--primary,#FF6B35); }
-.delivery-type-group .dt-opt input{ accent-color:var(--primary,#FF6B35); }
-.exp-delivery{ display:flex; gap:6px; margin-bottom:6px; }
-.exp-delivery .exp-dt{ flex:1; display:flex; align-items:center; justify-content:center; gap:4px; border:1px solid var(--border-color,#e7e7e7); border-radius:6px; padding:5px; cursor:pointer; font-size:11.5px; font-weight:600; }
-.exp-delivery .exp-dt:has(input:checked){ border-color:var(--primary,#FF6B35); background:rgba(255,107,53,.12); color:var(--primary,#FF6B35); }
-.exp-summary{ font-size:12.5px; margin-bottom:8px; color:var(--dark,#444); }
-.exp-summary .exp-total{ font-weight:800; color:var(--primary,#FF6B35); font-size:14px; margin-top:2px; }
-.cart-deliv-field{ margin-bottom:8px; }
-.cart-deliv-field label{ font-size:12.5px; font-weight:600; display:block; margin-bottom:3px; }
-.cart-dt-group{ margin-bottom:10px; }
-[data-theme="dark"] .order-summary-box{ background:#262a32; border-color:rgba(255,255,255,.1); }
-[data-theme="dark"] .delivery-type-group .dt-opt:has(input:checked),[data-theme="dark"] .exp-delivery .exp-dt:has(input:checked){ background:rgba(255,140,66,.18); }
 </style>
 <!-- Auto-WebP with safe fallback (added) -->
 <script>
@@ -724,10 +585,11 @@ body.has-cod-bar{ padding-top:96px !important; }
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<body class="has-cod-bar">
+<!-- Phone-first UX layer (loaded last to override) -->
+<link rel="stylesheet" href="mobile-ux.css">
+<body>
 
 <!-- نافبار زجاجي مطابق لـ index -->
-<div class="top-cod-bar" id="topCodBar"><span id="topBarText">🛒 الدفع عند الاستلام • التوصيل لكل الولايات</span></div>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
     <div class="container">
         <a class="navbar-brand" href="index.html">
@@ -842,10 +704,6 @@ body.has-cod-bar{ padding-top:96px !important; }
     <div class="offcanvas-body">
         <div id="cartItemsList"></div>
         <div class="cart-summary mt-3">
-            <div class="cart-deliv-field"><label><i class="bi bi-geo-alt"></i> الولاية</label><select id="cartWilaya" class="order-input" onchange="onCartWilayaChange()"></select></div>
-            <div class="delivery-type-group cart-dt-group"><label class="dt-opt"><input type="radio" name="cartDeliveryType" value="home" onchange="onCartDtChange()"> 🏠 للمنزل</label><label class="dt-opt"><input type="radio" name="cartDeliveryType" value="office" checked onchange="onCartDtChange()"> 🏢 للمكتب</label></div>
-            <div class="d-flex justify-content-between mb-1"><span>المجموع الفرعي:</span><span id="cartSubtotal">0 د.ج</span></div>
-            <div class="d-flex justify-content-between mb-1"><span><i class="bi bi-truck"></i> التوصيل:</span><span id="cartDelivery">اختر الولاية</span></div>
             <div class="d-flex justify-content-between mb-2">
                 <span>المجموع:</span>
                 <strong id="cartTotalAmount" class="text-primary">0 د.ج</strong>
@@ -855,45 +713,34 @@ body.has-cod-bar{ padding-top:96px !important; }
     </div>
 </div>
 
-<!-- مودا���� الطلب -->
+<!-- مودال الطلب -->
 <div class="modal fade" id="orderModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-bag-check-fill"></i> تأكيد الطلب</h5>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">تأكيد الطلب</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="order-summary-card">
-                    <img loading="lazy" decoding="async" id="modalProductImg" width="64" height="64" alt="صورة المنتج">
-                    <div><p class="os-title" id="modalProductTitle"></p><p class="os-price" id="modalProductPrice"></p></div>
+                <div class="order-summary mb-4 d-flex gap-3 align-items-center">
+                    <img loading="lazy" decoding="async" id="modalProductImg" width="70" class="rounded-3" alt="صورة المنتج">
+                    <div><h6 id="modalProductTitle"></h6><p id="modalProductPrice" class="text-primary fw-bold"></p></div>
                 </div>
-                <form id="orderForm" autocomplete="on">
+                <form id="orderForm">
                     <input type="hidden" id="orderProductName">
                     <input type="hidden" id="orderProductPrice">
-                    <input type="text" id="orderHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="اتركه فارغاً">
                     <div class="row">
-                        <div class="col-md-6 order-field"><label><i class="bi bi-person"></i> الاسم الكامل *</label><input type="text" id="fullName" class="order-input" required></div>
-                        <div class="col-md-6 order-field"><label><i class="bi bi-telephone"></i> رقم الهاتف *</label><input type="tel" id="phone" class="order-input" inputmode="numeric" required></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">الاسم الكامل *</label><input type="text" id="fullName" class="form-control" required></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">رقم الهاتف *</label><input type="tel" id="phone" class="form-control" required></div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 order-field"><label><i class="bi bi-geo-alt"></i> الولاية *</label><select id="wilayaSelect" class="order-input" required onchange="updateOrderSummary()"></select></div>
-                        <div class="col-md-6 order-field"><label><i class="bi bi-buildings"></i> البلدية</label><input type="text" id="baladiyaInput" class="order-input" placeholder="اسم البلدية"></div>
-                    </div>
-                    <div class="order-field"><label><i class="bi bi-house-door"></i> العنوان</label><textarea id="address" class="order-input" rows="2" placeholder="الحي، الشارع، رقم المنزل..."></textarea></div>
-                    <div class="order-pay-option"><i class="bi bi-cash-coin"></i><input class="form-check-input m-0" type="radio" name="payMethod" value="الدفع عند الاستلام" checked id="payCod"> <label class="m-0" for="payCod">الدفع عند الاستلام</label></div>
-                    <div class="order-field"><label><i class="bi bi-truck"></i> طريقة التوصيل *</label><div class="delivery-type-group"><label class="dt-opt"><input type="radio" name="deliveryType" value="home" onchange="updateOrderSummary()"> 🏠 للمنزل</label><label class="dt-opt"><input type="radio" name="deliveryType" value="office" checked onchange="updateOrderSummary()"> 🏢 للمكتب</label></div></div>
-                    <div class="order-summary-box"><div class="osb-row"><span>المجموع الفرعي</span><span id="sumSubtotal">0 د.ج</span></div><div class="osb-row"><span><i class="bi bi-truck"></i> سعر التوصيل</span><span id="sumDelivery">اختر الولاية</span></div><div class="osb-row osb-total"><span>المجموع الإجمالي</span><span id="sumTotal">0 د.ج</span></div></div>
-                    <div class="order-trust">
-                        <span><i class="bi bi-shield-check"></i> دفع آمن عند الاستلام</span>
-                        <span><i class="bi bi-truck"></i> توصيل سريع</span>
-                        <span><i class="bi bi-arrow-repeat"></i> إرجاع خلال 7 أيام</span>
-                    </div>
+                    <div class="mb-3"><label>الولاية *</label><select id="wilayaSelect" class="form-select" required></select></div>
+                    <div class="mb-3"><label>العنوان</label><textarea id="address" class="form-control" rows="2"></textarea></div>
+                    <div class="form-check mb-2"><input class="form-check-input" type="radio" name="payMethod" value="الدفع عند الاستلام" checked> <label>الدفع عند الاستلام</label></div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel-order" data-bs-dismiss="modal">إلغاء</button>
-                <button class="btn-confirm-order" id="submitOrderFinal"><i class="bi bi-check2-circle"></i> تأكيد الطلب</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button class="btn btn-orange" id="submitOrderFinal">تأكيد الطلب</button>
             </div>
         </div>
     </div>
@@ -936,28 +783,19 @@ body.has-cod-bar{ padding-top:96px !important; }
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
 // Firebase + EmailJS config — vendor libs are deferred, so init runs in initVendors() on DOMContentLoaded
-const firebaseConfig = { apiKey: "AIzaSyBTrnKCYOtfSSDYtmVQbzP2HcwgkLT565Y", authDomain: "robuste-c8e0f.firebaseapp.com", projectId: "robuste-c8e0f", storageBucket: "robuste-c8e0f.appspot.com", messagingSenderId: "975609984963", appId: "1:975609984963:web:a481efb493a88d7bc7af76" };
+const firebaseConfig = { apiKey: "DEMO_DISABLED", authDomain: "demo.firebaseapp.com", projectId: "demo-project", storageBucket: "demo.appspot.com", messagingSenderId: "000000000000", appId: "1:000000000000:web:demo" };
 let db = null;
 function initVendors() {
     if (typeof AOS !== 'undefined') { try { AOS.init({ duration: 600, once: true, disable: function(){ try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 768; } catch(e){ return false; } } }); } catch(e){} }
     try { if (typeof firebase !== 'undefined' && !(firebase.apps && firebase.apps.length)) firebase.initializeApp(firebaseConfig); } catch(e){ console.warn('Firebase init failed', e); }
     try { if (typeof firebase !== 'undefined') db = firebase.firestore(); } catch(e){}
-    try { if (typeof emailjs !== "undefined") emailjs.init("k77vdaUWPpnLrfTnS"); } catch(e){}
+    try { if (typeof emailjs !== "undefined") emailjs.init("DEMO_DISABLED"); } catch(e){}
 }
 
 // قائمة الولايات
-const deliveryFees = {"أدرار":[1200,600],"الشلف":[700,400],"الأغواط":[800,500],"أم البواقي":[700,400],"باتنة":[700,400],"بجاية":[650,400],"بسكرة":[800,470],"بشار":[1200,650],"البليدة":[650,350],"البويرة":[650,400],"تمنراست":[1600,800],"تبسة":[750,400],"تلمسان":[750,400],"تيارت":[750,400],"تيزي وزو":[650,400],"الجزائر":[500,350],"الجلفة":[800,470],"جيجل":[700,400],"سطيف":[500,350],"سعيدة":[750,400],"سكيكدة":[700,400],"سيدي بلعباس":[700,400],"عنابة":[650,400],"قالمة":[700,400],"قسنطينة":[650,400],"المدية":[700,400],"مستغانم":[700,400],"المسيلة":[700,400],"معسكر":[700,400],"ورقلة":[800,500],"وهران":[650,400],"البيض":[950,600],"إليزي":[1600,800],"برج بوعريريج":[650,400],"بومرداس":[600,400],"الطارف":[700,400],"تيندوف":[1200,600],"تيسمسيلت":[700,400],"الوادي":[800,500],"خنشلة":[750,400],"سوق أهراس":[750,400],"تيبازة":[650,400],"ميلة":[650,400],"عين الدفلى":[650,400],"النعامة":[900,600],"عين تموشنت":[700,400],"غرداية":[900,500],"غليزان":[700,400],"تيميمون":[1300,650],"أولاد جلال":[900,550],"بني عباس":[1300,650],"عين صالح":[1300,700],"توقرت":[850,600],"المغير":[850,null],"المنيعة":[900,500]};
-const wilayas = Object.keys(deliveryFees);
+const wilayas = ["أدرار","الشلف","الأغواط","أم البواقي","باتنة","بجاية","بسكرة","بشار","البليدة","البويرة","تمنراست","تبسة","تلمسان","تيارت","تيزي وزو","الجزائر","الجلفة","جيجل","سطيف","سعيدة","سكيكدة","سيدي بلعباس","عنابة","قالمة","قسنطينة","المدية","مستغانم","المسيلة","معسكر","ورقلة","وهران","البيض","إليزي","برج بوعريريج","بومرداس","الطارف","تيندوف","تيسمسيلت","الوادي","خنشلة","سوق أهراس","تيبازة","ميلة","عين الدفلى","النعامة","عين تموشنت","غرداية","غليزان"];
 const wilayaSelect = document.getElementById('wilayaSelect');
-if (wilayaSelect) { var __ph=document.createElement('option'); __ph.value=''; __ph.textContent='اختر الولاية'; __ph.disabled=true; __ph.selected=true; wilayaSelect.appendChild(__ph); wilayas.forEach(function(w){ var opt=document.createElement('option'); opt.value=w; opt.textContent=w; wilayaSelect.appendChild(opt); }); }
-(function(){ var cw=document.getElementById('cartWilaya'); if(cw){ var p0=document.createElement('option'); p0.value=''; p0.textContent='اختر الولاية'; p0.disabled=true; p0.selected=true; cw.appendChild(p0); wilayas.forEach(function(w){ var o=document.createElement('option'); o.value=w; o.textContent=w; cw.appendChild(o); }); try{ var sv=localStorage.getItem('robuste_wilaya'); if(sv){ cw.value=sv; } }catch(e){} } })();
-function deliveryFeeFor(wilaya, type){ var f=deliveryFees[wilaya]; if(!f) return null; var home=f[0], office=f[1]; if(type==='office'){ return (office==null? home : office); } return home; }
-function fmtDzd(n){ try{ return Number(n||0).toLocaleString(); }catch(e){ return String(n); } }
-function updateOrderSummary(){ try{ var subEl=document.getElementById('orderProductPrice'); var sub=subEl? (parseFloat(subEl.value)||0):0; var ws=document.getElementById('wilayaSelect'); var wilaya=ws? ws.value:''; var tEl=document.querySelector('input[name="deliveryType"]:checked'); var type=tEl? tEl.value:'home'; var sSub=document.getElementById('sumSubtotal'), sDel=document.getElementById('sumDelivery'), sTot=document.getElementById('sumTotal'); if(sSub) sSub.innerText=fmtDzd(sub)+' د.ج'; if(!wilaya){ if(sDel) sDel.innerText='اختر الولاية'; if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } var fee=deliveryFeeFor(wilaya,type); var na=(type==='office' && deliveryFees[wilaya] && deliveryFees[wilaya][1]==null); if(fee==null) fee=0; if(sDel) sDel.innerText=fmtDzd(fee)+' د.ج'+(na?' (للمنزل)':''); if(sTot) sTot.innerText=fmtDzd(sub+fee)+' د.ج'; }catch(e){} }
-function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); if(!wilaya){ if(de) de.innerText='اختر الولاية'; if(te) te.innerText=fmtDzd(sub)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type); if(fee==null) fee=0; if(de) de.innerText=fmtDzd(fee)+' دج'; if(te) te.innerText=fmtDzd(sub+fee)+' دج'; }catch(e){} }
-function onCartWilayaChange(){ try{ var w=(document.getElementById('cartWilaya')||{}).value; if(w) localStorage.setItem('robuste_wilaya', w); }catch(e){} renderCartItems(); }
-function onCartDtChange(){ renderCartItems(); }
-window.updateOrderSummary=updateOrderSummary; window.updateExpressSummary=updateExpressSummary; window.onCartWilayaChange=onCartWilayaChange; window.onCartDtChange=onCartDtChange; window.deliveryFeeFor=deliveryFeeFor;
+if (wilayaSelect) wilayas.forEach(w => { let opt = document.createElement('option'); opt.value = w; opt.textContent = w; wilayaSelect.appendChild(opt); });
 
 // إدارة السلة
 let cart = [];
@@ -973,7 +811,7 @@ function renderCartItems() {
     if(!container) return;
     if(cart.length === 0) {
         container.innerHTML = `<div class="empty-cart-cta"><i class="bi bi-bag-x"></i><h5 class="mt-2">سلة التسوق فارغة</h5><p class="text-muted">استكشف منتجاتنا وأضف ما يناسبك</p><a href="index.html#products" class="btn btn-outline-modern mt-2" onclick="toggleCart()">تصفح المنتجات</a></div>`;
-        document.getElementById('cartTotalAmount').innerText = '0 د.ج'; var _cs=document.getElementById('cartSubtotal'); if(_cs)_cs.innerText='0 د.ج'; var _cd=document.getElementById('cartDelivery'); if(_cd)_cd.innerText='—';
+        document.getElementById('cartTotalAmount').innerText = '0 د.ج';
         return;
     }
     let html = ''; let total = 0;
@@ -994,10 +832,10 @@ function renderCartItems() {
         </div>`;
     });
     container.innerHTML = html;
-    var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t); if(_fee==null)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=_fee.toLocaleString()+' د.ج'; document.getElementById('cartTotalAmount').innerText=(total+_fee).toLocaleString()+' د.ج'; }
+    document.getElementById('cartTotalAmount').innerText = `${total.toLocaleString()} د.ج`;
 }
 function updateQty(idx, newQty) { if(newQty<1) return removeCartItem(idx); cart[idx].quantity = newQty; saveCart(); }
-function removeCartItem(idx) { cart.splice(idx,1); saveCart(); showToast("تم إزالة المنت��", "success"); }
+function removeCartItem(idx) { cart.splice(idx,1); saveCart(); showToast("تم إزالة المنتج", "success"); }
 function addToCart(name, price, img, id) {
     const existing = cart.find(i => i.id === id);
     if(existing) existing.quantity++;
@@ -1015,8 +853,6 @@ function checkoutFromCart() {
     document.getElementById('modalProductTitle').innerText = `${cart.length} منتج مختلف`;
     document.getElementById('modalProductPrice').innerText = `${totalCart.toLocaleString()} د.ج`;
     document.getElementById('modalProductImg').src = first.image;
-    try{ var _cw=(document.getElementById('cartWilaya')||{}).value; if(_cw && document.getElementById('wilayaSelect')) document.getElementById('wilayaSelect').value=_cw; var _cdt=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value; if(_cdt){ var _mr=document.querySelector('input[name="deliveryType"][value="'+_cdt+'"]'); if(_mr)_mr.checked=true; } }catch(e){}
-    try{ updateOrderSummary(); }catch(e){}
     new bootstrap.Modal(document.getElementById('orderModal')).show();
 }
 function showOrderSuccess(orderId, phone, total) {
@@ -1050,48 +886,26 @@ function showToast(msg, type) {
     toastDiv.innerHTML = `<div class="alert shadow rounded-4 p-2 text-white" style="background:${bg};">${msg}</div>`;
     setTimeout(() => toastDiv.innerHTML = '', 2500);
 }
-/* ===== anti-spam helpers (client-side, low-friction) ===== */
-function honeypotFilled(id){ try { var el = document.getElementById(id); return !!(el && el.value && el.value.trim()); } catch(e){ return false; } }
-function antiSpamCheck(sig){
-    try {
-        var now = Date.now();
-        var last = parseInt(localStorage.getItem('robuste_last_order_ts') || '0', 10);
-        var lastSig = localStorage.getItem('robuste_last_order_sig') || '';
-        if(sig && sig === lastSig && last && (now - last) < 60000) { return { ok:false, msg:"لقد استلمنا هذا الطلب بالفعل، سنتواصل معك قريباً" }; }
-    } catch(e){}
-    return { ok:true };
-}
-function markOrderSent(sig){ try { localStorage.setItem('robuste_last_order_ts', String(Date.now())); if(sig) localStorage.setItem('robuste_last_order_sig', sig); } catch(e){} }
-
 let isSubmittingFinal = false;
 async function submitOrderFinal() {
     if(isSubmittingFinal) return;
-    if(honeypotFilled('orderHp')) { showOrderSuccess('', '', null); return; }
     const fullName = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
     const wilaya = document.getElementById('wilayaSelect').value;
-    const baladiya = (document.getElementById('baladiyaInput') ? document.getElementById('baladiyaInput').value.trim() : '');
-    const address = document.getElementById('address').value.trim();
-    const subtotal = parseFloat(document.getElementById('orderProductPrice').value) || 0;
-    var dType = (document.querySelector('input[name="deliveryType"]:checked')||{}).value || 'home';
-    var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
-    const totalPrice = subtotal + deliveryFee;
+    const address = document.getElementById('address').value;
+    const totalPrice = parseFloat(document.getElementById('orderProductPrice').value);
     if(!fullName || !phone || !wilaya) { showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
-    var guard = antiSpamCheck(phone + '|' + totalPrice);
-    if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingFinal = true;
     var finalBtn = document.getElementById('submitOrderFinal');
     var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
     if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
-    var fullAddress = [baladiya, address].filter(Boolean).join('، ');
-    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, deliveryFee, deliveryType: dType, payment: "الدفع عند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
-    try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(Object.assign({}, orderData, { address: fullAddress })); } } catch (e) {}
+    const orderData = { customer: fullName, phone, wilaya, address, products: cart, totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
+    try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
     try {
         const docRef = await db.collection('orders').add(orderData);
         const productsList = cart.map(p => `${p.name} x${p.quantity}`).join(', ');
-        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id: docRef.id, customer_name: fullName, customer_phone: phone, wilaya, address: fullAddress, subtotal: subtotal.toLocaleString(), delivery_price: deliveryFee.toLocaleString(), total_price: totalPrice.toLocaleString(), products: productsList });
-        markOrderSent(phone + '|' + totalPrice);
+        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id: docRef.id, customer_name: fullName, customer_phone: phone, wilaya, address, total_price: totalPrice.toLocaleString(), products: productsList });
         showOrderSuccess(docRef.id, phone, totalPrice);
         cart = []; saveCart();
         bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
@@ -1105,7 +919,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const productId = parseInt(urlParams.get('pid'));
 let currentProduct = null;
 const SEO_DOMAIN = "https://www.robustedz.store";
-function seoAbsUrl(u){ if(!u) return "https://www.robustedz.store/images/og-default-product.jpg"; if(/^https?:\/\//i.test(u)) return u; return SEO_DOMAIN + "/" + encodeURI(String(u).replace(/^\/+/, "")); }
+function seoAbsUrl(u){ if(!u) return "https://i.postimg.cc/bY06X2YN/logo-round.png"; if(/^https?:\/\//i.test(u)) return u; return SEO_DOMAIN + "/" + encodeURI(String(u).replace(/^\/+/, "")); }
 function seoSetMeta(attr, key, val){ var el=document.querySelector("meta["+attr+"='"+key+"']"); if(!el){ el=document.createElement("meta"); el.setAttribute(attr,key); document.head.appendChild(el); } el.setAttribute("content", val); }
 function seoSetCanonical(href){ var el=document.querySelector("link[rel='canonical']"); if(!el){ el=document.createElement("link"); el.setAttribute("rel","canonical"); document.head.appendChild(el); } el.setAttribute("href", href); }
 function applyProductSEO(p){
@@ -1152,7 +966,6 @@ function renderProductLayout(p) {
     let thumbHtml = '';
     p.images.forEach((img, idx) => { thumbHtml += `<div class="thumbnail ${idx===0?'active':''}" onclick="changeMainImage('${img}', this)"><img loading="lazy" decoding="async" src="${img}" alt="صورة مصغرة للمنتج"></div>`; });
     const discount = p.old_price ? Math.round(((p.old_price - p.price)/p.old_price)*100) : 0;
-    try { var __tb=document.getElementById('topBarText'); if(__tb){ __tb.innerHTML = '🛒 ' + p.price.toLocaleString() + ' دج' + (discount? ' • وفّر '+discount+'%':'') + ' • الدفع عند الاستلام'; } } catch(e){}
     const discountHtml = discount ? `<span class="discount-badge ms-2">-${discount}%</span>` : '';
     const featuresHtml = (p.features || ['جودة عالية', 'ضمان سنتان', 'توصيل سريع']).map(f => `<li><i class="bi bi-check-circle-fill"></i> ${f}</li>`).join('');
     const html = `
@@ -1188,21 +1001,16 @@ function renderProductLayout(p) {
                 <div class="quick-order-title">طلب سريع</div>
                 <div class="product-mini"><img loading="lazy" decoding="async" src="${p.images[0]}" width="50" alt="${p.title}"><div><strong>${p.title.substring(0,35)}</strong><div class="text-primary fw-bold">${p.price} د.ج</div></div></div>
                 <form id="expressForm">
-                    <input type="text" id="expressHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="اتركه فارغاً">
                     <input type="text" id="expressName" class="form-control-premium mb-2" placeholder="الاسم الكامل *">
                     <input type="tel" id="expressPhone" class="form-control-premium mb-2" placeholder="رقم الهاتف *">
-                    <select id="expressWilaya" class="form-select-premium mb-2" onchange="updateExpressSummary()"><option value="" disabled selected>اختر الولاية</option>${wilayas.map(w=>`<option value="${w}">${w}</option>`).join('')}</select>
-                    <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع)">
-                    <input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" oninput="updateExpressSummary()">
-                    <div class="exp-delivery"><label class="exp-dt"><input type="radio" name="expDeliveryType" value="home" onchange="updateExpressSummary()"> 🏠 للمنزل</label><label class="exp-dt"><input type="radio" name="expDeliveryType" value="office" checked onchange="updateExpressSummary()"> 🏢 للمكتب</label></div>
-                    <div class="exp-summary"><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
+                    <select id="expressWilaya" class="form-select-premium mb-2">${wilayas.map(w=>`<option>${w}</option>`).join('')}</select>
+                    <input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1">
                     <button type="button" class="btn-submit-express" onclick="submitExpressOrder()">تأكيد الطلب</button>
                 </form>
             </div>
         </div>
     `;
     document.getElementById('productDetailRow').innerHTML = html;
-    try { updateExpressSummary(); } catch(e){}
     document.getElementById('descriptionSection').innerHTML = `<h4 class="fw-bold mb-3">وصف المنتج</h4><p>${p.description_long || p.description_short || 'منتج عالي الجودة من ROBUSTE'}</p>`;
 }
 function changeMainImage(src, el) {
@@ -1215,30 +1023,22 @@ let isSubmittingExpress = false;
 async function submitExpressOrder() {
     if(isSubmittingExpress) return;
     if(!currentProduct) return;
-    if(honeypotFilled('expressHp')) { showOrderSuccess('', '', null); return; }
     const name = document.getElementById('expressName').value.trim();
     const phone = document.getElementById('expressPhone').value.trim();
     const wilaya = document.getElementById('expressWilaya').value;
-    const address = (document.getElementById('expressAddress') ? document.getElementById('expressAddress').value.trim() : "");
     const qty = parseInt(document.getElementById('expressQty').value) || 1;
     if(!name || !phone || !wilaya) { showToast("يرجى ملء البيانات", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
-    const subtotal = currentProduct.price * qty;
-    var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
-    var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
-    const total = subtotal + deliveryFee;
-    var guard = antiSpamCheck(phone + '|' + total);
-    if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingExpress = true;
     var expressBtn = document.querySelector('.btn-submit-express');
     var expressBtnOrig = expressBtn ? expressBtn.innerHTML : '';
     if(expressBtn){ expressBtn.disabled = true; expressBtn.innerHTML = 'جاري المعالجة...'; }
+    const total = currentProduct.price * qty;
     try {
-        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:address, payment:"الدفع عند الاستلام", subtotal, deliveryFee, deliveryType:dType, totalPrice:total, timestamp:new Date().toISOString() };
+        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:"", payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString() };
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         const docRef = await db.collection('orders').add(orderData);
-        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, address:address, subtotal:subtotal.toLocaleString(), delivery_price:deliveryFee.toLocaleString(), total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
-        markOrderSent(phone + '|' + total);
+        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
         showOrderSuccess(docRef.id, phone, total);
         document.getElementById('expressForm').reset();
     } catch(e) { showToast("حدث خطأ", "error"); }
@@ -1398,5 +1198,8 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
 <script src="i18n.js"></script>
 <script src="analytics.js"></script>
 <script src="telegram.js"></script>
+<!-- DEMO showcase layer -->
+<script src="demo-enhance.js"></script>
+<script src="demo-tour.js"></script>
 </body>
 </html>
