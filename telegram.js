@@ -4,24 +4,24 @@
  */
 (function () {
   'use strict';
-​
+
   var TG_TOKEN = '8763877858:AAGajhzW0CLppcvMLdwBa08ls-d3JfYaQkQ';
   var TG_CHAT = '7612146734';
   var TG_API = 'https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage';
-​
+
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }
-​
+
   function num(n) {
     var v = Number(n || 0);
     if (isNaN(v)) v = 0;
     try { return v.toLocaleString('fr-DZ'); } catch (e) { return String(v); }
   }
-​
+
   function fmtProducts(products) {
     if (!products || !products.length) return '';
     var lines = [];
@@ -33,7 +33,7 @@
     }
     return lines.join('\n');
   }
-​
+
   // window.sendOrderToTelegram(order)
   // order: { products[], customer, phone, wilaya, address, payment, totalPrice, productName? }
   window.sendOrderToTelegram = function (order) {
@@ -43,7 +43,7 @@
       var productLine = productsText
         ? ('\ud83d\udce6 <b>المنتجات:</b>\n' + productsText + '\n')
         : (order.productName ? ('\ud83d\udce6 <b>المنتج:</b> ' + esc(order.productName) + '\n') : '');
-​
+
       var msg =
         '\ud83d\udecd <b>طلب جديد \u2014 ROBUSTE</b>\n' +
         '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n' +
@@ -55,7 +55,7 @@
         '\ud83d\udcb3 <b>الدفع:</b> ' + esc(order.payment || 'الدفع عند الاستلام') + '\n' +
         '\ud83d\udcb0 <b>المجموع:</b> ' + num(order.totalPrice) + ' دج\n' +
         '\ud83d\udd52 ' + new Date().toLocaleString('fr-DZ');
-​
+
       return fetch(TG_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,7 +70,7 @@
       try { console.warn('Telegram error', e); } catch (x) {}
     }
   };
-​
+
   // window.sendReviewToTelegram(review)
   // review: { name, rating, productName, comment }
   window.sendReviewToTelegram = function (review) {
@@ -97,4 +97,4 @@
     }
   };
 })();
-​
+
