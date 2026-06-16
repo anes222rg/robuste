@@ -702,5 +702,30 @@
     "stock": 8,
     "category": "cuisine",
     "badge": "Nouveau"
+  },
+  {
+    "id": 105,
+    "title": "ROBO 26F",
+    "price": 15900,
+    "old_price": 20000,
+    "images": [
+      "images/ROBO 26F.webp",
+      "images/ROBO 26F 2.webp"
+    ],
+    "description_short": "Robot culinaire multifonction 800W avec 26 fonctions",
+    "description_long": "Robot culinaire Robuste multifonction 800W conçu pour être votre assistant quotidien idéal. Il dispose de 26 fonctions différentes pour préparer toutes vos recettes avec facilité : hacher, mixer, broyer, presser et fouetter avec professionnalisme. Bol de 1.8L adapté à la famille, lames puissantes et accessoires multiples pour des résultats précis et un design élégant.",
+    "features": [
+      "Puissance 800W",
+      "26 fonctions différentes",
+      "Bol 1.8L adapté à la famille",
+      "Fonctions: hacher, mixer, broyer, presser, fouetter",
+      "Lames puissantes en acier inoxydable",
+      "Accessoires multiples inclus",
+      "Design élégant",
+      "Résultats précis"
+    ],
+    "stock": 5,
+    "category": "cuisine",
+    "badge": "Nouveau"
   }
 ]
