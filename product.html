@@ -416,6 +416,125 @@ body {
     transform: translateY(-2px);
 }
 
+/* ===== honeypot anti-spam (hidden from humans) ===== */
+.hp-field {
+    position: absolute !important;
+    left: -9999px !important;
+    top: auto !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+/* ===== Confirm order modal (branded) ===== */
+#orderModal .modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,.28);
+}
+#orderModal .modal-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-bottom: none;
+    padding: 18px 22px;
+    align-items: center;
+}
+#orderModal .modal-header .modal-title {
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.15rem;
+    color: #fff;
+}
+#orderModal .modal-body { padding: 22px; background: var(--light); }
+#orderModal .modal-footer { border-top: 1px solid var(--border-color); padding: 14px 22px; background: var(--light); gap: 10px; }
+.order-summary-card {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(255,107,53,.08), rgba(255,107,53,.02));
+    border: 1px solid rgba(255,107,53,.18);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+}
+.order-summary-card img { border-radius: 10px; object-fit: cover; width: 64px; height: 64px; }
+.order-summary-card .os-title { font-weight: 700; margin: 0 0 2px; font-size: .98rem; }
+.order-summary-card .os-price { color: var(--primary); font-weight: 800; margin: 0; }
+.order-field { margin-bottom: 14px; }
+.order-field label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: .9rem;
+    margin-bottom: 6px;
+    color: var(--dark);
+}
+.order-field label i { color: var(--primary); }
+.order-input {
+    width: 100%;
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    padding: 11px 13px;
+    background: var(--light);
+    color: var(--dark);
+    transition: var(--transition);
+    font-size: .95rem;
+}
+.order-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255,107,53,.12);
+    outline: none;
+}
+.order-pay-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px solid rgba(255,107,53,.35);
+    background: rgba(255,107,53,.05);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.order-pay-option i { color: var(--primary); font-size: 1.2rem; }
+.order-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 14px;
+    font-size: .82rem;
+    color: var(--gray);
+}
+.order-trust span { display: inline-flex; align-items: center; gap: 5px; }
+.order-trust i { color: var(--success); }
+.btn-confirm-order {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    color: #fff;
+    font-weight: 800;
+    padding: 12px 26px;
+    border-radius: 12px;
+    transition: var(--transition);
+    box-shadow: 0 8px 20px rgba(255,107,53,.32);
+}
+.btn-confirm-order:hover { transform: translateY(-2px); color: #fff; box-shadow: 0 12px 26px rgba(255,107,53,.4); }
+.btn-confirm-order:disabled { opacity: .7; transform: none; cursor: not-allowed; }
+.btn-cancel-order {
+    background: transparent;
+    border: 1.5px solid var(--border-color);
+    color: var(--gray);
+    font-weight: 600;
+    padding: 11px 20px;
+    border-radius: 12px;
+    transition: var(--transition);
+}
+.btn-cancel-order:hover { background: rgba(0,0,0,.04); }
+
 /* ========== المنتجات المقترحة (كروت مثل index) ========== */
 .related-card {
     background: var(--light);
@@ -711,30 +830,39 @@ body {
 <div class="modal fade" id="orderModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">تأكيد الطلب</h5>
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-bag-check-fill"></i> تأكيد الطلب</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="order-summary mb-4 d-flex gap-3 align-items-center">
-                    <img loading="lazy" decoding="async" id="modalProductImg" width="70" class="rounded-3" alt="صورة المنتج">
-                    <div><h6 id="modalProductTitle"></h6><p id="modalProductPrice" class="text-primary fw-bold"></p></div>
+                <div class="order-summary-card">
+                    <img loading="lazy" decoding="async" id="modalProductImg" width="64" height="64" alt="صورة المنتج">
+                    <div><p class="os-title" id="modalProductTitle"></p><p class="os-price" id="modalProductPrice"></p></div>
                 </div>
-                <form id="orderForm">
+                <form id="orderForm" autocomplete="on">
                     <input type="hidden" id="orderProductName">
                     <input type="hidden" id="orderProductPrice">
+                    <input type="text" id="orderHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="اتركه فارغاً">
                     <div class="row">
-                        <div class="col-md-6 mb-3"><label class="form-label">الاسم الكامل *</label><input type="text" id="fullName" class="form-control" required></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">رقم الهاتف *</label><input type="tel" id="phone" class="form-control" required></div>
+                        <div class="col-md-6 order-field"><label><i class="bi bi-person"></i> الاسم الكامل *</label><input type="text" id="fullName" class="order-input" required></div>
+                        <div class="col-md-6 order-field"><label><i class="bi bi-telephone"></i> رقم الهاتف *</label><input type="tel" id="phone" class="order-input" inputmode="numeric" required></div>
                     </div>
-                    <div class="mb-3"><label>الولاية *</label><select id="wilayaSelect" class="form-select" required></select></div>
-                    <div class="mb-3"><label>العنوان</label><textarea id="address" class="form-control" rows="2"></textarea></div>
-                    <div class="form-check mb-2"><input class="form-check-input" type="radio" name="payMethod" value="الدفع عند الاستلام" checked> <label>الدفع عند الاستلام</label></div>
+                    <div class="row">
+                        <div class="col-md-6 order-field"><label><i class="bi bi-geo-alt"></i> الولاية *</label><select id="wilayaSelect" class="order-input" required></select></div>
+                        <div class="col-md-6 order-field"><label><i class="bi bi-buildings"></i> البلدية</label><input type="text" id="baladiyaInput" class="order-input" placeholder="اسم البلدية"></div>
+                    </div>
+                    <div class="order-field"><label><i class="bi bi-house-door"></i> العنوان</label><textarea id="address" class="order-input" rows="2" placeholder="الحي، الشارع، رقم المنزل..."></textarea></div>
+                    <div class="order-pay-option"><i class="bi bi-cash-coin"></i><input class="form-check-input m-0" type="radio" name="payMethod" value="الدفع عند الاستلام" checked id="payCod"> <label class="m-0" for="payCod">الدفع عند الاستلام</label></div>
+                    <div class="order-trust">
+                        <span><i class="bi bi-shield-check"></i> دفع آمن عند الاستلام</span>
+                        <span><i class="bi bi-truck"></i> توصيل سريع</span>
+                        <span><i class="bi bi-arrow-repeat"></i> إرجاع خلال 7 أيام</span>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <button class="btn btn-orange" id="submitOrderFinal">تأكيد الطلب</button>
+                <button class="btn-cancel-order" data-bs-dismiss="modal">إلغاء</button>
+                <button class="btn-confirm-order" id="submitOrderFinal"><i class="bi bi-check2-circle"></i> تأكيد الطلب</button>
             </div>
         </div>
     </div>
@@ -880,26 +1008,45 @@ function showToast(msg, type) {
     toastDiv.innerHTML = `<div class="alert shadow rounded-4 p-2 text-white" style="background:${bg};">${msg}</div>`;
     setTimeout(() => toastDiv.innerHTML = '', 2500);
 }
+/* ===== anti-spam helpers (client-side, low-friction) ===== */
+function honeypotFilled(id){ try { var el = document.getElementById(id); return !!(el && el.value && el.value.trim()); } catch(e){ return false; } }
+function antiSpamCheck(sig){
+    try {
+        var now = Date.now();
+        var last = parseInt(localStorage.getItem('robuste_last_order_ts') || '0', 10);
+        var lastSig = localStorage.getItem('robuste_last_order_sig') || '';
+        if(sig && sig === lastSig && last && (now - last) < 60000) { return { ok:false, msg:"لقد استلمنا هذا الطلب بالفعل، سنتواصل معك قريباً" }; }
+    } catch(e){}
+    return { ok:true };
+}
+function markOrderSent(sig){ try { localStorage.setItem('robuste_last_order_ts', String(Date.now())); if(sig) localStorage.setItem('robuste_last_order_sig', sig); } catch(e){} }
+
 let isSubmittingFinal = false;
 async function submitOrderFinal() {
     if(isSubmittingFinal) return;
+    if(honeypotFilled('orderHp')) { showOrderSuccess('', '', null); return; }
     const fullName = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
     const wilaya = document.getElementById('wilayaSelect').value;
-    const address = document.getElementById('address').value;
+    const baladiya = (document.getElementById('baladiyaInput') ? document.getElementById('baladiyaInput').value.trim() : '');
+    const address = document.getElementById('address').value.trim();
     const totalPrice = parseFloat(document.getElementById('orderProductPrice').value);
     if(!fullName || !phone || !wilaya) { showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    var guard = antiSpamCheck(phone + '|' + totalPrice);
+    if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingFinal = true;
     var finalBtn = document.getElementById('submitOrderFinal');
     var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
     if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
-    const orderData = { customer: fullName, phone, wilaya, address, products: cart, totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
-    try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
+    var fullAddress = [baladiya, address].filter(Boolean).join('، ');
+    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
+    try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(Object.assign({}, orderData, { address: fullAddress })); } } catch (e) {}
     try {
         const docRef = await db.collection('orders').add(orderData);
         const productsList = cart.map(p => `${p.name} x${p.quantity}`).join(', ');
-        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id: docRef.id, customer_name: fullName, customer_phone: phone, wilaya, address, total_price: totalPrice.toLocaleString(), products: productsList });
+        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id: docRef.id, customer_name: fullName, customer_phone: phone, wilaya, address: fullAddress, total_price: totalPrice.toLocaleString(), products: productsList });
+        markOrderSent(phone + '|' + totalPrice);
         showOrderSuccess(docRef.id, phone, totalPrice);
         cart = []; saveCart();
         bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
@@ -995,9 +1142,11 @@ function renderProductLayout(p) {
                 <div class="quick-order-title">طلب سريع</div>
                 <div class="product-mini"><img loading="lazy" decoding="async" src="${p.images[0]}" width="50" alt="${p.title}"><div><strong>${p.title.substring(0,35)}</strong><div class="text-primary fw-bold">${p.price} د.ج</div></div></div>
                 <form id="expressForm">
+                    <input type="text" id="expressHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="اتركه فارغاً">
                     <input type="text" id="expressName" class="form-control-premium mb-2" placeholder="الاسم الكامل *">
                     <input type="tel" id="expressPhone" class="form-control-premium mb-2" placeholder="رقم الهاتف *">
                     <select id="expressWilaya" class="form-select-premium mb-2">${wilayas.map(w=>`<option>${w}</option>`).join('')}</select>
+                    <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع)">
                     <input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1">
                     <button type="button" class="btn-submit-express" onclick="submitExpressOrder()">تأكيد الطلب</button>
                 </form>
@@ -1017,22 +1166,27 @@ let isSubmittingExpress = false;
 async function submitExpressOrder() {
     if(isSubmittingExpress) return;
     if(!currentProduct) return;
+    if(honeypotFilled('expressHp')) { showOrderSuccess('', '', null); return; }
     const name = document.getElementById('expressName').value.trim();
     const phone = document.getElementById('expressPhone').value.trim();
     const wilaya = document.getElementById('expressWilaya').value;
+    const address = (document.getElementById('expressAddress') ? document.getElementById('expressAddress').value.trim() : "");
     const qty = parseInt(document.getElementById('expressQty').value) || 1;
     if(!name || !phone || !wilaya) { showToast("يرجى ملء البيانات", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    const total = currentProduct.price * qty;
+    var guard = antiSpamCheck(phone + '|' + total);
+    if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingExpress = true;
     var expressBtn = document.querySelector('.btn-submit-express');
     var expressBtnOrig = expressBtn ? expressBtn.innerHTML : '';
     if(expressBtn){ expressBtn.disabled = true; expressBtn.innerHTML = 'جاري المعالجة...'; }
-    const total = currentProduct.price * qty;
     try {
-        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:"", payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString() };
+        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:address, payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString() };
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         const docRef = await db.collection('orders').add(orderData);
-        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
+        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, address:address, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
+        markOrderSent(phone + '|' + total);
         showOrderSuccess(docRef.id, phone, total);
         document.getElementById('expressForm').reset();
     } catch(e) { showToast("حدث خطأ", "error"); }
