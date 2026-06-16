@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-<!-- DEMO BUILD: mock backend, no real API keys/tokens or network calls -->
-<script src="demo-mock.js"></script>
-<link rel="stylesheet" href="demo-tour.css">
-
 <meta charset="UTF-8">
 <!-- Google tag (gtag.js) -->
-<!-- removed for demo: external service replaced by demo-mock.js -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GREM5BTR7T"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-DEMO000000');
+gtag('config', 'G-GREM5BTR7T');
 </script>
 <meta name="description" content="Robuste eulma - أجهزة منزلية عالية الجودة بأسعار تنافسية في الجزائر مع ضمان سنة واحدة وتوصيل سريع">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- أيقونات الموقع -->
-<link rel="shortcut icon" href="https://www.robustedz.store/images/favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" sizes="180x180" href="https://www.robustedz.store/images/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://www.robustedz.store/images/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="https://www.robustedz.store/images/favicon-16x16.png">
+<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 
 <meta name="theme-color" content="#ff6600">
 <title>ROBUSTE eulma - المتجر الرسمي</title>
@@ -73,13 +69,13 @@ gtag('config', 'G-DEMO000000');
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"></noscript>
 
 <!-- Bootstrap -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+<link href="bootstrap.min.css" rel="stylesheet">
 
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
 
 <!-- EmailJS -->
-<!-- removed for demo: external service replaced by demo-mock.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <link rel="stylesheet" href="style.css">
 <!-- Auto-WebP with safe fallback (added) -->
@@ -129,8 +125,6 @@ gtag('config', 'G-DEMO000000');
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<!-- Phone-first UX layer (loaded last to override) -->
-<link rel="stylesheet" href="mobile-ux.css">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
@@ -173,7 +167,7 @@ gtag('config', 'G-DEMO000000');
 <!-- القسم الرئيسي Hero -->
 <section class="hero-container position-relative">
     <div class="hero-image-container">
-        <img width="3780" height="1890" src="https://www.robustedz.store/images/banner.webp" alt="أجهزة منزلية" class="hero-image" fetchpriority="high" decoding="async">
+        <img width="3780" height="1890" src="images/banner.webp" alt="أجهزة منزلية" class="hero-image" fetchpriority="high" decoding="async">
         <div class="image-overlay"></div>
     </div>
     <div class="hero-content container text-center position-absolute top-50 start-50 translate-middle">
@@ -189,19 +183,19 @@ gtag('config', 'G-DEMO000000');
 <!-- عرض الشرائح (Slideshow) -->
 <div class="slideshow-container1">
   <div class="mySlides1 fade1">
-    <img src="https://www.robustedz.store/images/signal-2025-08-21-103443_002.webp" width="1600" height="800" style="width:100%;height:auto" alt="عرض المنتجات" loading="eager">
+    <img src="images/signal-2025-08-21-103443_002.webp" width="1600" height="800" style="width:100%;height:auto" alt="عرض المنتجات" loading="eager">
   </div>
   <div class="mySlides1 fade1">
-    <img src="https://www.robustedz.store/images/signal-2025-08-21-103443_003.webp" width="1600" height="800" style="width:100%;height:auto" alt="عروض خاصة" loading="eager">
+    <img src="images/signal-2025-08-21-103443_003.webp" width="1600" height="800" style="width:100%;height:auto" alt="عروض خاصة" loading="eager">
   </div>
   <div class="mySlides1 fade1">
-    <img src="https://www.robustedz.store/images/signal-2025-08-21-103443_004.webp" width="1600" height="800" style="width:100%;height:auto" alt="جودة المنتجات" loading="eager">
+    <img src="images/signal-2025-08-21-103443_004.webp" width="1600" height="800" style="width:100%;height:auto" alt="جودة المنتجات" loading="eager">
   </div>
   <div class="mySlides1 fade1">
-    <img src="https://www.robustedz.store/images/signal-2025-08-21-103443_005.webp" width="1600" height="800" style="width:100%;height:auto" alt="ضمان المنتجات" loading="eager">
+    <img src="images/signal-2025-08-21-103443_005.webp" width="1600" height="800" style="width:100%;height:auto" alt="ضمان المنتجات" loading="eager">
   </div>
   <div class="mySlides1 fade1">
-    <img src="https://www.robustedz.store/images/4_20250820_152310_0003.webp" width="1600" height="800" style="width:100%;height:auto" alt="توصيل سريع" loading="eager">
+    <img src="images/4_20250820_152310_0003.webp" width="1600" height="800" style="width:100%;height:auto" alt="توصيل سريع" loading="eager">
   </div>
   <a class="prev1" onclick="plusSlides1(-1)" role="button" tabindex="0" aria-label="السابق">&#10094;</a>
   <a class="next1" onclick="plusSlides1(1)" role="button" tabindex="0" aria-label="التالي">&#10095;</a>
@@ -238,13 +232,13 @@ gtag('config', 'G-DEMO000000');
         <div class="trust-icon"><i class="bi bi-headset"></i></div>
         <div class="trust-text">
           <span class="trust-title">خدمة ما بعد الشراء</span>
-          <span class="trust-sub">��عم دائم لك</span>
+          <span class="trust-sub">دعم دائم لك</span>
         </div>
       </div>
       <div class="trust-item">
         <div class="trust-icon"><i class="bi bi-cash-coin"></i></div>
         <div class="trust-text">
-          <span class="trust-title">دفع يد بيد</span>
+          <span class="trust-title">دفع يد بي��</span>
           <span class="trust-sub">ادفع عند الاستلام</span>
         </div>
       </div>
@@ -299,13 +293,13 @@ gtag('config', 'G-DEMO000000');
 
           <div class="carousel-inner">
             <div class="carousel-item active">
-              <a href="product.html?pid=100"><img src="https://www.robustedz.store/images/Robuste Defroisseur 1.jpg" class="d-block w-100" alt="Défroisseur Vapeur" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=100"><img src="images/Robuste Defroisseur 1.jpg" class="d-block w-100" alt="Défroisseur Vapeur" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=100"><img src="https://www.robustedz.store/images/Robuste Defroisseur 2.jpg" class="d-block w-100" alt="Défroisseur Vapeur vue de côté" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=100"><img src="images/Robuste Defroisseur 2.jpg" class="d-block w-100" alt="Défroisseur Vapeur vue de côté" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=100"><img src="https://www.robustedz.store/images/Robuste Defroisseur.jpg" class="d-block w-100" alt="Défroisseur Vapeur en action" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=100"><img src="images/Robuste Defroisseur.jpg" class="d-block w-100" alt="Défroisseur Vapeur en action" loading="lazy" decoding="async"></a>
             </div>
           </div>
 
@@ -343,13 +337,13 @@ gtag('config', 'G-DEMO000000');
 
           <div class="carousel-inner">
             <div class="carousel-item active">
-              <a href="product.html?pid=101"><img src="https://www.robustedz.store/images/ASPIRATEUR SOUFFLEUR A MAIN.png" class="d-block w-100" alt="Aspirateur Souffleur" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=101"><img src="images/ASPIRATEUR SOUFFLEUR A MAIN.png" class="d-block w-100" alt="Aspirateur Souffleur" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=101"><img src="https://www.robustedz.store/images/ASPIRATEUR SOUFFLEUR A MAIN 2.png" class="d-block w-100" alt="Aspirateur Souffleur accessoires" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=101"><img src="images/ASPIRATEUR SOUFFLEUR A MAIN 2.png" class="d-block w-100" alt="Aspirateur Souffleur accessoires" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=101"><img src="https://www.robustedz.store/images/ASPIRATEUR SOUFFLEUR A MAIN 3.png" class="d-block w-100" alt="Aspirateur Souffleur en action" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=101"><img src="images/ASPIRATEUR SOUFFLEUR A MAIN 3.png" class="d-block w-100" alt="Aspirateur Souffleur en action" loading="lazy" decoding="async"></a>
             </div>
           </div>
 
@@ -386,10 +380,10 @@ gtag('config', 'G-DEMO000000');
 
           <div class="carousel-inner">
             <div class="carousel-item active">
-              <a href="product.html?pid=102"><img src="https://www.robustedz.store/images/NETTOYEUR DE TACHES 4 EN 1.jpg" class="d-block w-100" alt="Nettoyeur de Taches 4 en 1" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=102"><img src="images/NETTOYEUR DE TACHES 4 EN 1.jpg" class="d-block w-100" alt="Nettoyeur de Taches 4 en 1" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=102"><img src="https://www.robustedz.store/images/NETTOYEUR DE TACHES 4 EN 1 robuste.jpg" class="d-block w-100" alt="Nettoyeur de Taches vue arrière" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=102"><img src="images/NETTOYEUR DE TACHES 4 EN 1 robuste.jpg" class="d-block w-100" alt="Nettoyeur de Taches vue arrière" loading="lazy" decoding="async"></a>
             </div>
           </div>
 
@@ -427,13 +421,13 @@ gtag('config', 'G-DEMO000000');
 
           <div class="carousel-inner">
             <div class="carousel-item active">
-              <a href="product.html?pid=103"><img src="https://www.robustedz.store/images/PANINEUSE ET GRILL 1000W.png" class="d-block w-100" alt="Panineuse et Grill" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=103"><img src="images/PANINEUSE ET GRILL 1000W.png" class="d-block w-100" alt="Panineuse et Grill" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=103"><img src="https://www.robustedz.store/images/PANINEUSE ET GRILL 1000W 2.png" class="d-block w-100" alt="Panineuse et Grill 2" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=103"><img src="images/PANINEUSE ET GRILL 1000W 2.png" class="d-block w-100" alt="Panineuse et Grill 2" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=103"><img src="https://www.robustedz.store/images/PANINEUSE ET GRILL 1000W 3.jpeg" class="d-block w-100" alt="Panineuse et Grill 3" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=103"><img src="images/PANINEUSE ET GRILL 1000W 3.jpeg" class="d-block w-100" alt="Panineuse et Grill 3" loading="lazy" decoding="async"></a>
             </div>
           </div>
 
@@ -471,13 +465,13 @@ gtag('config', 'G-DEMO000000');
 
           <div class="carousel-inner">
             <div class="carousel-item active">
-              <a href="product.html?pid=4"><img src="https://www.robustedz.store/images/FRITEUSE DF 900 W.png" class="d-block w-100" alt="Friteuse DF 900 W" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=4"><img src="images/FRITEUSE DF 900 W.png" class="d-block w-100" alt="Friteuse DF 900 W" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=4"><img src="https://www.robustedz.store/images/FRITEUSE DF 900 W 2.png" class="d-block w-100" alt="Friteuse DF 900 W 2" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=4"><img src="images/FRITEUSE DF 900 W 2.png" class="d-block w-100" alt="Friteuse DF 900 W 2" loading="lazy" decoding="async"></a>
             </div>
             <div class="carousel-item">
-              <a href="product.html?pid=4"><img src="https://www.robustedz.store/images/FRITEUSE DF 900 W 3.jpeg" class="d-block w-100" alt="Friteuse DF 900 W 3" loading="lazy" decoding="async"></a>
+              <a href="product.html?pid=4"><img src="images/FRITEUSE DF 900 W 3.jpeg" class="d-block w-100" alt="Friteuse DF 900 W 3" loading="lazy" decoding="async"></a>
             </div>
           </div>
 
@@ -861,8 +855,8 @@ gtag('config', 'G-DEMO000000');
 </div>
 
 <!-- النصوص ال��رمجية الخارجية -->
-<!-- removed for demo: external service replaced by demo-mock.js -->
-<!-- removed for demo: external service replaced by demo-mock.js -->
+<script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script defer src="main.js"></script>
 <script defer src="i18n.js"></script>
@@ -870,8 +864,5 @@ gtag('config', 'G-DEMO000000');
 <script defer src="telegram.js"></script>
 
 <!-- لا توجد أية سكربتات لترجمة أسماء المنتجات أو العلامة التجارية -->
-<!-- DEMO showcase layer -->
-<script src="demo-enhance.js"></script>
-<script src="demo-tour.js"></script>
 </body>
 </html>
