@@ -6,11 +6,9 @@
 <meta name="robots" content="noindex, nofollow">
 <title>لوحة إدارة الطلبات | ROBUSTE</title>
 
-<!-- Bootstrap RTL + Icons (same CDNs already used by the site) -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<!-- Firebase (same compat SDK version as the rest of the site) + Auth -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -27,46 +25,57 @@
   .navbar-admin { background:#fff; border-bottom:1px solid var(--line); }
   .navbar-admin .logo { font-weight:800; color:var(--brand); letter-spacing:.5px; }
 
-  .stat-card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px 20px; height:100%; transition:transform .15s ease, box-shadow .15s ease; }
+  .nav-pills .nav-link { color:var(--muted); font-weight:700; border-radius:10px; }
+  .nav-pills .nav-link.active { background:var(--brand); color:#fff; }
+
+  .stat-card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; height:100%; transition:transform .15s ease, box-shadow .15s ease; }
   .stat-card:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.06); }
-  .stat-card .label { color:var(--muted); font-size:.85rem; font-weight:600; }
-  .stat-card .value { font-size:1.7rem; font-weight:800; margin-top:4px; }
-  .stat-icon { width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem; }
+  .stat-card .label { color:var(--muted); font-size:.82rem; font-weight:600; }
+  .stat-card .value { font-size:1.55rem; font-weight:800; margin-top:2px; }
+  .stat-card .sub { font-size:.72rem; color:var(--muted); margin-top:2px; }
+  .stat-icon { width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem; flex-shrink:0; }
 
   .chart-card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px 20px; height:100%; }
   .chart-card h6 { font-weight:800; }
   .bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
   .bar-row:last-child { margin-bottom:0; }
-  .bar-label { width:84px; font-size:.8rem; color:var(--muted); flex-shrink:0; }
+  .bar-label { width:96px; font-size:.78rem; color:var(--muted); flex-shrink:0; }
   .bar-track { flex-grow:1; background:#f1f2f4; border-radius:8px; height:22px; overflow:hidden; }
   .bar-fill { height:100%; border-radius:8px; min-width:2px; transition:width .45s ease; }
-  .bar-val { font-size:.8rem; font-weight:700; width:30px; text-align:left; flex-shrink:0; }
+  .bar-val { font-size:.8rem; font-weight:700; width:46px; text-align:left; flex-shrink:0; }
   .daybars { display:flex; align-items:flex-end; gap:4px; height:150px; }
   .daybar { flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; }
   .daybar .col { width:100%; background:var(--brand); border-radius:4px 4px 0 0; min-height:2px; transition:height .45s ease; }
   .daybar .d-label { font-size:.6rem; color:var(--muted); margin-top:5px; }
   .chart-empty { color:var(--muted); font-size:.85rem; text-align:center; padding:30px 0; }
+  .funnel-note { font-size:.74rem; color:var(--muted); }
 
   .toolbar { background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
 
-  .table-wrap { background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden; }
-  table.orders { width:100%; border-collapse:collapse; }
-  table.orders th { background:#fafbfc; font-size:.82rem; color:var(--muted); text-align:right; padding:12px 14px; border-bottom:1px solid var(--line); white-space:nowrap; }
-  table.orders td { padding:12px 14px; border-bottom:1px solid #f1f2f4; font-size:.9rem; vertical-align:middle; }
+  .table-wrap { background:#fff; border:1px solid var(--line); border-radius:16px; overflow:auto; }
+  table.orders { width:100%; border-collapse:collapse; min-width:820px; }
+  table.orders th { background:#fafbfc; font-size:.8rem; color:var(--muted); text-align:right; padding:12px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  table.orders td { padding:10px 12px; border-bottom:1px solid #f1f2f4; font-size:.88rem; vertical-align:middle; }
   table.orders tr:last-child td { border-bottom:none; }
   table.orders tbody tr { cursor:pointer; transition:background .12s ease; }
   table.orders tbody tr:hover { background:#fff8f2; }
   table.orders tbody tr.archived-row { background:#fafafa; opacity:.7; }
-  table.orders tbody tr.archived-row:hover { background:#f3f4f6; }
-  .order-id { font-family:monospace; font-size:.8rem; color:var(--muted); }
-  .arch-tag { font-size:.65rem; background:#e5e7eb; color:#6b7280; padding:.15em .5em; border-radius:6px; margin-right:4px; }
+  .order-id { font-family:monospace; font-size:.78rem; color:var(--muted); }
+  .arch-tag { font-size:.62rem; background:#e5e7eb; color:#6b7280; padding:.15em .5em; border-radius:6px; margin-right:4px; }
+  .src-tag { font-size:.7rem; background:#f1f5f9; color:#475569; padding:.2em .55em; border-radius:6px; white-space:nowrap; }
+  .risk-dot { display:inline-block; width:11px; height:11px; border-radius:50%; }
+  .rd-green { background:#22c55e; } .rd-yellow { background:#f59e0b; } .rd-red { background:#ef4444; }
+  .row-actions { display:flex; gap:6px; flex-wrap:nowrap; }
+  .row-actions .btn { --bs-btn-padding-y:.2rem; --bs-btn-padding-x:.5rem; --bs-btn-font-size:.74rem; }
 
-  .badge-status { font-size:.78rem; font-weight:700; padding:.4em .7em; border-radius:999px; white-space:nowrap; }
+  .badge-status { font-size:.76rem; font-weight:700; padding:.4em .7em; border-radius:999px; white-space:nowrap; }
   .s-new { background:#e0f2fe; color:#0369a1; }
   .s-confirmed { background:#ede9fe; color:#6d28d9; }
   .s-preparing { background:#fef3c7; color:#b45309; }
   .s-delivered { background:#dcfce7; color:#15803d; }
+  .s-noanswer { background:#f3f4f6; color:#4b5563; }
   .s-cancelled { background:#fee2e2; color:#b91c1c; }
+  .s-returned { background:#ffe4e6; color:#9f1239; }
 
   .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
   .empty-state i { font-size:3rem; opacity:.4; }
@@ -75,20 +84,26 @@
   .prod-line img { width:46px;height:46px;object-fit:cover;border-radius:8px;background:#f1f2f4; }
   .prod-line:last-child { border-bottom:none; }
 
-  .info-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed #eef0f2; font-size:.92rem; }
+  .info-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed #eef0f2; font-size:.92rem; gap:10px; }
   .info-row:last-child { border-bottom:none; }
   .info-row .k { color:var(--muted); }
-  .info-row .v { font-weight:700; }
+  .info-row .v { font-weight:700; text-align:left; }
+
+  .pe-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .pe-row input { font-size:.85rem; }
 
   .btn-brand { background:var(--brand); border-color:var(--brand); color:#fff; }
   .btn-brand:hover { background:var(--brand-dark); border-color:var(--brand-dark); color:#fff; }
 
   .spin-wrap { padding:60px; text-align:center; color:var(--muted); }
+  .seg { display:inline-flex; background:#f1f2f4; border-radius:10px; padding:3px; }
+  .seg button { border:none; background:transparent; font-size:.82rem; font-weight:700; color:var(--muted); padding:6px 14px; border-radius:8px; }
+  .seg button.active { background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12); }
 </style>
 </head>
 <body>
 
-<!-- ===================== LOGIN GATE (Firebase Auth) ===================== -->
+<!-- ===================== LOGIN GATE ===================== -->
 <div id="loginGate">
   <div class="card p-4">
     <div class="d-flex align-items-center gap-3 mb-3">
@@ -112,8 +127,12 @@
 <div id="app" style="display:none;">
 
   <nav class="navbar navbar-admin py-3">
-    <div class="container-xl d-flex justify-content-between align-items-center">
+    <div class="container-xl d-flex justify-content-between align-items-center flex-wrap gap-2">
       <span class="logo fs-5"><i class="bi bi-box-seam"></i> ROBUSTE · لوحة الطلبات</span>
+      <ul class="nav nav-pills gap-1" id="mainTabs">
+        <li class="nav-item"><button class="nav-link active" data-tab="orders"><i class="bi bi-list-check"></i> الطلبات</button></li>
+        <li class="nav-item"><button class="nav-link" data-tab="analytics"><i class="bi bi-graph-up-arrow"></i> التحليلات</button></li>
+      </ul>
       <div class="d-flex gap-2 align-items-center">
         <span id="adminWho" class="text-muted d-none d-md-inline" style="font-size:.82rem;" dir="ltr"></span>
         <button id="refreshBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> تحديث</button>
@@ -124,95 +143,109 @@
 
   <div class="container-xl py-4">
 
-    <div class="row g-3 mb-4" id="statsRow">
+    <!-- KPI cards (always visible) -->
+    <div class="row g-3 mb-2" id="statsRow">
       <div class="col-6 col-lg-3">
         <div class="stat-card d-flex align-items-center gap-3">
           <div class="stat-icon" style="background:#eef2ff;color:#4338ca;"><i class="bi bi-receipt"></i></div>
-          <div><div class="label">إجمالي الطلبات</div><div class="value" id="statTotal">—</div></div>
+          <div><div class="label">إجمالي الطلبات</div><div class="value" id="statTotal">—</div><div class="sub" id="statNewSub">—</div></div>
         </div>
       </div>
       <div class="col-6 col-lg-3">
         <div class="stat-card d-flex align-items-center gap-3">
-          <div class="stat-icon" style="background:#e0f2fe;color:#0369a1;"><i class="bi bi-bell"></i></div>
-          <div><div class="label">طلبات جديدة</div><div class="value" id="statNew">—</div></div>
+          <div class="stat-icon" style="background:#ede9fe;color:#6d28d9;"><i class="bi bi-telephone-forward"></i></div>
+          <div><div class="label">مؤكدة (بالاتصال)</div><div class="value" id="statConfirmed">—</div><div class="sub" id="statConfirmRate">—</div></div>
         </div>
       </div>
       <div class="col-6 col-lg-3">
         <div class="stat-card d-flex align-items-center gap-3">
           <div class="stat-icon" style="background:#dcfce7;color:#15803d;"><i class="bi bi-check2-circle"></i></div>
-          <div><div class="label">تم التسليم</div><div class="value" id="statDelivered">—</div></div>
+          <div><div class="label">تم التسليم</div><div class="value" id="statDelivered">—</div><div class="sub" id="statDeliverRate">—</div></div>
         </div>
       </div>
       <div class="col-6 col-lg-3">
         <div class="stat-card d-flex align-items-center gap-3">
-          <div class="stat-icon" style="background:#fff7ed;color:#c2410c;"><i class="bi bi-cash-coin"></i></div>
-          <div><div class="label">إجمالي قيمة الطلبات</div><div class="value" id="statRevenue">—</div></div>
+          <div class="stat-icon" style="background:#fff7ed;color:#c2410c;"><i class="bi bi-cash-stack"></i></div>
+          <div><div class="label">الإيرادات الحقيقية</div><div class="value" id="statRevenue">—</div><div class="sub">المُسلَّمة فقط</div></div>
         </div>
+      </div>
+    </div>
+    <p class="funnel-note mb-4"><i class="bi bi-info-circle"></i> "الإيرادات الحقيقية" تحتسب الطلبات المُسلَّمة فقط — وليس الطلبات التي لم تؤكَّد أو لم تُسلَّم بعد.</p>
+
+    <!-- ============ ANALYTICS TAB ============ -->
+    <div id="tab-analytics" style="display:none;">
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card"><div class="label">إيرادات قيد التنفيذ</div><div class="value" id="kpiPending">—</div><div class="sub">جديد + مؤكد + قيد التحضير</div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card"><div class="label">متوسط قيمة الطلب المُسلَّم</div><div class="value" id="kpiAov">—</div><div class="sub">الإيراد الحقيقي ÷ المُسلَّمة</div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card"><div class="label">طلبات ضائعة</div><div class="value" id="kpiLost">—</div><div class="sub">ملغى + لم يرد + مرتجع</div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card"><div class="label">طلبات تحتاج مراجعة</div><div class="value" id="kpiRisk">—</div><div class="sub">إشارات خطر (أصفر/أحمر)</div></div>
+        </div>
+      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-6"><div class="chart-card"><h6 class="mb-3"><i class="bi bi-bar-chart-line"></i> الطلبات حسب الحالة</h6><div id="chartStatus"></div></div></div>
+        <div class="col-12 col-lg-6"><div class="chart-card"><h6 class="mb-3"><i class="bi bi-graph-up"></i> الطلبات آخر 12 شهر</h6><div class="daybars" id="chartDays"></div></div></div>
+      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-4"><div class="chart-card"><h6 class="mb-3"><i class="bi bi-geo-alt"></i> أعلى الولايات</h6><div id="chartWilaya"></div></div></div>
+        <div class="col-12 col-lg-4"><div class="chart-card"><h6 class="mb-3"><i class="bi bi-megaphone"></i> مصدر الزيارة</h6><div id="chartSource"></div></div></div>
+        <div class="col-12 col-lg-4"><div class="chart-card"><h6 class="mb-3"><i class="bi bi-shield-check"></i> توزيع الخطورة</h6><div id="chartRisk"></div></div></div>
       </div>
     </div>
 
-    <!-- ===== Charts (pure SVG/CSS, no external libraries) ===== -->
-    <div class="row g-3 mb-4">
-      <div class="col-12 col-lg-6">
-        <div class="chart-card">
-          <h6 class="mb-3"><i class="bi bi-bar-chart-line"></i> الطلبات حسب الحالة</h6>
-          <div id="chartStatus"></div>
+    <!-- ============ ORDERS TAB ============ -->
+    <div id="tab-orders">
+      <div class="toolbar mb-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-lg-4">
+            <label class="form-label mb-1" style="font-size:.82rem;"><i class="bi bi-search"></i> بحث (الاسم / الهاتف / رقم الطلب)</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="ابحث...">
+          </div>
+          <div class="col-6 col-lg-2">
+            <label class="form-label mb-1" style="font-size:.82rem;">الحالة</label>
+            <select id="statusFilter" class="form-select"><option value="">الكل</option></select>
+          </div>
+          <div class="col-6 col-lg-2">
+            <label class="form-label mb-1" style="font-size:.82rem;">من تاريخ</label>
+            <input type="date" id="dateFrom" class="form-control">
+          </div>
+          <div class="col-6 col-lg-2">
+            <label class="form-label mb-1" style="font-size:.82rem;">إلى تاريخ</label>
+            <input type="date" id="dateTo" class="form-control">
+          </div>
+          <div class="col-6 col-lg-2">
+            <button id="clearFilters" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle"></i> مسح</button>
+          </div>
+        </div>
+        <div class="form-check form-switch mt-3 mb-0">
+          <input class="form-check-input" type="checkbox" id="showArchived">
+          <label class="form-check-label" for="showArchived" style="font-size:.85rem;">إظهار الطلبات المؤرشفة</label>
         </div>
       </div>
-      <div class="col-12 col-lg-6">
-        <div class="chart-card">
-          <h6 class="mb-3"><i class="bi bi-graph-up"></i> الطلبات آخر 12 شهر</h6>
-          <div class="daybars" id="chartDays"></div>
-        </div>
-      </div>
-    </div>
 
-    <div class="toolbar mb-3">
-      <div class="row g-2 align-items-end">
-        <div class="col-12 col-lg-4">
-          <label class="form-label mb-1" style="font-size:.82rem;"><i class="bi bi-search"></i> بحث (الاسم / الهاتف / رقم الطلب)</label>
-          <input type="text" id="searchInput" class="form-control" placeholder="ابحث...">
-        </div>
-        <div class="col-6 col-lg-2">
-          <label class="form-label mb-1" style="font-size:.82rem;">الحالة</label>
-          <select id="statusFilter" class="form-select">
-            <option value="">الكل</option>
-          </select>
-        </div>
-        <div class="col-6 col-lg-2">
-          <label class="form-label mb-1" style="font-size:.82rem;">من تاريخ</label>
-          <input type="date" id="dateFrom" class="form-control">
-        </div>
-        <div class="col-6 col-lg-2">
-          <label class="form-label mb-1" style="font-size:.82rem;">إلى تاريخ</label>
-          <input type="date" id="dateTo" class="form-control">
-        </div>
-        <div class="col-6 col-lg-2">
-          <button id="clearFilters" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle"></i> مسح</button>
+      <div class="table-wrap">
+        <div id="tableContent">
+          <div class="spin-wrap"><div class="spinner-border text-warning" role="status"></div><div class="mt-2">جاري تحميل الطلبات...</div></div>
         </div>
       </div>
-      <div class="form-check form-switch mt-3 mb-0">
-        <input class="form-check-input" type="checkbox" id="showArchived">
-        <label class="form-check-label" for="showArchived" style="font-size:.85rem;">إظهار الطلبات المؤرشفة</label>
-      </div>
+      <div id="resultCount" class="text-muted mt-2" style="font-size:.85rem;"></div>
     </div>
-
-    <div class="table-wrap">
-      <div id="tableContent">
-        <div class="spin-wrap"><div class="spinner-border text-warning" role="status"></div><div class="mt-2">جاري تحميل الطلبات...</div></div>
-      </div>
-    </div>
-    <div id="resultCount" class="text-muted mt-2" style="font-size:.85rem;"></div>
 
   </div>
 </div>
 
-<!-- ===================== ORDER DETAILS MODAL ===================== -->
+<!-- ===================== ORDER MODAL ===================== -->
 <div class="modal fade" id="orderModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
     <div class="modal-content" style="border-radius:16px; border:none;">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-receipt-cutoff"></i> تفا��يل الطلب</h5>
+        <h5 class="modal-title"><i class="bi bi-receipt-cutoff"></i> تفاصيل الطلب</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="modalBody"></div>
@@ -225,10 +258,6 @@
 (function(){
   'use strict';
 
-  /* =========================================================
-     CONFIG — same Firebase project as the storefront.
-     Login uses Firebase Authentication (Email/Password).
-     ========================================================= */
   var firebaseConfig = {
     apiKey: "AIzaSyBTrnKCYOtfSSDYtmVQbzP2HcwgkLT565Y",
     authDomain: "robuste-c8e0f.firebaseapp.com",
@@ -238,15 +267,22 @@
     appId: "1:975609984963:web:a481efb493a88d7bc7af76"
   };
 
-  /* ===== Status model (Arabic, matching existing data) ===== */
+  /* COD status funnel */
   var STATUSES = [
     { key: "جديد",          css: "s-new",       color: "#0ea5e9" },
     { key: "مؤكد",          css: "s-confirmed", color: "#8b5cf6" },
-    { key: "قيد التحضير", css: "s-preparing", color: "#f59e0b" },
+    { key: "قيد التحضير",  css: "s-preparing", color: "#f59e0b" },
     { key: "تم التسليم",    css: "s-delivered", color: "#22c55e" },
-    { key: "ملغى",          css: "s-cancelled", color: "#ef4444" }
+    { key: "لم يرد",         css: "s-noanswer",  color: "#9ca3af" },
+    { key: "ملغى",          css: "s-cancelled", color: "#ef4444" },
+    { key: "مرتجع",         css: "s-returned",  color: "#be123c" }
   ];
   var DEFAULT_STATUS = "جديد";
+  var CONFIRMED_SET = ["مؤكد","قيد التحضير","تم التسليم"]; // confirmed-or-beyond
+  var PENDING_SET   = ["جديد","مؤكد","قيد التحضير"];
+  var LOST_SET      = ["لم يرد","ملغى","مرتجع"];
+  var DELIVERED     = "تم التسليم";
+  function inSet(set, k){ return set.indexOf(k) !== -1; }
 
   function statusMeta(raw){
     var s = (raw == null || String(raw).trim() === "") ? DEFAULT_STATUS : String(raw).trim();
@@ -254,13 +290,14 @@
     return { key: s, css: "s-new", color: "#0ea5e9" };
   }
 
-  /* ===== State ===== */
+  /* State */
   var auth = null, db = null;
   var allOrders = [];
   var modalInstance = null;
   var ordersLoaded = false;
+  var editMode = false;
 
-  /* ===== Helpers ===== */
+  /* Helpers */
   function $(id){ return document.getElementById(id); }
   function esc(v){
     if (v == null) return "";
@@ -268,11 +305,9 @@
       return ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"})[c];
     });
   }
-  function fmtMoney(n){
-    var num = Number(n);
-    if (!isFinite(num)) num = 0;
-    return num.toLocaleString('ar-DZ') + " د.ج";
-  }
+  function fmtMoney(n){ var num = Number(n); if (!isFinite(num)) num = 0; return num.toLocaleString('ar-DZ') + " د.ج"; }
+  function fmtMoneyShort(n){ var num = Number(n)||0; return num.toLocaleString('ar-DZ'); }
+  function pct(a,b){ if (!b) return "0%"; return Math.round((a/b)*100) + "%"; }
   function parseDate(ts){
     if (!ts) return null;
     try {
@@ -298,246 +333,203 @@
     var t = 0; for (var i=0;i<arr.length;i++){ t += (Number(arr[i].price)||0) * (Number(arr[i].quantity)||0); }
     return t;
   }
+  function orderSource(data){
+    var m = data.meta || {};
+    return m.lastTouchSource || m.utm_source || m.firstTouchSource || m.referrerHost || "مباشر";
+  }
+  function riskLevel(data){ return (data.risk && data.risk.level) || "green"; }
   function isArchived(data){ return data && data.archived === true; }
-  /* Active = not archived. Stats and charts use active orders only. */
   function activeOrders(){
     var out = [];
     for (var i=0;i<allOrders.length;i++){ if (!isArchived(allOrders[i].data)) out.push(allOrders[i]); }
     return out;
   }
   function maxOf(arr){ var m=0; for (var i=0;i<arr.length;i++){ if (arr[i]>m) m=arr[i]; } return m; }
+  function intlPhone(p){ var s = String(p||"").replace(/[^0-9]/g,""); if (s.indexOf("0")===0) s = "213" + s.slice(1); return s; }
 
-  /* ===== Firebase init (runs immediately) ===== */
+  /* Firebase init */
   function initFirebase(){
-    if (typeof firebase === 'undefined' || !firebase.initializeApp){
-      showLoginError("تعذر تحميل Firebase. تحقق من اتصال الإنترنت.");
-      return false;
-    }
+    if (typeof firebase === 'undefined' || !firebase.initializeApp){ showLoginError("تعذر تحميل Firebase. تحقق من اتصال الإنترنت."); return false; }
     try {
       if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      auth = firebase.auth();
-      db = firebase.firestore();
-      return true;
-    } catch(e){
-      console.error('Firebase init error', e);
-      showLoginError("خطأ في تهيئة Firebase.");
-      return false;
-    }
+      auth = firebase.auth(); db = firebase.firestore(); return true;
+    } catch(e){ console.error('Firebase init error', e); showLoginError("خطأ في تهيئة Firebase."); return false; }
   }
 
-  /* ===== Auth ===== */
-  function showLoginError(msg){
-    var el = $("loginError");
-    el.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + esc(msg);
-    el.style.display = 'block';
-  }
+  /* Auth */
+  function showLoginError(msg){ var el = $("loginError"); el.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + esc(msg); el.style.display = 'block'; }
   function tryLogin(){
     if (!auth) { if (!initFirebase()) return; }
     var email = ($("adminEmail").value || "").trim();
     var pass = $("adminPass").value;
     if (!email || !pass){ showLoginError("أدخل البريد وكلمة المرور."); return; }
     $("loginError").style.display = 'none';
-    var btn = $("loginBtn");
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري الدخول...';
+    var btn = $("loginBtn"); btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري الدخول...';
     auth.signInWithEmailAndPassword(email, pass)
       .catch(function(err){
         console.error('Auth error', err);
-        var map = {
-          'auth/invalid-email': "البريد الإلكتروني غير صالح.",
-          'auth/user-not-found': "لا يوجد حساب بهذا البريد.",
-          'auth/wrong-password': "كلمة المرور غير صحيحة.",
-          'auth/invalid-credential': "بيانات الدخول غير صحيحة.",
-          'auth/too-many-requests': "محاولات كثيرة. حاول لاحقاً."
-        };
+        var map = { 'auth/invalid-email':"البريد الإلكتروني غير صالح.",'auth/user-not-found':"لا يوجد حساب بهذا البريد.",'auth/wrong-password':"كلمة المرور غير صحيحة.",'auth/invalid-credential':"بيانات الدخول غير صحيحة.",'auth/too-many-requests':"محاولات كثيرة. حاول لاحقاً." };
         showLoginError(map[err && err.code] || "تعذر تسجيل الدخول. تحقق من بياناتك.");
       })
-      .finally(function(){
-        btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-box-arrow-in-left"></i> دخول';
-      });
+      .finally(function(){ btn.disabled = false; btn.innerHTML = '<i class="bi bi-box-arrow-in-left"></i> دخول'; });
   }
   function logout(){ if (auth) auth.signOut(); }
-
   function onAuth(user){
     if (user){
-      $("loginGate").style.display = 'none';
-      $("app").style.display = 'block';
+      $("loginGate").style.display = 'none'; $("app").style.display = 'block';
       var who = $("adminWho"); if (who) who.textContent = user.email || '';
       if (!ordersLoaded){ buildStatusFilter(); loadOrders(); }
     } else {
-      ordersLoaded = false;
-      $("app").style.display = 'none';
-      $("loginGate").style.display = 'flex';
+      ordersLoaded = false; $("app").style.display = 'none'; $("loginGate").style.display = 'flex';
       var p = $("adminPass"); if (p) p.value = '';
     }
   }
-
   function buildStatusFilter(){
-    var sel = $("statusFilter");
-    if (sel.options.length > 1) return; // already built
-    STATUSES.forEach(function(s){
-      var o = document.createElement('option');
-      o.value = s.key; o.textContent = s.key;
-      sel.appendChild(o);
-    });
+    var sel = $("statusFilter"); if (sel.options.length > 1) return;
+    STATUSES.forEach(function(s){ var o = document.createElement('option'); o.value = s.key; o.textContent = s.key; sel.appendChild(o); });
   }
 
-  /* ===== Load orders ===== */
+  /* Load */
   function loadOrders(){
     $("tableContent").innerHTML = '<div class="spin-wrap"><div class="spinner-border text-warning" role="status"></div><div class="mt-2">جاري تحميل الطلبات...</div></div>';
     db.collection('orders').get()
       .then(function(snap){
-        ordersLoaded = true;
-        allOrders = [];
+        ordersLoaded = true; allOrders = [];
         snap.forEach(function(doc){ allOrders.push({ id: doc.id, data: doc.data() || {} }); });
-        allOrders.sort(function(a,b){
-          var da = orderDate(a.data), dbb = orderDate(b.data);
-          if (da && dbb) return dbb - da;
-          if (da) return -1; if (dbb) return 1; return 0;
-        });
-        renderStats();
-        renderCharts();
-        applyFilters();
+        allOrders.sort(function(a,b){ var da = orderDate(a.data), dbb = orderDate(b.data); if (da && dbb) return dbb - da; if (da) return -1; if (dbb) return 1; return 0; });
+        renderStats(); renderCharts(); applyFilters();
       })
       .catch(function(err){
         console.error('Load error', err);
-        var msg = (err && err.code === 'permission-denied')
-          ? "لا توجد صلاحية لقراءة الطلبات. تأكد من نشر قواعد Firestore وأن حسابك مسجّل الدخول."
-          : "تعذر تحميل الطلبات. حاول مجدداً.";
-        showTableError(msg);
+        showTableError((err && err.code === 'permission-denied') ? "لا توجد صلاحية لقراءة الطلبات. تأكد من نشر قواعد Firestore وأن حسابك مسجّل الدخول." : "تعذر تحميل الطلبات. حاول مجدداً.");
       });
   }
+  function showTableError(msg){ $("tableContent").innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><div class="mt-3 fw-semibold">'+esc(msg)+'</div></div>'; $("resultCount").textContent = ""; }
 
-  function showTableError(msg){
-    $("tableContent").innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><div class="mt-3 fw-semibold">'+esc(msg)+'</div></div>';
-    $("resultCount").textContent = "";
-  }
-
-  /* ===== Analytics cards (active orders only) ===== */
+  /* ===== Stats (true funnel) ===== */
   function renderStats(){
     var active = activeOrders();
-    var total = active.length;
-    var nNew = 0, nDelivered = 0, revenue = 0;
+    var total = active.length, nNew = 0, nConfirmed = 0, nDelivered = 0, nLost = 0, nRisk = 0;
+    var trueRevenue = 0, pendingRevenue = 0;
     active.forEach(function(o){
-      var st = statusMeta(o.data.status).key;
-      if (st === "جديد") nNew++;
-      if (st === "تم التسليم") nDelivered++;
-      if (st !== "ملغى") revenue += orderTotal(o.data);
+      var k = statusMeta(o.data.status).key;
+      if (k === "جديد") nNew++;
+      if (inSet(CONFIRMED_SET, k)) nConfirmed++;
+      if (k === DELIVERED){ nDelivered++; trueRevenue += orderTotal(o.data); }
+      if (inSet(PENDING_SET, k)) pendingRevenue += orderTotal(o.data);
+      if (inSet(LOST_SET, k)) nLost++;
+      var rl = riskLevel(o.data); if (rl === "yellow" || rl === "red") nRisk++;
     });
     $("statTotal").textContent = total.toLocaleString('ar-DZ');
-    $("statNew").textContent = nNew.toLocaleString('ar-DZ');
+    $("statNewSub").textContent = nNew.toLocaleString('ar-DZ') + " جديدة بانتظار الاتصال";
+    $("statConfirmed").textContent = nConfirmed.toLocaleString('ar-DZ');
+    $("statConfirmRate").textContent = "نسبة التأكيد " + pct(nConfirmed, total);
     $("statDelivered").textContent = nDelivered.toLocaleString('ar-DZ');
-    $("statRevenue").textContent = fmtMoney(revenue);
+    $("statDeliverRate").textContent = "نسبة التسليم " + pct(nDelivered, nConfirmed);
+    $("statRevenue").textContent = fmtMoney(trueRevenue);
+    $("kpiPending").textContent = fmtMoney(pendingRevenue);
+    $("kpiAov").textContent = fmtMoney(nDelivered ? Math.round(trueRevenue / nDelivered) : 0);
+    $("kpiLost").textContent = nLost.toLocaleString('ar-DZ');
+    $("kpiRisk").textContent = nRisk.toLocaleString('ar-DZ');
   }
 
-  /* ===== Charts (pure SVG/CSS, no libraries) ===== */
+  /* ===== Charts ===== */
+  function barChart(el, entries){ // entries: [{label,count,color}]
+    var max = maxOf(entries.map(function(e){ return e.count; })); if (max < 1) max = 1;
+    var any = entries.some(function(e){ return e.count > 0; });
+    if (!any){ el.innerHTML = '<div class="chart-empty">لا توجد بيانات بعد.</div>'; return; }
+    el.innerHTML = entries.map(function(e){
+      var p = Math.round((e.count / max) * 100);
+      return '<div class="bar-row"><span class="bar-label">'+esc(e.label)+'</span>'
+        + '<div class="bar-track"><div class="bar-fill" style="width:'+p+'%;background:'+(e.color||'#ff6b00')+';"></div></div>'
+        + '<span class="bar-val">'+e.count.toLocaleString('ar-DZ')+'</span></div>';
+    }).join('');
+  }
+  function topCounts(active, keyFn, limit){
+    var map = {};
+    active.forEach(function(o){ var k = keyFn(o.data) || "—"; map[k] = (map[k]||0) + 1; });
+    var arr = Object.keys(map).map(function(k){ return { label:k, count:map[k] }; });
+    arr.sort(function(a,b){ return b.count - a.count; });
+    return limit ? arr.slice(0, limit) : arr;
+  }
   function renderCharts(){
     var active = activeOrders();
 
-    // --- Orders by status (horizontal bars) ---
-    var counts = {};
-    STATUSES.forEach(function(s){ counts[s.key] = 0; });
-    active.forEach(function(o){
-      var k = statusMeta(o.data.status).key;
-      if (counts[k] == null) counts[k] = 0;
-      counts[k]++;
-    });
-    var countVals = [];
-    STATUSES.forEach(function(s){ countVals.push(counts[s.key] || 0); });
-    var maxCount = maxOf(countVals); if (maxCount < 1) maxCount = 1;
-    if (!active.length){
-      $("chartStatus").innerHTML = '<div class="chart-empty">لا توجد بيانات بعد.</div>';
-    } else {
-      var bars = STATUSES.map(function(s){
-        var c = counts[s.key] || 0;
-        var pct = Math.round((c / maxCount) * 100);
-        return '<div class="bar-row">'
-          + '<span class="bar-label">'+esc(s.key)+'</span>'
-          + '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+s.color+';"></div></div>'
-          + '<span class="bar-val">'+c.toLocaleString('ar-DZ')+'</span>'
-          + '</div>';
-      }).join('');
-      $("chartStatus").innerHTML = bars;
-    }
+    // status
+    var counts = {}; STATUSES.forEach(function(s){ counts[s.key] = 0; });
+    active.forEach(function(o){ var k = statusMeta(o.data.status).key; if (counts[k]==null) counts[k]=0; counts[k]++; });
+    barChart($("chartStatus"), STATUSES.map(function(s){ return { label:s.key, count:counts[s.key]||0, color:s.color }; }));
 
-    // --- Orders over the last 12 months (vertical bars) ---
+    // months
     var MONTHS_AR = ["جانفي","فيفري","مارس","أفريل","ماي","جوان","جويلية","أوت","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-    var months = [];
-    var firstOfThisMonth = new Date(); firstOfThisMonth.setDate(1); firstOfThisMonth.setHours(0,0,0,0);
-    for (var i=11;i>=0;i--){ var mm = new Date(firstOfThisMonth.getFullYear(), firstOfThisMonth.getMonth()-i, 1); months.push({ y: mm.getFullYear(), m: mm.getMonth(), count: 0 }); }
-    active.forEach(function(o){
-      var dt = orderDate(o.data); if (!dt) return;
-      var oy = dt.getFullYear(), om = dt.getMonth();
-      for (var j=0;j<months.length;j++){ if (months[j].y === oy && months[j].m === om){ months[j].count++; break; } }
-    });
-    var monthVals = months.map(function(d){ return d.count; });
-    var maxMonth = maxOf(monthVals); if (maxMonth < 1) maxMonth = 1;
-    var hasMonthData = false; for (var k=0;k<monthVals.length;k++){ if (monthVals[k] > 0){ hasMonthData = true; break; } }
-    if (!hasMonthData){
-      $("chartDays").innerHTML = '<div class="chart-empty" style="width:100%;">لا توجد طلبات في آخر 12 شهر.</div>';
-    } else {
-      var cols = months.map(function(d){
-        var h = Math.round((d.count / maxMonth) * 100);
-        var lbl = MONTHS_AR[d.m] + ' ' + d.y;
-        return '<div class="daybar" title="'+lbl+' — '+d.count+' طلب">'
-          + '<div class="col" style="height:'+h+'%;"></div>'
-          + '<span class="d-label">'+MONTHS_AR[d.m].slice(0,3)+'</span>'
-          + '</div>';
-      }).join('');
-      $("chartDays").innerHTML = cols;
-    }
+    var months = []; var f = new Date(); f.setDate(1); f.setHours(0,0,0,0);
+    for (var i=11;i>=0;i--){ var mm = new Date(f.getFullYear(), f.getMonth()-i, 1); months.push({ y:mm.getFullYear(), m:mm.getMonth(), count:0 }); }
+    active.forEach(function(o){ var dt = orderDate(o.data); if (!dt) return; for (var j=0;j<months.length;j++){ if (months[j].y===dt.getFullYear() && months[j].m===dt.getMonth()){ months[j].count++; break; } } });
+    var maxMonth = maxOf(months.map(function(d){return d.count;})); if (maxMonth<1) maxMonth=1;
+    var hasMonth = months.some(function(d){ return d.count>0; });
+    if (!hasMonth){ $("chartDays").innerHTML = '<div class="chart-empty" style="width:100%;">لا توجد طلبات في آخر 12 شهر.</div>'; }
+    else { $("chartDays").innerHTML = months.map(function(d){ var h = Math.round((d.count/maxMonth)*100); return '<div class="daybar" title="'+MONTHS_AR[d.m]+' '+d.y+' — '+d.count+' طلب"><div class="col" style="height:'+h+'%;"></div><span class="d-label">'+MONTHS_AR[d.m].slice(0,3)+'</span></div>'; }).join(''); }
+
+    // wilaya
+    barChart($("chartWilaya"), topCounts(active, function(d){ return d.wilaya; }, 6).map(function(e){ return { label:e.label, count:e.count, color:'#6366f1' }; }));
+    // source
+    barChart($("chartSource"), topCounts(active, orderSource, 6).map(function(e){ return { label:e.label, count:e.count, color:'#0ea5e9' }; }));
+    // risk
+    var rl = { green:0, yellow:0, red:0 };
+    active.forEach(function(o){ var l = riskLevel(o.data); if (rl[l]==null) rl[l]=0; rl[l]++; });
+    barChart($("chartRisk"), [ {label:"سليم",count:rl.green,color:'#22c55e'}, {label:"مراجعة",count:rl.yellow,color:'#f59e0b'}, {label:"خطر",count:rl.red,color:'#ef4444'} ]);
   }
 
-  /* ===== Filtering + search ===== */
+  /* ===== Filtering ===== */
   function applyFilters(){
     var q = ($("searchInput").value || "").trim().toLowerCase();
     var statusF = $("statusFilter").value;
-    var fromV = $("dateFrom").value;
-    var toV = $("dateTo").value;
+    var fromV = $("dateFrom").value, toV = $("dateTo").value;
     var showArch = $("showArchived").checked;
     var from = fromV ? new Date(fromV + "T00:00:00") : null;
     var to = toV ? new Date(toV + "T23:59:59") : null;
-
     var base = showArch ? allOrders : activeOrders();
-
     var rows = base.filter(function(o){
       var d = o.data;
       if (statusF && statusMeta(d.status).key !== statusF) return false;
       var dt = orderDate(d);
       if (from && (!dt || dt < from)) return false;
       if (to && (!dt || dt > to)) return false;
-      if (q){
-        var hay = (customerName(d) + " " + (d.phone||"") + " " + o.id).toLowerCase();
-        if (hay.indexOf(q) === -1) return false;
-      }
+      if (q){ var hay = (customerName(d) + " " + (d.phone||"") + " " + o.id).toLowerCase(); if (hay.indexOf(q) === -1) return false; }
       return true;
     });
-
     renderTable(rows);
   }
 
-  /* ===== Table render ===== */
+  /* ===== Table with quick actions ===== */
   function renderTable(rows){
     if (!rows.length){
       $("tableContent").innerHTML = '<div class="empty-state"><i class="bi bi-inbox"></i><div class="mt-3">لا توجد طلبات مطابقة.</div></div>';
-      $("resultCount").textContent = "0 طلب";
-      return;
+      $("resultCount").textContent = "0 طلب"; return;
     }
     var html = '<table class="orders"><thead><tr>'
-      + '<th>رقم الطلب</th><th>العميل</th><th>الهاتف</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th>'
+      + '<th>رقم الطلب</th><th>العميل</th><th>الهاتف</th><th>الإجمالي</th><th>التاريخ</th><th>المصدر</th><th>الخطر</th><th>الحالة</th><th>إجراءات</th>'
       + '</tr></thead><tbody>';
     rows.forEach(function(o){
-      var d = o.data;
-      var sm = statusMeta(d.status);
-      var arch = isArchived(d);
+      var d = o.data; var sm = statusMeta(d.status); var arch = isArchived(d);
+      var k = sm.key; var rl = riskLevel(d);
+      var confirmBtn = (k === "جديد")
+        ? '<button class="btn btn-brand act-confirm" data-id="'+esc(o.id)+'" title="تأكيد بالاتصال"><i class="bi bi-telephone-check"></i> تأكيد</button>'
+        : (k === "مؤكد" || k === "قيد التحضير")
+          ? '<button class="btn btn-outline-success act-deliver" data-id="'+esc(o.id)+'" title="تم التسليم"><i class="bi bi-check2-circle"></i> تسليم</button>'
+          : '';
       html += '<tr data-id="'+esc(o.id)+'" class="'+(arch?'archived-row':'')+'">'
         + '<td><span class="order-id">'+esc(o.id)+'</span>'+(arch?' <span class="arch-tag">مؤرشف</span>':'')+'</td>'
         + '<td>'+esc(customerName(d))+'</td>'
         + '<td dir="ltr" style="text-align:right;">'+esc(d.phone||"—")+'</td>'
         + '<td>'+esc(fmtMoney(orderTotal(d)))+'</td>'
-        + '<td>'+esc(fmtDate(orderDate(d)))+'</td>'
+        + '<td style="white-space:nowrap;">'+esc(fmtDate(orderDate(d)))+'</td>'
+        + '<td><span class="src-tag">'+esc(orderSource(d))+'</span></td>'
+        + '<td><span class="risk-dot rd-'+esc(rl)+'" title="'+esc(rl)+'"></span></td>'
         + '<td><span class="badge-status '+sm.css+'">'+esc(sm.key)+'</span></td>'
+        + '<td><div class="row-actions">'+confirmBtn
+        +   '<button class="btn btn-outline-secondary act-edit" data-id="'+esc(o.id)+'" title="تعديل"><i class="bi bi-pencil"></i></button>'
+        + '</div></td>'
         + '</tr>';
     });
     html += '</tbody></table>';
@@ -546,158 +538,271 @@
 
     var trs = $("tableContent").querySelectorAll('tbody tr');
     for (var i=0;i<trs.length;i++){
-      trs[i].addEventListener('click', function(){ openOrder(this.getAttribute('data-id')); });
+      trs[i].addEventListener('click', function(e){
+        if (e.target.closest('.row-actions')) return; // let action buttons handle themselves
+        openOrder(this.getAttribute('data-id'), false);
+      });
+    }
+    bindAll('.act-confirm', function(id){ quickStatus(id, "مؤكد"); });
+    bindAll('.act-deliver', function(id){ quickStatus(id, "تم التسليم"); });
+    bindAll('.act-edit', function(id){ openOrder(id, true); });
+  }
+  function bindAll(sel, fn){
+    var els = $("tableContent").querySelectorAll(sel);
+    for (var i=0;i<els.length;i++){
+      els[i].addEventListener('click', function(e){ e.stopPropagation(); var b=this; b.disabled=true; fn(b.getAttribute('data-id')); });
     }
   }
 
-  /* ===== Order details modal ===== */
-  function openOrder(id){
-    var rec = null;
-    for (var i=0;i<allOrders.length;i++){ if (allOrders[i].id === id){ rec = allOrders[i]; break; } }
-    if (!rec) return;
-    var d = rec.data;
-    var sm = statusMeta(d.status);
-    var arch = isArchived(d);
+  /* Quick inline status change from the table (no modal) */
+  function quickStatus(id, newStatus){
+    writeStatus(id, newStatus).then(function(){ renderStats(); renderCharts(); applyFilters(); })
+      .catch(function(err){ alert((err && err.code === 'permission-denied') ? "لا توجد صلاحية لتحديث الطلب." : "تعذر حفظ الحالة."); applyFilters(); });
+  }
 
+  /* Shared Firestore status writer (adds timestamps) */
+  function writeStatus(id, newStatus){
+    var patch = { status: newStatus, updatedAt: new Date().toISOString() };
+    if (newStatus === "مؤكد") patch.confirmedAt = new Date().toISOString();
+    if (newStatus === DELIVERED) patch.deliveredAt = new Date().toISOString();
+    return db.collection('orders').doc(id).update(patch).then(function(){
+      for (var i=0;i<allOrders.length;i++){ if (allOrders[i].id === id){ var dd = allOrders[i].data; dd.status = newStatus; dd.updatedAt = patch.updatedAt; if (patch.confirmedAt) dd.confirmedAt = patch.confirmedAt; if (patch.deliveredAt) dd.deliveredAt = patch.deliveredAt; break; } }
+    });
+  }
+
+  /* ===== Order modal (details + edit) ===== */
+  function getRec(id){ for (var i=0;i<allOrders.length;i++){ if (allOrders[i].id === id) return allOrders[i]; } return null; }
+
+  function openOrder(id, startEdit){
+    var rec = getRec(id); if (!rec) return;
+    editMode = !!startEdit;
+    renderModal(rec);
+    if (!modalInstance) modalInstance = new bootstrap.Modal($("orderModal"));
+    modalInstance.show();
+  }
+
+  function renderModal(rec){
+    var id = rec.id, d = rec.data, sm = statusMeta(d.status), arch = isArchived(d);
+    var phone = d.phone || "";
+    var header = ''
+      + '<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">'
+      +   '<span class="order-id">#'+esc(id)+(arch?' <span class="arch-tag">مؤرشف</span>':'')+'</span>'
+      +   '<div class="d-flex align-items-center gap-2">'
+      +     '<span class="badge-status '+sm.css+'" id="modalCurrentStatus">'+esc(sm.key)+'</span>'
+      +     '<div class="seg"><button id="viewDetailsBtn" class="'+(editMode?'':'active')+'">تفاصيل</button><button id="viewEditBtn" class="'+(editMode?'active':'')+'">تعديل</button></div>'
+      +   '</div>'
+      + '</div>';
+    $("modalBody").innerHTML = header + '<div id="modalInner"></div>';
+    $("viewDetailsBtn").addEventListener('click', function(){ editMode=false; renderInner(rec); setSeg(); });
+    $("viewEditBtn").addEventListener('click', function(){ editMode=true; renderInner(rec); setSeg(); });
+    function setSeg(){ $("viewDetailsBtn").className = editMode?'':'active'; $("viewEditBtn").className = editMode?'active':''; }
+    renderInner(rec);
+  }
+
+  function renderInner(rec){
+    if (editMode) renderEdit(rec); else renderDetails(rec);
+  }
+
+  function renderDetails(rec){
+    var id = rec.id, d = rec.data;
+    var phone = d.phone || "";
     var products = Array.isArray(d.products) ? d.products : [];
     var prodHtml = '';
     if (products.length){
       products.forEach(function(p){
-        var name = p.name || p.title || "منتج";
-        var qty = (p.quantity != null) ? p.quantity : 1;
-        var price = Number(p.price)||0;
+        var name = p.name || p.title || "منتج"; var qty = (p.quantity != null) ? p.quantity : 1; var price = Number(p.price)||0;
         prodHtml += '<div class="prod-line">'
           + (p.image ? '<img src="'+esc(p.image)+'" alt="" onerror="this.style.visibility=&#39;hidden&#39;">' : '<div style="width:46px;height:46px;border-radius:8px;background:#f1f2f4;"></div>')
-          + '<div class="flex-grow-1"><div class="fw-semibold">'+esc(name)+'</div>'
-          + '<div class="text-muted" style="font-size:.82rem;">'+fmtMoney(price)+' × '+esc(qty)+'</div></div>'
-          + '<div class="fw-bold">'+fmtMoney(price*(Number(qty)||0))+'</div>'
-          + '</div>';
+          + '<div class="flex-grow-1"><div class="fw-semibold">'+esc(name)+'</div><div class="text-muted" style="font-size:.82rem;">'+fmtMoney(price)+' × '+esc(qty)+'</div></div>'
+          + '<div class="fw-bold">'+fmtMoney(price*(Number(qty)||0))+'</div></div>';
       });
-    } else {
-      prodHtml = '<div class="text-muted">لا توجد منتجات مسجلة لهذا الطلب.</div>';
-    }
+    } else { prodHtml = '<div class="text-muted">لا توجد منتجات مسجلة لهذا الطلب.</div>'; }
 
-    var statusBtns = STATUSES.map(function(s){
-      var active = (s.key === sm.key);
-      return '<button class="btn btn-sm '+(active?'btn-brand':'btn-outline-secondary')+' status-set-btn" data-status="'+esc(s.key)+'">'+esc(s.key)+'</button>';
-    }).join(' ');
-
-    var archiveBlock = ''
-      + '<hr>'
-      + '<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">'
-      +   '<span class="text-muted" style="font-size:.82rem;">'
-      +     (arch ? 'هذا الطلب مؤرشف — مخفي من القائمة لكن بياناته محفوظة.' : 'الأرشفة تُخفي الطلب من القائمة دون حذف بياناته.')
-      +   '</span>'
-      +   '<button class="btn btn-sm '+(arch?'btn-outline-success':'btn-outline-danger')+'" id="archiveBtn">'
-      +     (arch ? '<i class="bi bi-arrow-counterclockwise"></i> إلغاء الأرشفة' : '<i class="bi bi-archive"></i> أرشفة الطلب')
-      +   '</button>'
-      + '</div>'
-      + '<div id="archiveMsg" class="mt-2" style="font-size:.85rem;"></div>';
+    var statusBtns = STATUSES.map(function(s){ var on = (s.key === statusMeta(d.status).key); return '<button class="btn btn-sm '+(on?'btn-brand':'btn-outline-secondary')+' status-set-btn" data-status="'+esc(s.key)+'">'+esc(s.key)+'</button>'; }).join(' ');
+    var wa = intlPhone(phone);
+    var contactBtns = phone ? ('<div class="d-flex gap-2 mb-3 flex-wrap">'
+        + '<a class="btn btn-sm btn-success" href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> واتساب</a>'
+        + '<a class="btn btn-sm btn-outline-primary" href="tel:'+esc(phone)+'"><i class="bi bi-telephone"></i> اتصال</a>'
+      + '</div>') : '';
+    var arch = isArchived(d);
+    var archiveBlock = '<hr><div class="d-flex justify-content-between align-items-center flex-wrap gap-2">'
+      + '<span class="text-muted" style="font-size:.82rem;">'+(arch ? 'هذا الطلب مؤرشف — مخفي من القائمة لكن بياناته محفوظة.' : 'الأرشفة تُخفي الطلب من القائمة دون حذف بياناته.')+'</span>'
+      + '<button class="btn btn-sm '+(arch?'btn-outline-success':'btn-outline-danger')+'" id="archiveBtn">'+(arch ? '<i class="bi bi-arrow-counterclockwise"></i> إلغاء الأرشفة' : '<i class="bi bi-archive"></i> أرشفة الطلب')+'</button>'
+      + '</div><div id="archiveMsg" class="mt-2" style="font-size:.85rem;"></div>';
 
     var body = ''
-      + '<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">'
-      +   '<span class="order-id">#'+esc(id)+(arch?' <span class="arch-tag">مؤرشف</span>':'')+'</span>'
-      +   '<span class="badge-status '+sm.css+'" id="modalCurrentStatus">'+esc(sm.key)+'</span>'
-      + '</div>'
       + '<h6 class="fw-bold mb-2"><i class="bi bi-person"></i> بيانات العميل</h6>'
+      + contactBtns
       + '<div class="mb-3">'
       +   '<div class="info-row"><span class="k">الاسم</span><span class="v">'+esc(customerName(d))+'</span></div>'
-      +   '<div class="info-row"><span class="k">الهاتف</span><span class="v" dir="ltr">'+esc(d.phone||"—")+'</span></div>'
+      +   '<div class="info-row"><span class="k">الهاتف</span><span class="v" dir="ltr">'+esc(phone||"—")+'</span></div>'
       +   (d.email ? '<div class="info-row"><span class="k">البريد</span><span class="v" dir="ltr">'+esc(d.email)+'</span></div>' : '')
       +   '<div class="info-row"><span class="k">الولاية</span><span class="v">'+esc(d.wilaya||"—")+'</span></div>'
       +   '<div class="info-row"><span class="k">العنوان</span><span class="v">'+esc(d.address||"—")+'</span></div>'
       +   (d.payment ? '<div class="info-row"><span class="k">الدفع</span><span class="v">'+esc(d.payment)+'</span></div>' : '')
       +   '<div class="info-row"><span class="k">التاريخ</span><span class="v">'+esc(fmtDate(orderDate(d)))+'</span></div>'
+      +   (d.note ? '<div class="info-row"><span class="k">ملاحظة داخلية</span><span class="v">'+esc(d.note)+'</span></div>' : '')
       + '</div>'
       + '<h6 class="fw-bold mb-2"><i class="bi bi-bag"></i> المنتجات</h6>'
       + '<div class="mb-2">'+prodHtml+'</div>'
       + '<div class="info-row" style="font-size:1.05rem;"><span class="k fw-bold">الإجمالي</span><span class="v">'+fmtMoney(orderTotal(d))+'</span></div>'
-      + '<hr>'
-      + '<h6 class="fw-bold mb-2"><i class="bi bi-arrow-repeat"></i> تغيير الحالة</h6>'
+      + '<hr><h6 class="fw-bold mb-2"><i class="bi bi-arrow-repeat"></i> تغيير الحالة</h6>'
       + '<div class="d-flex flex-wrap gap-2" id="statusBtns">'+statusBtns+'</div>'
       + '<div id="statusMsg" class="mt-2" style="font-size:.85rem;"></div>'
       + archiveBlock;
 
-    $("modalBody").innerHTML = body;
-
+    $("modalInner").innerHTML = body;
     var btns = $("statusBtns").querySelectorAll('.status-set-btn');
-    for (var i=0;i<btns.length;i++){
-      btns[i].addEventListener('click', function(){
-        updateStatus(id, this.getAttribute('data-status'));
-      });
-    }
-    var aBtn = $("archiveBtn");
-    if (aBtn){ aBtn.addEventListener('click', function(){ toggleArchive(id, !isArchived(d)); }); }
-
-    if (!modalInstance) modalInstance = new bootstrap.Modal($("orderModal"));
-    modalInstance.show();
+    for (var i=0;i<btns.length;i++){ btns[i].addEventListener('click', function(){ updateStatus(id, this.getAttribute('data-status')); }); }
+    var aBtn = $("archiveBtn"); if (aBtn){ aBtn.addEventListener('click', function(){ toggleArchive(id, !isArchived(d)); }); }
   }
 
-  /* ===== Update status in Firestore (only the status field) ===== */
-  function updateStatus(id, newStatus){
-    var msg = $("statusMsg");
+  /* ===== Edit form ===== */
+  function renderEdit(rec){
+    var id = rec.id, d = rec.data;
+    var products = Array.isArray(d.products) ? d.products : [];
+    var statusOpts = STATUSES.map(function(s){ var on = (s.key === statusMeta(d.status).key); return '<option value="'+esc(s.key)+'"'+(on?' selected':'')+'>'+esc(s.key)+'</option>'; }).join('');
+    var body = ''
+      + '<div class="row g-2">'
+      +   '<div class="col-md-6"><label class="form-label mb-1" style="font-size:.82rem;">الاسم</label><input id="edName" class="form-control" value="'+esc(customerName(d)==='—'?'':customerName(d))+'"></div>'
+      +   '<div class="col-md-6"><label class="form-label mb-1" style="font-size:.82rem;">الهاتف</label><input id="edPhone" class="form-control" dir="ltr" value="'+esc(d.phone||"")+'"></div>'
+      +   '<div class="col-md-6"><label class="form-label mb-1" style="font-size:.82rem;">البريد</label><input id="edEmail" class="form-control" dir="ltr" value="'+esc(d.email||"")+'"></div>'
+      +   '<div class="col-md-6"><label class="form-label mb-1" style="font-size:.82rem;">الولاية</label><input id="edWilaya" class="form-control" value="'+esc(d.wilaya||"")+'"></div>'
+      +   '<div class="col-12"><label class="form-label mb-1" style="font-size:.82rem;">العنوان</label><input id="edAddress" class="form-control" value="'+esc(d.address||"")+'"></div>'
+      +   '<div class="col-md-6"><label class="form-label mb-1" style="font-size:.82rem;">طريقة الدفع</label><input id="edPayment" class="form-control" value="'+esc(d.payment||"")+'"></div>'
+      +   '<div class="col-md-6"><label class="form-label mb-1" style="font-size:.82rem;">الحالة</label><select id="edStatus" class="form-select">'+statusOpts+'</select></div>'
+      + '</div>'
+      + '<h6 class="fw-bold mt-3 mb-2"><i class="bi bi-bag"></i> المنتجات</h6>'
+      + '<div id="peList"></div>'
+      + '<button class="btn btn-sm btn-outline-secondary" id="peAdd"><i class="bi bi-plus-lg"></i> إضافة منتج</button>'
+      + '<div class="d-flex justify-content-between align-items-center mt-3">'
+      +   '<span class="text-muted" style="font-size:.85rem;">الإجمالي المحسوب</span><span class="fw-bold" id="peTotal">—</span>'
+      + '</div>'
+      + '<div class="form-check form-switch mt-2"><input class="form-check-input" type="checkbox" id="edManualTotal"><label class="form-check-label" for="edManualTotal" style="font-size:.82rem;">تحديد الإجمالي يدوياً</label></div>'
+      + '<input id="edTotal" class="form-control mt-1" type="number" value="'+esc(orderTotal(d))+'" style="display:none;">'
+      + '<div class="mt-3"><label class="form-label mb-1" style="font-size:.82rem;">ملاحظة داخلية (للإدارة فقط)</label><textarea id="edNote" class="form-control" rows="2">'+esc(d.note||"")+'</textarea></div>'
+      + '<div class="d-flex gap-2 mt-3"><button class="btn btn-brand" id="edSave"><i class="bi bi-save"></i> حفظ التعديلات</button><button class="btn btn-outline-secondary" id="edCancel">إلغاء</button></div>'
+      + '<div id="edMsg" class="mt-2" style="font-size:.85rem;"></div>';
+    $("modalInner").innerHTML = body;
+
+    var peList = $("peList");
+    function addRow(p){
+      p = p || {}; var row = document.createElement('div'); row.className = 'pe-row';
+      row.innerHTML = '<input class="form-control pe-name" placeholder="الاسم" value="'+esc(p.name||p.title||"")+'" style="flex:2;">'
+        + '<input class="form-control pe-price" type="number" placeholder="السعر" value="'+esc(p.price!=null?p.price:"")+'" style="flex:1;">'
+        + '<input class="form-control pe-qty" type="number" placeholder="الكمية" value="'+esc(p.quantity!=null?p.quantity:1)+'" style="flex:1;">'
+        + '<button class="btn btn-outline-danger pe-del" type="button"><i class="bi bi-trash"></i></button>';
+      peList.appendChild(row);
+      row.querySelector('.pe-del').addEventListener('click', function(){ row.remove(); recalc(); });
+      row.querySelector('.pe-price').addEventListener('input', recalc);
+      row.querySelector('.pe-qty').addEventListener('input', recalc);
+    }
+    function collect(){
+      var out = []; var rows = peList.querySelectorAll('.pe-row');
+      for (var i=0;i<rows.length;i++){
+        var name = rows[i].querySelector('.pe-name').value.trim();
+        var price = Number(rows[i].querySelector('.pe-price').value)||0;
+        var qty = Number(rows[i].querySelector('.pe-qty').value)||0;
+        if (!name && !price && !qty) continue;
+        out.push({ name:name, price:price, quantity:qty });
+      }
+      return out;
+    }
+    function calcTotal(){ var arr = collect(), t = 0; for (var i=0;i<arr.length;i++) t += arr[i].price * arr[i].quantity; return t; }
+    function recalc(){ var t = calcTotal(); $("peTotal").textContent = fmtMoney(t); if (!$("edManualTotal").checked) $("edTotal").value = t; }
+
+    if (products.length) products.forEach(addRow); else addRow();
+    recalc();
+    $("peAdd").addEventListener('click', function(){ addRow(); recalc(); });
+    $("edManualTotal").addEventListener('change', function(){ $("edTotal").style.display = this.checked ? 'block' : 'none'; if (!this.checked) recalc(); });
+    $("edCancel").addEventListener('click', function(){ editMode=false; renderModal(rec); });
+    $("edSave").addEventListener('click', function(){ saveEdit(id, collect, calcTotal); });
+  }
+
+  function saveEdit(id, collectFn, calcTotalFn){
+    var msg = $("edMsg"); var btn = $("edSave"); btn.disabled = true;
     msg.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> جاري الحفظ...</span>';
+    var products = collectFn();
+    var manual = $("edManualTotal").checked;
+    var total = manual ? (Number($("edTotal").value)||0) : calcTotalFn();
+    var newStatus = $("edStatus").value;
+    var patch = {
+      customer: $("edName").value.trim(),
+      phone: $("edPhone").value.trim(),
+      email: $("edEmail").value.trim(),
+      wilaya: $("edWilaya").value.trim(),
+      address: $("edAddress").value.trim(),
+      payment: $("edPayment").value.trim(),
+      products: products,
+      totalPrice: total,
+      status: newStatus,
+      note: $("edNote").value.trim(),
+      updatedAt: new Date().toISOString()
+    };
+    if (newStatus === "مؤكد") patch.confirmedAt = new Date().toISOString();
+    if (newStatus === DELIVERED) patch.deliveredAt = new Date().toISOString();
+    db.collection('orders').doc(id).update(patch)
+      .then(function(){
+        var rec = getRec(id);
+        if (rec){ for (var key in patch){ if (patch.hasOwnProperty(key)) rec.data[key] = patch[key]; } }
+        msg.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> تم حفظ التعديلات</span>';
+        renderStats(); renderCharts(); applyFilters();
+        editMode = false; if (rec) renderModal(rec);
+      })
+      .catch(function(err){
+        console.error('Save error', err); btn.disabled = false;
+        msg.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle"></i> '+esc((err && err.code === 'permission-denied') ? "لا توجد صلاحية لتعديل الطلب (قواعد Firestore)." : "تعذر حفظ التعديلات. حاول مجدداً.")+'</span>';
+      });
+  }
+
+  /* ===== Status update from modal ===== */
+  function updateStatus(id, newStatus){
+    var msg = $("statusMsg"); msg.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> جاري الحفظ...</span>';
     var btns = $("statusBtns").querySelectorAll('.status-set-btn');
     for (var i=0;i<btns.length;i++) btns[i].disabled = true;
-
-    db.collection('orders').doc(id).update({ status: newStatus })
+    writeStatus(id, newStatus)
       .then(function(){
-        for (var i=0;i<allOrders.length;i++){ if (allOrders[i].id === id){ allOrders[i].data.status = newStatus; break; } }
-        var sm = statusMeta(newStatus);
-        var cur = $("modalCurrentStatus");
+        var sm = statusMeta(newStatus); var cur = $("modalCurrentStatus");
         if (cur){ cur.className = 'badge-status ' + sm.css; cur.textContent = sm.key; }
-        for (var j=0;j<btns.length;j++){
-          var bs = btns[j].getAttribute('data-status');
-          btns[j].className = 'btn btn-sm ' + (bs === newStatus ? 'btn-brand' : 'btn-outline-secondary') + ' status-set-btn';
-          btns[j].disabled = false;
-        }
+        for (var j=0;j<btns.length;j++){ var bs = btns[j].getAttribute('data-status'); btns[j].className = 'btn btn-sm ' + (bs === newStatus ? 'btn-brand' : 'btn-outline-secondary') + ' status-set-btn'; btns[j].disabled = false; }
         msg.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> تم تحديث الحالة</span>';
-        renderStats();
-        renderCharts();
-        applyFilters();
+        renderStats(); renderCharts(); applyFilters();
       })
       .catch(function(err){
         console.error('Update error', err);
         for (var k=0;k<btns.length;k++) btns[k].disabled = false;
-        var t = (err && err.code === 'permission-denied')
-          ? "لا توجد صلاحية لتحديث الطلب (قواعد Firestore)."
-          : "تعذر حفظ الحالة. حاول مجدداً.";
-        msg.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle"></i> '+esc(t)+'</span>';
+        msg.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle"></i> '+esc((err && err.code === 'permission-denied') ? "لا توجد صلاحية لتحديث الطلب (قواعد Firestore)." : "تعذر حفظ الحالة. حاول مجدداً.")+'</span>';
       });
   }
 
-  /* ===== Archive / unarchive (soft-delete via the archived field) ===== */
+  /* ===== Archive ===== */
   function toggleArchive(id, makeArchived){
-    var msg = $("archiveMsg");
-    if (msg) msg.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> جاري الحفظ...</span>';
+    var msg = $("archiveMsg"); if (msg) msg.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> جاري الحفظ...</span>';
     var aBtn = $("archiveBtn"); if (aBtn) aBtn.disabled = true;
-
     db.collection('orders').doc(id).update({ archived: makeArchived })
       .then(function(){
-        for (var i=0;i<allOrders.length;i++){ if (allOrders[i].id === id){ allOrders[i].data.archived = makeArchived; break; } }
-        renderStats();
-        renderCharts();
-        applyFilters();
-        openOrder(id); // refresh modal so the button + tags reflect the new state
-        var m2 = $("archiveMsg");
-        if (m2) m2.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> '+(makeArchived?'تمت الأرشفة':'تم إلغاء الأرشفة')+'</span>';
+        var rec = getRec(id); if (rec) rec.data.archived = makeArchived;
+        renderStats(); renderCharts(); applyFilters();
+        if (rec) renderModal(rec);
       })
       .catch(function(err){
-        console.error('Archive error', err);
-        if (aBtn) aBtn.disabled = false;
-        var t = (err && err.code === 'permission-denied')
-          ? "لا توجد صلاحية لأرشفة الطلب (قواعد Firestore)."
-          : "تعذر حفظ العملية. حاول مجدداً.";
-        var m3 = $("archiveMsg");
-        if (m3) m3.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle"></i> '+esc(t)+'</span>';
+        console.error('Archive error', err); if (aBtn) aBtn.disabled = false;
+        var m3 = $("archiveMsg"); if (m3) m3.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle"></i> '+esc((err && err.code === 'permission-denied') ? "لا توجد صلاحية لأرشفة الطلب (قواعد Firestore)." : "تعذر حفظ العملية. حاول مجدداً.")+'</span>';
       });
   }
 
-  /* ===== Wire up events ===== */
+  /* ===== Tabs ===== */
+  function switchTab(tab){
+    $("tab-orders").style.display = (tab === 'orders') ? 'block' : 'none';
+    $("tab-analytics").style.display = (tab === 'analytics') ? 'block' : 'none';
+    var btns = $("mainTabs").querySelectorAll('.nav-link');
+    for (var i=0;i<btns.length;i++){ btns[i].classList.toggle('active', btns[i].getAttribute('data-tab') === tab); }
+  }
+
+  /* ===== Wire up ===== */
   document.addEventListener('DOMContentLoaded', function(){
     initFirebase();
     if (auth){ auth.onAuthStateChanged(onAuth); }
-
     $("loginBtn").addEventListener('click', tryLogin);
     $("adminPass").addEventListener('keydown', function(e){ if (e.key === 'Enter') tryLogin(); });
     $("adminEmail").addEventListener('keydown', function(e){ if (e.key === 'Enter') $("adminPass").focus(); });
@@ -708,14 +813,13 @@
     $("dateFrom").addEventListener('change', applyFilters);
     $("dateTo").addEventListener('change', applyFilters);
     $("showArchived").addEventListener('change', applyFilters);
-    $("clearFilters").addEventListener('click', function(){
-      $("searchInput").value = ''; $("statusFilter").value = '';
-      $("dateFrom").value = ''; $("dateTo").value = '';
-      applyFilters();
-    });
+    $("clearFilters").addEventListener('click', function(){ $("searchInput").value=''; $("statusFilter").value=''; $("dateFrom").value=''; $("dateTo").value=''; applyFilters(); });
+    var tb = $("mainTabs").querySelectorAll('.nav-link');
+    for (var i=0;i<tb.length;i++){ tb[i].addEventListener('click', function(){ switchTab(this.getAttribute('data-tab')); }); }
   });
 
 })();
 </script>
+<script src="admin-forensics.js"></script>
 </body>
 </html>
