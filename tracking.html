@@ -4,14 +4,20 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>تتبع طلبي — ROBUSTE</title>
+<meta name="description" content="تتبع حالة طلبك من ROBUSTE برقم الهاتف المستعمل عند الطلب" />
+<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-  :root{ --primary:#FF6B35; --ink:#1f2330; --muted:#6b7280; --bg:#f7f7f8; --card:#fff; --line:#ececf0; --ok:#2e7d32; --warn:#b26a00; --bad:#c62828; }
+  :root{ --primary:#FF6B35; --ink:#1f2330; --muted:#6b7280; --bg:#f7f7f8; --card:#fff; --line:#ececf0; --ok:#2e7d32; --warn:#b26a00; --bad:#c62828; --dark:#1c1f26; }
   *{ box-sizing:border-box; }
-  body{ margin:0; font-family:"Segoe UI",Tahoma,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  body{ margin:0; font-family:"Tajawal","Segoe UI",Tahoma,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
   .wrap{ max-width:680px; margin:0 auto; padding:18px 16px 48px; }
-  header{ text-align:center; padding:22px 0 8px; }
-  header .logo{ font-size:1.9rem; font-weight:900; letter-spacing:1px; color:var(--primary); }
-  header p{ margin:6px 0 0; color:var(--muted); font-size:.95rem; }
+  .page-head{ text-align:center; padding:22px 0 8px; }
+  .page-head .logo{ font-size:1.7rem; font-weight:900; letter-spacing:.5px; color:var(--primary); }
+  .page-head p{ margin:6px 0 0; color:var(--muted); font-size:.95rem; }
   .search{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-top:14px; box-shadow:0 6px 24px rgba(0,0,0,.04); }
   label{ display:block; font-weight:700; font-size:.95rem; margin-bottom:8px; }
   .row{ display:flex; gap:10px; }
@@ -42,15 +48,50 @@
   .timeline li{ display:flex; gap:10px; padding:7px 0; font-size:.9rem; }
   .timeline .tdate{ color:var(--muted); min-width:120px; direction:ltr; text-align:left; font-size:.82rem; }
   .track-no{ font-size:.82rem; color:var(--muted); margin-top:10px; direction:ltr; text-align:left; }
-  footer{ text-align:center; color:var(--muted); font-size:.8rem; margin-top:26px; }
   .spin{ display:inline-block; width:18px; height:18px; border:3px solid #fff; border-top-color:transparent; border-radius:50%; animation:r .8s linear infinite; vertical-align:-3px; }
   @keyframes r{ to{ transform:rotate(360deg); } }
+
+  /* Branded top bar (tape) + footer to match the ROBUSTE site */
+  .topbar{ position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--line); box-shadow:0 2px 14px rgba(0,0,0,.05); }
+  .topbar .bar{ max-width:1080px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand img{ height:42px; width:auto; display:block; }
+  .brand b{ color:var(--primary); font-weight:800; font-size:1.15rem; }
+  .navlinks{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .navlinks a{ color:var(--ink); text-decoration:none; font-weight:700; font-size:.92rem; padding:8px 12px; border-radius:10px; transition:.15s; }
+  .navlinks a:hover{ background:#fff1e8; color:var(--primary); }
+  .navlinks a.home{ background:var(--primary); color:#fff; }
+  .navlinks a.home:hover{ filter:brightness(.95); color:#fff; }
+  @media(max-width:520px){ .brand b{ display:none; } .navlinks a{ padding:7px 9px; font-size:.85rem; } }
+
+  .site-footer{ background:var(--dark); color:#cbd0d8; margin-top:40px; }
+  .site-footer .inner{ max-width:1080px; margin:0 auto; padding:30px 16px; display:flex; flex-wrap:wrap; gap:28px; justify-content:space-between; }
+  .site-footer h4{ color:#fff; font-size:1rem; margin:0 0 12px; }
+  .site-footer a{ color:#cbd0d8; text-decoration:none; display:block; padding:4px 0; font-size:.9rem; }
+  .site-footer a:hover{ color:var(--primary); }
+  .site-footer .muted{ font-size:.88rem; line-height:1.8; max-width:300px; margin:0; }
+  .site-footer .copy{ border-top:1px solid rgba(255,255,255,.1); text-align:center; padding:14px 16px; font-size:.82rem; color:#9aa1ab; }
 </style>
 </head>
 <body>
+
+<header class="topbar">
+  <div class="bar">
+    <a class="brand" href="index.html">
+      <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" alt="شعار ROBUSTE" width="160" height="44">
+      <b>ROBUSTE eulma</b>
+    </a>
+    <nav class="navlinks">
+      <a class="home" href="index.html"><i class="bi bi-house-door"></i> الرئيسية</a>
+      <a href="index.html#products">المنتجات</a>
+      <a href="index.html#contact">اتصل بنا</a>
+    </nav>
+  </div>
+</header>
+
 <div class="wrap">
-  <header>
-    <div class="logo">ROBUSTE</div>
+  <header class="page-head">
+    <div class="logo"><i class="bi bi-truck"></i> تتبع طلبي</div>
     <p>تتبع حالة طلبك بإدخال رقم الهاتف الذي استعملته عند الطلب</p>
   </header>
 
@@ -64,9 +105,31 @@
   </form>
 
   <div id="out"></div>
-
-  <footer>ROBUSTE · الدفع عند الاستلام · توصيل لكل الولايات</footer>
 </div>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div>
+      <h4>ROBUSTE</h4>
+      <p class="muted">متجر متخصص في الأجهزة المنزلية عالية الجودة بأسعار تنافسية. الدفع عند الاستلام وتوصيل لكل الولايات.</p>
+    </div>
+    <div>
+      <h4>روابط سريعة</h4>
+      <a href="index.html">الرئيسية</a>
+      <a href="index.html#products">المنتجات</a>
+      <a href="index.html#reviews">آراء العملاء</a>
+      <a href="tracking.html">تتبع طلبي</a>
+      <a href="index.html#contact">اتصل بنا</a>
+    </div>
+    <div>
+      <h4>تواصل معنا</h4>
+      <a href="tel:+213656360457" dir="ltr">+213 656 36 04 57</a>
+      <a href="mailto:laidaouih@gmail.com">laidaouih@gmail.com</a>
+      <a href="https://www.facebook.com/share/19QooaXfy8/" target="_blank" rel="noopener"><i class="bi bi-facebook"></i> فيسبوك</a>
+    </div>
+  </div>
+  <div class="copy">© 2025 ROBUSTE · جميع الحقوق محفوظة</div>
+</footer>
 
 <script>
   // Point this at your deployed Worker (no trailing slash). Falls back to window global.
