@@ -1,84 +1,241 @@
-/* ROBUSTE — Cloudflare Worker: secure order intake (Phase 3).
- * Receives {order, meta, risk} from the storefront, enriches with the REAL client
- * IP + geolocation, checks the watchlist, computes server-side risk, writes the
- * order to Firestore via a service account, and notifies Telegram + EmailJS using
- * server-side secrets (so no token ever ships to the browser).
+/* ROBUSTE — Cloudflare Worker (Phase 3 + Tracking).
+ * Two responsibilities:
+ *   1) POST /            → secure order INTAKE (IP/geo, risk, Firestore write, Telegram/EmailJS)
+ *   2) GET  /track?phone → customer ORDER TRACKING (find orders by phone, read LIVE EcoTrack status)
  *
- * Worker secrets / vars to set (dashboard or `wrangler secret put`):
+ * All secrets live here, never in the browser.
+ *
+ * Worker secrets / vars to set (`wrangler secret put` or dashboard):
  *   FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
  *   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
  *   EMAILJS_SERVICE, EMAILJS_TEMPLATE, EMAILJS_PUBLIC_KEY, EMAILJS_PRIVATE_KEY (optional)
- *   ALLOWED_ORIGIN  e.g. https://www.yourdomain.com
+ *   ALLOWED_ORIGIN   e.g. https://www.robustedz.store   (NEVER leave as "*" in prod)
+ *   ECOTRACK_API_URL e.g. https://assildelivery.ecotrack.dz
+ *   ECOTRACK_TOKEN   the API STANDARD token from the EcoTrack dashboard
  */
+
+const PHONE_RE = /^0[5-7][0-9]{8}$/;
 
 export default {
   async fetch(request, env, ctx) {
     const origin = env.ALLOWED_ORIGIN || "*";
     const cors = {
       "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type"
     };
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
-    if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
 
-    let payload;
-    try { payload = await request.json(); } catch { return json({ error: "Bad JSON" }, 400, cors); }
+    const url = new URL(request.url);
 
-    // Review notifications: token-free client relays here instead of calling Telegram directly.
-    if (payload.type === "review") {
-      const rp = notifyReviewTelegram(env, payload.review || {});
-      if (ctx && ctx.waitUntil) ctx.waitUntil(rp); else await rp;
-      return json({ ok: true }, 200, cors);
+    // ---------- Customer order tracking (read-only, phone lookup) ----------
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/track")) {
+      return handleTrack(url, env, cors);
     }
 
-    const order = payload.order || {};
-    const meta = payload.meta || {};
-
-    // 1) Real IP + geo from the edge (client cannot spoof these)
-    meta.ip = request.headers.get("CF-Connecting-IP") || "";
-    const cf = request.cf || {};
-    meta.country = cf.country || "";
-    meta.city = cf.city || "";
-    meta.region = cf.region || "";
-    meta.isp = cf.asOrganization || "";
-    meta.serverTimestamp = new Date().toISOString();
-
-    // 2) Watchlist check (flags only — never blocks, per your choice)
-    let watch = { phones: [], ips: [] };
-    try { watch = await readWatchlist(env); } catch {}
-    const flags = Array.isArray(payload.risk && payload.risk.flags) ? payload.risk.flags.slice() : [];
-    if (order.phone && watch.phones.includes(order.phone)) flags.push({ key: "watchlisted_phone", level: "red", label: "Phone on watchlist" });
-    if (meta.ip && watch.ips.includes(meta.ip)) flags.push({ key: "watchlisted_ip", level: "red", label: "IP on watchlist" });
-
-    // 3) Velocity flag: orders from this IP in the last 24h
-    try {
-      const recent = await countRecentByIp(env, meta.ip);
-      if (recent >= 3) flags.push({ key: "repeat_ip", level: recent >= 5 ? "red" : "yellow", label: "IP used " + recent + "x / 24h" });
-    } catch {}
-
-    const level = flags.some(f => f.level === "red") ? "red" : flags.some(f => f.level === "yellow") ? "yellow" : "green";
-    const score = Math.min(100, flags.reduce((a, f) => a + (f.level === "red" ? 60 : 25), 0));
-    const risk = { flags, level, score };
-
-    order.meta = meta;
-    order.risk = risk;
-    if (!order.status) order.status = "\u062c\u062f\u064a\u062f";
-    if (!order.timestamp) order.timestamp = new Date().toISOString();
-    order.createdAt = new Date().toISOString();
-
-    // 4) Persist to Firestore
-    let id = null;
-    try { id = await writeOrder(env, order); }
-    catch (e) { return json({ error: "Firestore write failed", detail: String(e) }, 500, cors); }
-
-    // 5) Notify (best-effort; order already saved)
-    const notify = Promise.allSettled([ notifyTelegram(env, order, id, risk), notifyEmail(env, order, id) ]);
-    if (ctx && ctx.waitUntil) ctx.waitUntil(notify); else await notify;
-
-    return json({ id, risk }, 200, cors);
+    if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
+    return handleIntake(request, env, ctx, cors);
   }
 };
+
+/* =========================================================================
+   TRACKING  —  GET /track?phone=0XXXXXXXXX
+   Privacy note: phone-only lookup means anyone with a valid phone can see
+   that order. We therefore return MINIMAL, sanitized data (no full address,
+   no email, first name only) and the front-end is rate-limited at the edge.
+   ========================================================================= */
+async function handleTrack(url, env, cors) {
+  const phone = (url.searchParams.get("phone") || "").trim();
+  if (!PHONE_RE.test(phone)) return json({ error: "invalid_phone" }, 400, cors);
+
+  let docs = [];
+  try { docs = await ordersByPhone(env, phone); }
+  catch (e) { return json({ error: "lookup_failed", detail: String(e) }, 500, cors); }
+
+  if (!docs.length) return json({ orders: [] }, 200, cors);
+
+  // Collect tracking numbers that exist, fetch their live EcoTrack status in one call.
+  const codes = docs.map(d => d.ecotrackTracking).filter(Boolean);
+  let live = {};
+  if (codes.length) { try { live = await ecotrackTrackings(env, codes); } catch (e) { live = {}; } }
+
+  const orders = docs.map(d => {
+    const code = d.ecotrackTracking || null;
+    const liveOne = code && live[code] ? live[code] : null;
+    return {
+      ref: shortRef(d.id),
+      placedAt: d.createdAt || d.timestamp || null,
+      productCount: Array.isArray(d.products) ? d.products.length : 0,
+      total: Number(d.totalPrice || 0),
+      wilaya: d.wilaya || "",
+      customerFirst: firstName(d.customer),
+      internalStatus: d.status || "",
+      stage: liveOne ? liveOne.stage : internalStage(d.status),
+      stageLabel: liveOne ? liveOne.label : internalLabel(d.status),
+      tracking: code,
+      timeline: liveOne ? liveOne.timeline : internalTimeline(d)
+    };
+  });
+
+  return json({ orders }, 200, cors);
+}
+
+async function ordersByPhone(env, phone) {
+  const token = await accessToken(env);
+  const q = { structuredQuery: {
+    from: [{ collectionId: "orders" }],
+    where: { fieldFilter: { field: { fieldPath: "phone" }, op: "EQUAL", value: { stringValue: phone } } },
+    orderBy: [{ field: { fieldPath: "createdAt" }, direction: "DESCENDING" }],
+    limit: 10
+  } };
+  const res = await fetch(baseUrl(env) + ":runQuery", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify(q)
+  });
+  if (!res.ok) throw new Error("runQuery " + res.status);
+  const rows = await res.json();
+  return rows.filter(r => r.document).map(r => {
+    const o = decodeFields(r.document.fields || {});
+    o.id = r.document.name.split("/").pop();
+    return o;
+  });
+}
+
+/* ---- EcoTrack live status ----
+ * Standard EcoTrack/Noest read endpoint. VERIFY the exact path against the
+ * "Information" button in YOUR dashboard — most tenants use one of:
+ *   POST {API_URL}/api/v1/get/trackings/info     (most common)
+ *   POST {API_URL}/api/public/get/trackings/info  (Noest-style)
+ * Body: { trackings: ["CODE1", ...] }  Header: Authorization: Bearer <token>
+ * Response: object keyed by tracking code, each with an activity/events array.
+ */
+async function ecotrackTrackings(env, codes) {
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) return {};
+  const endpoint = env.ECOTRACK_API_URL.replace(/\/+$/, "") + "/api/v1/get/trackings/info";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + env.ECOTRACK_TOKEN,
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({ trackings: codes, api_token: env.ECOTRACK_TOKEN })
+  });
+  if (!res.ok) return {};
+  const data = await res.json();
+  const out = {};
+  for (const code of codes) {
+    const node = data[code] || (data.trackings && data.trackings[code]) || null;
+    if (!node) continue;
+    // Defensive: EcoTrack returns activity under "activity" | "activites" | "events".
+    const acts = node.activity || node.activites || node.events || node.OrderInfo && node.OrderInfo.activity || [];
+    const timeline = (Array.isArray(acts) ? acts : []).map(a => ({
+      date: a.date || a.created_at || a.event_date || "",
+      status: a.event || a.status || a.activity || a.libelle || ""
+    })).filter(t => t.status);
+    const lastRaw = timeline.length ? timeline[0].status : (node.status || node.last_status || "");
+    const mapped = mapEcotrackStatus(lastRaw);
+    out[code] = { stage: mapped.stage, label: mapped.label, timeline };
+  }
+  return out;
+}
+
+/* Map raw EcoTrack status text (FR/AR) to a customer-facing stage + Arabic label. */
+function mapEcotrackStatus(raw) {
+  const s = String(raw || "").toLowerCase();
+  if (/livr|livr\u00e9|delivered|\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645/.test(s)) return { stage: "delivered", label: "\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645" };
+  if (/retour|returned|\u0625\u0631\u062c\u0627\u0639|\u0631\u0627\u062c\u0639/.test(s)) return { stage: "returned", label: "\u0645\u0631\u062a\u062c\u0639" };
+  if (/sortie|out for|en livraison|\u062e\u0631\u062c|\u0644\u0644\u062a\u0648\u0635\u064a\u0644/.test(s)) return { stage: "out_for_delivery", label: "\u062e\u0631\u062c \u0644\u0644\u062a\u0648\u0635\u064a\u0644" };
+  if (/transit|achemin|exp\u00e9di|ramass|collect|\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642/.test(s)) return { stage: "in_transit", label: "\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642" };
+  if (/pr\u00eat|ready|prepar|\u062c\u0627\u0647\u0632/.test(s)) return { stage: "preparing", label: "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631" };
+  return { stage: "in_transit", label: raw || "\u0642\u064a\u062f \u0627\u0644\u0645\u0639\u0627\u0644\u062c\u0629" };
+}
+
+/* Internal status (before a parcel/tracking number exists). */
+function internalStage(st) {
+  const s = String(st || "").toLowerCase();
+  if (/\u0623\u0643\u062f|confirm/.test(s)) return "confirmed";
+  if (/\u062a\u062d\u0636\u064a\u0631|prepar/.test(s)) return "preparing";
+  if (/\u0625\u0644\u063a|cancel/.test(s)) return "cancelled";
+  return "received";
+}
+function internalLabel(st) {
+  switch (internalStage(st)) {
+    case "confirmed": return "\u062a\u0645 \u062a\u0623\u0643\u064a\u062f \u0627\u0644\u0637\u0644\u0628";
+    case "preparing": return "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631";
+    case "cancelled": return "\u0645\u0644\u063a\u0649";
+    default: return "\u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0637\u0644\u0628\u0643";
+  }
+}
+function internalTimeline(d) {
+  const t = [{ date: d.createdAt || d.timestamp || "", status: "\u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0627\u0644\u0637\u0644\u0628" }];
+  if (internalStage(d.status) === "confirmed") t.unshift({ date: "", status: "\u062a\u0645 \u0627\u0644\u062a\u0623\u0643\u064a\u062f" });
+  return t;
+}
+
+function firstName(full) { return String(full || "").trim().split(/\s+/)[0] || ""; }
+function shortRef(id) { return id ? String(id).slice(-6).toUpperCase() : ""; }
+
+/* =========================================================================
+   ORDER INTAKE  —  POST /
+   ========================================================================= */
+async function handleIntake(request, env, ctx, cors) {
+  let payload;
+  try { payload = await request.json(); } catch { return json({ error: "Bad JSON" }, 400, cors); }
+
+  // Cap payload size defensively (junk/abuse protection).
+  try { if (JSON.stringify(payload).length > 20000) return json({ error: "payload_too_large" }, 413, cors); } catch {}
+
+  if (payload.type === "review") {
+    const rp = notifyReviewTelegram(env, payload.review || {});
+    if (ctx && ctx.waitUntil) ctx.waitUntil(rp); else await rp;
+    return json({ ok: true }, 200, cors);
+  }
+
+  const order = payload.order || {};
+  const meta = payload.meta || {};
+
+  // Minimal schema validation before persisting.
+  if (!order.phone || !PHONE_RE.test(String(order.phone))) return json({ error: "invalid_order_phone" }, 400, cors);
+  if (!order.customer || !order.wilaya) return json({ error: "missing_fields" }, 400, cors);
+  if (!Array.isArray(order.products) || order.products.length === 0) return json({ error: "empty_cart" }, 400, cors);
+
+  meta.ip = request.headers.get("CF-Connecting-IP") || "";
+  const cf = request.cf || {};
+  meta.country = cf.country || ""; meta.city = cf.city || ""; meta.region = cf.region || ""; meta.isp = cf.asOrganization || "";
+  meta.serverTimestamp = new Date().toISOString();
+
+  let watch = { phones: [], ips: [] };
+  try { watch = await readWatchlist(env); } catch {}
+  const flags = Array.isArray(payload.risk && payload.risk.flags) ? payload.risk.flags.slice() : [];
+  if (order.phone && watch.phones.includes(order.phone)) flags.push({ key: "watchlisted_phone", level: "red", label: "Phone on watchlist" });
+  if (meta.ip && watch.ips.includes(meta.ip)) flags.push({ key: "watchlisted_ip", level: "red", label: "IP on watchlist" });
+
+  try {
+    const recent = await countRecentByIp(env, meta.ip);
+    if (recent >= 3) flags.push({ key: "repeat_ip", level: recent >= 5 ? "red" : "yellow", label: "IP used " + recent + "x / 24h" });
+  } catch {}
+
+  const level = flags.some(f => f.level === "red") ? "red" : flags.some(f => f.level === "yellow") ? "yellow" : "green";
+  const score = Math.min(100, flags.reduce((a, f) => a + (f.level === "red" ? 60 : 25), 0));
+  const risk = { flags, level, score };
+
+  order.meta = meta; order.risk = risk;
+  if (!order.status) order.status = "\u062c\u062f\u064a\u062f";
+  if (!order.timestamp) order.timestamp = new Date().toISOString();
+  order.createdAt = new Date().toISOString();
+  order.ecotrackTracking = order.ecotrackTracking || null; // set later, when the parcel ships
+
+  let id = null;
+  try { id = await writeOrder(env, order); }
+  catch (e) { return json({ error: "Firestore write failed", detail: String(e) }, 500, cors); }
+
+  const notify = Promise.allSettled([ notifyTelegram(env, order, id, risk), notifyEmail(env, order, id) ]);
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify); else await notify;
+
+  return json({ id, ref: shortRef(id), risk }, 200, cors);
+}
 
 function json(obj, status, cors) {
   return new Response(JSON.stringify(obj), { status: status || 200, headers: Object.assign({ "Content-Type": "application/json" }, cors || {}) });
@@ -174,8 +331,22 @@ function encodeValue(v) {
   if (typeof v === "object") return { mapValue: { fields: encodeFields(v) } };
   return { stringValue: String(v) };
 }
+/* Decode Firestore REST value shapes back into plain JS (used by tracking lookup). */
+function decodeFields(fields) { const out = {}; for (const k in fields) out[k] = decodeValue(fields[k]); return out; }
+function decodeValue(v) {
+  if (!v || typeof v !== "object") return v;
+  if ("nullValue" in v) return null;
+  if ("booleanValue" in v) return v.booleanValue;
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("doubleValue" in v) return v.doubleValue;
+  if ("stringValue" in v) return v.stringValue;
+  if ("timestampValue" in v) return v.timestampValue;
+  if ("arrayValue" in v) return (v.arrayValue.values || []).map(decodeValue);
+  if ("mapValue" in v) return decodeFields(v.mapValue.fields || {});
+  return null;
+}
 
-/* ---------- Notifications ---------- */
+/* ---------- Notifications (unchanged) ---------- */
 async function notifyTelegram(env, order, id, risk) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
   const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
