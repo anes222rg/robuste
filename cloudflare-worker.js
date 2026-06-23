@@ -12,6 +12,7 @@
  *   ALLOWED_ORIGIN   e.g. https://www.robustedz.store   (NEVER leave as "*" in prod)
  *   ECOTRACK_API_URL e.g. https://assildelivery.ecotrack.dz
  *   ECOTRACK_TOKEN   the API STANDARD token from the EcoTrack dashboard
+ *   ADMIN_KEY        long random string; gate for the /admin/* routes (you only)
  */
 
 const PHONE_RE = /^0[5-7][0-9]{8}$/;
@@ -22,7 +23,7 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
+      "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key"
     };
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -31,6 +32,17 @@ export default {
     // ---------- Customer order tracking (read-only, phone lookup) ----------
     if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/track")) {
       return handleTrack(url, env, cors);
+    }
+
+    // ---------- Admin (protected by X-Admin-Key) ----------
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/admin/orders")) {
+      return handleAdminOrders(url, request, env, cors);
+    }
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/set-tracking")) {
+      return handleAdminSetTracking(request, env, cors);
+    }
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/confirm-ship")) {
+      return handleAdminConfirmShip(request, env, cors);
     }
 
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
@@ -80,26 +92,236 @@ async function handleTrack(url, env, cors) {
   return json({ orders }, 200, cors);
 }
 
+/* =========================================================================
+   ADMIN  —  protected by the X-Admin-Key header (set the ADMIN_KEY secret).
+   GET  /admin/orders?phone=...   full (unsanitized) orders for a phone
+   POST /admin/set-tracking       { id, tracking, status? } -> patch the order
+   ========================================================================= */
+function adminOk(request, env) {
+  return !!env.ADMIN_KEY && request.headers.get("X-Admin-Key") === env.ADMIN_KEY;
+}
+
+async function handleAdminOrders(url, request, env, cors) {
+  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  const phone = (url.searchParams.get("phone") || "").trim();
+  if (!PHONE_RE.test(phone)) return json({ error: "invalid_phone" }, 400, cors);
+  let docs = [];
+  try { docs = await ordersByPhone(env, phone); }
+  catch (e) { return json({ error: "lookup_failed", detail: String(e) }, 500, cors); }
+  const orders = docs.map(d => ({
+    id: d.id, ref: shortRef(d.id), customer: d.customer || "", phone: d.phone || "",
+    wilaya: d.wilaya || "", commune: d.commune || "", address: d.address || "", total: Number(d.totalPrice || 0),
+    status: d.status || "", ecotrackTracking: d.ecotrackTracking || null,
+    placedAt: d.createdAt || d.timestamp || null,
+    productCount: Array.isArray(d.products) ? d.products.length : 0
+  }));
+  return json({ orders }, 200, cors);
+}
+
+async function handleAdminSetTracking(request, env, cors) {
+  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  const id = String(body.id || "").trim();
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
+  const fields = {};
+  if (body.tracking !== undefined) fields.ecotrackTracking = body.tracking ? String(body.tracking).trim() : null;
+  if (body.status !== undefined && body.status) fields.status = String(body.status).trim();
+  if (!Object.keys(fields).length) return json({ error: "nothing_to_update" }, 400, cors);
+  try { await updateOrderFields(env, id, fields); }
+  catch (e) { return json({ error: "update_failed", detail: String(e) }, 500, cors); }
+  return json({ ok: true, id, updated: fields }, 200, cors);
+}
+
+/* POST /admin/confirm-ship  { id, commune?, code_wilaya?, adresse?, type?, stop_desk?, status?, remarque? }
+ * The TRUE auto path: creates the parcel in EcoTrack via the API, which RETURNS the
+ * tracking number in the response. We then store ecotrackTracking on the order — no
+ * manual paste, no guessing. Creating a parcel = a REAL shipment, so this is gated by
+ * ADMIN_KEY and is idempotent (refuses if the order already has a tracking number). */
+async function handleAdminConfirmShip(request, env, cors) {
+  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  const id = String(body.id || "").trim();
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
+
+  let order;
+  try { order = await getOrderById(env, id); }
+  catch (e) { return json({ error: "lookup_failed", detail: String(e) }, 500, cors); }
+  if (!order) return json({ error: "order_not_found" }, 404, cors);
+  if (order.ecotrackTracking) return json({ error: "already_shipped", tracking: order.ecotrackTracking }, 409, cors);
+
+  let payload;
+  try { payload = buildEcotrackPayload(order, body); }
+  catch (e) { return json({ error: "invalid_parcel", detail: String(e.message || e) }, 400, cors); }
+
+  let created;
+  try { created = await ecotrackCreateOrder(env, payload); }
+  catch (e) { return json({ error: "ecotrack_create_failed", detail: String(e.message || e) }, 502, cors); }
+
+  const tracking = created.tracking;
+  const fields = { ecotrackTracking: tracking, status: (body.status && String(body.status).trim()) || "\u062a\u0645 \u0627\u0644\u062a\u0623\u0643\u064a\u062f" };
+  try { await updateOrderFields(env, id, fields); }
+  catch (e) { return json({ error: "saved_parcel_but_db_update_failed", tracking, detail: String(e) }, 500, cors); }
+
+  return json({ ok: true, id, tracking, status: fields.status }, 200, cors);
+}
+
+async function getOrderById(env, id) {
+  const token = await accessToken(env);
+  const res = await fetch(baseUrl(env) + "/orders/" + encodeURIComponent(id), { headers: { "Authorization": "Bearer " + token } });
+  if (res.status === 404) return null;
+  if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("get " + res.status + " " + t.slice(0, 300)); }
+  const data = await res.json();
+  const o = decodeFields(data.fields || {});
+  o.id = data.name.split("/").pop();
+  return o;
+}
+
+/* Build + validate the EcoTrack create/order body. Field names & rules verified against
+ * the CourierDZ EcoTrack integration (api/v1/create/order):
+ *   nom_client*, telephone* (9-10 digits), adresse*, commune*, code_wilaya* (1-58),
+ *   montant*, type* (1=Livraison,2=Echange,3=Pickup,4=Recouvrement), stop_desk(0/1),
+ *   reference?, telephone_2?, produit?, remarque?
+ * Admin can override the fields an order may lack (commune, code_wilaya, adresse). */
+function buildEcotrackPayload(order, ov) {
+  ov = ov || {};
+  const phone = String(order.phone || "").replace(/\s+/g, "");
+  if (!/^0[5-7][0-9]{8}$/.test(phone)) throw new Error("telephone invalide");
+
+  const wilayaRaw = (ov.code_wilaya != null && ov.code_wilaya !== "") ? ov.code_wilaya : order.wilaya;
+  const code_wilaya = resolveWilayaCode(wilayaRaw);
+  if (!code_wilaya) throw new Error("wilaya non reconnue: \"" + (order.wilaya || "") + "\" (envoyez code_wilaya entre 1 et 58)");
+
+  const commune = String(ov.commune || order.commune || "").trim();
+  if (!commune) throw new Error("commune manquante");
+
+  const nom_client = String(order.customer || "").trim();
+  if (!nom_client) throw new Error("nom client manquant");
+
+  const adresse = (String(ov.adresse || order.address || "").trim()) || commune;
+  const montant = Number(order.totalPrice || 0);
+  if (!(montant > 0)) throw new Error("montant invalide");
+
+  const produit = ((Array.isArray(order.products) ? order.products : [])
+    .map(p => String(p.name || "") + (p.quantity ? " x" + p.quantity : "")).join(", ") || "Commande").slice(0, 255);
+
+  const payload = {
+    nom_client: nom_client.slice(0, 255),
+    telephone: phone,
+    adresse: adresse.slice(0, 255),
+    commune: commune.slice(0, 255),
+    code_wilaya,
+    montant,
+    produit,
+    type: Number(ov.type || 1),
+    stop_desk: ov.stop_desk != null ? Number(ov.stop_desk) : 0
+  };
+  const reference = order.id ? String(order.id).slice(-12) : "";
+  if (reference) payload.reference = reference;
+  if (ov.remarque) payload.remarque = String(ov.remarque).slice(0, 255);
+  return payload;
+}
+
+async function ecotrackCreateOrder(env, payload) {
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) throw new Error("ecotrack non configure");
+  const endpoint = env.ECOTRACK_API_URL.replace(/\/+$/, "") + "/api/v1/create/order";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + env.ECOTRACK_TOKEN, "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(Object.assign({ api_token: env.ECOTRACK_TOKEN }, payload))
+  });
+  const text = await res.text();
+  let data = null; try { data = JSON.parse(text); } catch {}
+  if (!res.ok) throw new Error("HTTP " + res.status + " " + text.slice(0, 300));
+  if (data && data.success === false) throw new Error(data.message || "creation refusee");
+  const tracking = data && (data.tracking || data.tracking_id || data.trackingNumber ||
+    (data.order && (data.order.tracking || data.order.tracking_id)) ||
+    (data.data && (data.data.tracking || data.data.tracking_id)) || data.id);
+  if (!tracking) throw new Error("pas de numero de suivi dans la reponse: " + text.slice(0, 300));
+  return { tracking: String(tracking), raw: data };
+}
+
+/* ---- Wilaya name -> code (1..58). Accepts a numeric code, an Arabic name, or a
+ * French/Latin name. Both the input and the table are passed through normWilaya so
+ * accents, spaces, apostrophes, tashkeel and the Arabic article "\u0627\u0644" don't matter. */
+function resolveWilayaCode(input) {
+  if (input == null) return null;
+  const n = Number(String(input).trim());
+  if (Number.isInteger(n) && n >= 1 && n <= 58) return n;
+  const key = normWilaya(String(input));
+  return key ? (WILAYA_LOOKUP[key] || null) : null;
+}
+function normWilaya(s) {
+  let x = String(s || "").trim().toLowerCase();
+  x = x.normalize("NFD").replace(/[\u0300-\u036f]/g, "");                 // latin accents
+  x = x.replace(/[\u064B-\u0652\u0670]/g, "")                              // arabic tashkeel
+       .replace(/[\u0623\u0625\u0622\u0627]/g, "\u0627")                   // alef variants
+       .replace(/\u0649/g, "\u064a")                                       // alef maqsura -> ya
+       .replace(/\u0629/g, "\u0647");                                      // ta marbuta -> ha
+  x = x.replace(/^\u0627\u0644/, "");                                      // arabic article "al"
+  x = x.replace(/[^0-9a-z\u0621-\u064a]/g, "");                            // keep latin+arabic letters/digits
+  return x;
+}
+const WILAYAS = [
+  [1,"Adrar","\u0623\u062f\u0631\u0627\u0631"],[2,"Chlef","\u0627\u0644\u0634\u0644\u0641"],[3,"Laghouat","\u0627\u0644\u0623\u063a\u0648\u0627\u0637"],
+  [4,"Oum El Bouaghi","\u0623\u0645 \u0627\u0644\u0628\u0648\u0627\u0642\u064a"],[5,"Batna","\u0628\u0627\u062a\u0646\u0629"],[6,"Bejaia","\u0628\u062c\u0627\u064a\u0629"],
+  [7,"Biskra","\u0628\u0633\u0643\u0631\u0629"],[8,"Bechar","\u0628\u0634\u0627\u0631"],[9,"Blida","\u0627\u0644\u0628\u0644\u064a\u062f\u0629"],
+  [10,"Bouira","\u0627\u0644\u0628\u0648\u064a\u0631\u0629"],[11,"Tamanrasset","\u062a\u0645\u0646\u0631\u0627\u0633\u062a"],[12,"Tebessa","\u062a\u0628\u0633\u0629"],
+  [13,"Tlemcen","\u062a\u0644\u0645\u0633\u0627\u0646"],[14,"Tiaret","\u062a\u064a\u0627\u0631\u062a"],[15,"Tizi Ouzou","\u062a\u064a\u0632\u064a \u0648\u0632\u0648"],
+  [16,"Alger","\u0627\u0644\u062c\u0632\u0627\u0626\u0631"],[17,"Djelfa","\u0627\u0644\u062c\u0644\u0641\u0629"],[18,"Jijel","\u062c\u064a\u062c\u0644"],
+  [19,"Setif","\u0633\u0637\u064a\u0641"],[20,"Saida","\u0633\u0639\u064a\u062f\u0629"],[21,"Skikda","\u0633\u0643\u064a\u0643\u062f\u0629"],
+  [22,"Sidi Bel Abbes","\u0633\u064a\u062f\u064a \u0628\u0644\u0639\u0628\u0627\u0633"],[23,"Annaba","\u0639\u0646\u0627\u0628\u0629"],[24,"Guelma","\u0642\u0627\u0644\u0645\u0629"],
+  [25,"Constantine","\u0642\u0633\u0646\u0637\u064a\u0646\u0629"],[26,"Medea","\u0627\u0644\u0645\u062f\u064a\u0629"],[27,"Mostaganem","\u0645\u0633\u062a\u063a\u0627\u0646\u0645"],
+  [28,"Msila","\u0627\u0644\u0645\u0633\u064a\u0644\u0629"],[29,"Mascara","\u0645\u0639\u0633\u0643\u0631"],[30,"Ouargla","\u0648\u0631\u0642\u0644\u0629"],
+  [31,"Oran","\u0648\u0647\u0631\u0627\u0646"],[32,"El Bayadh","\u0627\u0644\u0628\u064a\u0636"],[33,"Illizi","\u0625\u0644\u064a\u0632\u064a"],
+  [34,"Bordj Bou Arreridj","\u0628\u0631\u062c \u0628\u0648\u0639\u0631\u064a\u0631\u064a\u062c"],[35,"Boumerdes","\u0628\u0648\u0645\u0631\u062f\u0627\u0633"],[36,"El Tarf","\u0627\u0644\u0637\u0627\u0631\u0641"],
+  [37,"Tindouf","\u062a\u0646\u062f\u0648\u0641"],[38,"Tissemsilt","\u062a\u064a\u0633\u0645\u0633\u064a\u0644\u062a"],[39,"El Oued","\u0627\u0644\u0648\u0627\u062f\u064a"],
+  [40,"Khenchela","\u062e\u0646\u0634\u0644\u0629"],[41,"Souk Ahras","\u0633\u0648\u0642 \u0623\u0647\u0631\u0627\u0633"],[42,"Tipaza","\u062a\u064a\u0628\u0627\u0632\u0629"],
+  [43,"Mila","\u0645\u064a\u0644\u0629"],[44,"Ain Defla","\u0639\u064a\u0646 \u0627\u0644\u062f\u0641\u0644\u0649"],[45,"Naama","\u0627\u0644\u0646\u0639\u0627\u0645\u0629"],
+  [46,"Ain Temouchent","\u0639\u064a\u0646 \u062a\u0645\u0648\u0634\u0646\u062a"],[47,"Ghardaia","\u063a\u0631\u062f\u0627\u064a\u0629"],[48,"Relizane","\u063a\u0644\u064a\u0632\u0627\u0646"],
+  [49,"El Mghair","\u0627\u0644\u0645\u063a\u064a\u0631"],[50,"El Meniaa","\u0627\u0644\u0645\u0646\u064a\u0639\u0629"],[51,"Ouled Djellal","\u0623\u0648\u0644\u0627\u062f \u062c\u0644\u0627\u0644"],
+  [52,"Bordj Baji Mokhtar","\u0628\u0631\u062c \u0628\u0627\u062c\u064a \u0645\u062e\u062a\u0627\u0631"],[53,"Beni Abbes","\u0628\u0646\u064a \u0639\u0628\u0627\u0633"],[54,"Timimoun","\u062a\u064a\u0645\u064a\u0645\u0648\u0646"],
+  [55,"Touggourt","\u062a\u0642\u0631\u062a"],[56,"Djanet","\u062c\u0627\u0646\u062a"],[57,"In Salah","\u0639\u064a\u0646 \u0635\u0627\u0644\u062d"],[58,"In Guezzam","\u0639\u064a\u0646 \u0642\u0632\u0627\u0645"]
+];
+const WILAYA_LOOKUP = (() => { const m = {}; for (const [c, fr, ar] of WILAYAS) { m[normWilaya(fr)] = c; m[normWilaya(ar)] = c; } return m; })();
+
+async function updateOrderFields(env, id, fields) {
+  const token = await accessToken(env);
+  const masks = Object.keys(fields).map(k => "updateMask.fieldPaths=" + encodeURIComponent(k)).join("&");
+  const res = await fetch(baseUrl(env) + "/orders/" + encodeURIComponent(id) + "?" + masks, {
+    method: "PATCH",
+    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: encodeFields(fields) })
+  });
+  if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("patch " + res.status + " " + t.slice(0, 300)); }
+  return true;
+}
+
 async function ordersByPhone(env, phone) {
   const token = await accessToken(env);
+  // No orderBy here on purpose: filtering by `phone` and ordering by a DIFFERENT
+  // field (`createdAt`) would require a Firestore composite index. We filter only
+  // (single-field index, always present) and sort in JS below.
   const q = { structuredQuery: {
     from: [{ collectionId: "orders" }],
     where: { fieldFilter: { field: { fieldPath: "phone" }, op: "EQUAL", value: { stringValue: phone } } },
-    orderBy: [{ field: { fieldPath: "createdAt" }, direction: "DESCENDING" }],
-    limit: 10
+    limit: 25
   } };
   const res = await fetch(baseUrl(env) + ":runQuery", {
     method: "POST",
     headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
     body: JSON.stringify(q)
   });
-  if (!res.ok) throw new Error("runQuery " + res.status);
+  if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("runQuery " + res.status + " " + t.slice(0, 300)); }
   const rows = await res.json();
-  return rows.filter(r => r.document).map(r => {
+  const docs = rows.filter(r => r.document).map(r => {
     const o = decodeFields(r.document.fields || {});
     o.id = r.document.name.split("/").pop();
     return o;
   });
+  docs.sort((a, b) => String(b.createdAt || b.timestamp || "").localeCompare(String(a.createdAt || a.timestamp || "")));
+  return docs.slice(0, 10);
 }
 
 /* ---- EcoTrack live status ----
