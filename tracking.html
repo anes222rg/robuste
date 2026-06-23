@@ -111,7 +111,8 @@
       return '<div class="step ' + (i <= idx && !cancelled ? "done" : "") + '"><div class="dot"></div>' + STAGE_AR[s] + '</div>';
     }).join("");
     var tl = (o.timeline || []).map(function(t){
-      return '<li><span class="tdate">' + esc(fmtDate(t.date)) + '</span><span>' + esc(t.status) + '</span></li>';
+      var loc = t.location ? ' <span style="color:var(--muted)">\u00b7 ' + esc(t.location) + '</span>' : '';
+      return '<li><span class="tdate">' + esc(fmtDate(t.date)) + '</span><span>' + esc(t.status) + loc + '</span></li>';
     }).join("");
     return '<div class="order">' +
       '<div class="order-top">' +
@@ -121,8 +122,10 @@
       '</div>' +
       '<div class="meta">' +
         '<span><b>' + (o.productCount || 0) + '</b> \u0645\u0646\u062a\u062c</span>' +
+        (o.product ? '<span>\u0627\u0644\u0645\u0646\u062a\u062c: <b>' + esc(o.product) + '</b></span>' : "") +
         (o.total ? '<span><b>' + Number(o.total).toLocaleString() + '</b> \u062f\u062c</span>' : "") +
         (o.wilaya ? '<span>\u0627\u0644\u0648\u0644\u0627\u064a\u0629: <b>' + esc(o.wilaya) + '</b></span>' : "") +
+        (o.commune ? '<span>\u0627\u0644\u0628\u0644\u062f\u064a\u0629: <b>' + esc(o.commune) + '</b></span>' : "") +
       '</div>' +
       (cancelled ? "" : '<div class="steps">' + steps + '</div>') +
       (tl ? '<ul class="timeline">' + tl + '</ul>' : "") +
