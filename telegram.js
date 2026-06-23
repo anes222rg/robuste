@@ -1,1 +1,37 @@
-!function(){"use strict";var e="7612146734",r="https://api.telegram.org/bot8763877858:AAGajhzW0CLppcvMLdwBa08ls-d3JfYaQkQ/sendMessage";function n(e){return String(null==e?"":e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}function t(e){var r=Number(e||0);isNaN(r)&&(r=0);try{return r.toLocaleString("fr-DZ")}catch(e){return String(r)}}window.sendOrderToTelegram=function(a){try{var o=function(e){if(!e||!e.length)return"";for(var r=[],a=0;a<e.length;a++){var o=e[a]||{},c=o.quantity||1,i=Number(o.price||0);r.push("• "+n(o.name||"منتج")+" ×"+c+" = "+t(i*c)+" دج")}return r.join("\n")}((a=a||{}).products),c="🛍 <b>طلب جديد — ROBUSTE</b>\n━━━━━━━━━━━━\n"+(o?"📦 <b>المنتجات:</b>\n"+o+"\n":a.productName?"📦 <b>المنتج:</b> "+n(a.productName)+"\n":"")+"👤 <b>الاسم:</b> "+n(a.customer||a.fullName||"-")+"\n📞 <b>الهاتف:</b> "+n(a.phone||"-")+"\n📍 <b>الولاية:</b> "+n(a.wilaya||"-")+"\n🏠 <b>العنوان:</b> "+n(a.address||"-")+"\n💳 <b>الدفع:</b> "+n(a.payment||"الدفع عند الاستلام")+"\n💰 <b>المجموع:</b> "+t(a.totalPrice)+" دج\n🕒 "+(new Date).toLocaleString("fr-DZ");return fetch(r,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:e,text:c,parse_mode:"HTML",disable_web_page_preview:!0})}).catch(function(e){try{console.warn("Telegram send failed",e)}catch(e){}})}catch(e){try{console.warn("Telegram error",e)}catch(e){}}},window.sendReviewToTelegram=function(t){try{t=t||{};var a=Number(t.rating||0);(isNaN(a)||a<1)&&(a=5),a>5&&(a=5);for(var o="",c=0;c<5;c++)o+=c<a?"⭐":"☆";var i="📝 <b>تقييم جديد — ROBUSTE</b>\n━━━━━━━━━━━━\n👤 <b>الاسم:</b> "+n(t.name||"-")+"\n"+(t.productName?"📦 <b>المنتج:</b> "+n(t.productName)+"\n":"")+"⭐ <b>التقييم:</b> "+o+" ("+a+"/5)\n💬 <b>الرأي:</b> "+n(t.comment||"-")+"\n🕒 "+(new Date).toLocaleString("fr-DZ");return fetch(r,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:e,text:i,parse_mode:"HTML",disable_web_page_preview:!0})}).catch(function(e){try{console.warn("Telegram review send failed",e)}catch(e){}})}catch(e){try{console.warn("Telegram review error",e)}catch(e){}}}}();
+/* ROBUSTE — Telegram notifier (TOKEN-FREE, secure).
+   The bot token used to live in this file and shipped to every visitor.
+   It has been REMOVED. Notifications are now sent server-side by the
+   Cloudflare Worker, using secrets that never reach the browser.
+
+   - sendOrderToTelegram: disabled on the client. The Worker notifies on every
+     order it writes to Firestore (with real IP + risk).
+   - sendReviewToTelegram: forwarded to the Worker (window.ROBUSTE_WORKER_URL)
+     as { type: "review", review }, so reviews still ping Telegram — no token here.
+
+   Both fail silently if the Worker URL isn't set yet. */
+(function () {
+  "use strict";
+
+  function workerUrl() {
+    return (typeof window !== "undefined" && window.ROBUSTE_WORKER_URL) || "";
+  }
+
+  // Orders are notified server-side by the Worker. This stays as a safe no-op so
+  // any existing calls in the site keep working without shipping a token.
+  window.sendOrderToTelegram = function () {
+    try { console.info("[ROBUSTE] Order Telegram is handled server-side by the Worker; client notifier disabled."); } catch (e) {}
+  };
+
+  // Reviews are relayed through the Worker (no token in the browser).
+  window.sendReviewToTelegram = function (review) {
+    try {
+      var url = workerUrl();
+      if (!url) { try { console.info("[ROBUSTE] Review notification skipped: Worker URL not set yet."); } catch (e) {} return; }
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "review", review: review || {} })
+      }).catch(function (e) { try { console.warn("Review notify failed", e); } catch (e2) {} });
+    } catch (e) { try { console.warn("Review notify error", e); } catch (e2) {} }
+  };
+})();

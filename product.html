@@ -1044,12 +1044,21 @@ async function submitOrderFinal() {
     try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
     try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(Object.assign({}, orderData, { address: fullAddress })); } } catch (e) {}
     try {
-        const docRef = await db.collection('orders').add(orderData);
+        var orderId;
+        if (window.ROBUSTE_WORKER_URL) {
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            if (!resp.ok) throw new Error('Worker ' + resp.status);
+            const data = await resp.json();
+            orderId = data && data.id;
+        } else {
+            const docRef = await db.collection('orders').add(orderData);
+            orderId = docRef.id;
+        }
         const productsList = cart.map(p => `${p.name} x${p.quantity}`).join(', ');
-        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id: docRef.id, customer_name: fullName, customer_phone: phone, wilaya, address: fullAddress, total_price: totalPrice.toLocaleString(), products: productsList });
+        try { await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id: orderId, customer_name: fullName, customer_phone: phone, wilaya, address: fullAddress, total_price: totalPrice.toLocaleString(), products: productsList }); } catch(e){}
         markOrderSent(phone + '|' + totalPrice);
-        showOrderSuccess(docRef.id, phone, totalPrice);
-        try { if (window.trackPurchase) window.trackPurchase({ transaction_id: docRef.id, value: totalPrice, products: cart }); } catch(e){}
+        showOrderSuccess(orderId, phone, totalPrice);
+        try { if (window.trackPurchase) window.trackPurchase({ transaction_id: orderId, value: totalPrice, products: cart }); } catch(e){}
         cart = []; saveCart();
         bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
         document.getElementById('orderForm').reset();
@@ -1187,11 +1196,20 @@ async function submitExpressOrder() {
         const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:address, payment:"الدفع عند الاستلام", totalPrice:total, timestamp:new Date().toISOString() };
         try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
-        const docRef = await db.collection('orders').add(orderData);
-        await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:docRef.id, customer_name:name, customer_phone:phone, wilaya, address:address, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` });
+        var orderId;
+        if (window.ROBUSTE_WORKER_URL) {
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            if (!resp.ok) throw new Error('Worker ' + resp.status);
+            const data = await resp.json();
+            orderId = data && data.id;
+        } else {
+            const docRef = await db.collection('orders').add(orderData);
+            orderId = docRef.id;
+        }
+        try { await emailjs.send("service_lc1q5k8", "template_a15g7yg", { order_id:orderId, customer_name:name, customer_phone:phone, wilaya, address:address, total_price:total.toLocaleString(), products:`${currentProduct.title} x${qty}` }); } catch(e){}
         markOrderSent(phone + '|' + total);
-        showOrderSuccess(docRef.id, phone, total);
-        try { if (window.trackPurchase) window.trackPurchase({ transaction_id: docRef.id, value: total, products: orderData.products }); } catch(e){}
+        showOrderSuccess(orderId, phone, total);
+        try { if (window.trackPurchase) window.trackPurchase({ transaction_id: orderId, value: total, products: orderData.products }); } catch(e){}
         document.getElementById('expressForm').reset();
     } catch(e) { showToast("حدث خطأ", "error"); }
     finally { isSubmittingExpress = false; if(expressBtn){ expressBtn.disabled = false; expressBtn.innerHTML = expressBtnOrig; } }
