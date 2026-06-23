@@ -68,8 +68,10 @@ async function handleTrack(url, env, cors) {
 
   // Collect tracking numbers that exist, fetch their live EcoTrack status in one call.
   const codes = docs.map(d => d.ecotrackTracking).filter(Boolean);
+  const wantDebug = url.searchParams.get("debug") === "1";
+  const diag = wantDebug ? { attempts: [] } : null;
   let live = {};
-  if (codes.length) { try { live = await ecotrackTrackings(env, codes); } catch (e) { live = {}; } }
+  if (codes.length) { try { live = await ecotrackTrackings(env, codes, diag); } catch (e) { if (diag) diag.fatal = String(e); live = {}; } }
 
   const orders = docs.map(d => {
     const code = d.ecotrackTracking || null;
@@ -89,7 +91,9 @@ async function handleTrack(url, env, cors) {
     };
   });
 
-  return json({ orders }, 200, cors);
+  const resp = { orders };
+  if (wantDebug) resp._debug = { codes, diag };
+  return json(resp, 200, cors);
 }
 
 /* =========================================================================
@@ -332,26 +336,46 @@ async function ordersByPhone(env, phone) {
  * Body: { trackings: ["CODE1", ...] }  Header: Authorization: Bearer <token>
  * Response: object keyed by tracking code, each with an activity/events array.
  */
-async function ecotrackTrackings(env, codes) {
-  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) return {};
-  const endpoint = env.ECOTRACK_API_URL.replace(/\/+$/, "") + "/api/v1/get/trackings/info";
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer " + env.ECOTRACK_TOKEN,
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({ trackings: codes, api_token: env.ECOTRACK_TOKEN })
-  });
-  if (!res.ok) return {};
-  const data = await res.json();
+async function ecotrackTrackings(env, codes, diag) {
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) { if (diag) diag.error = "ecotrack_not_configured"; return {}; }
+  const base = env.ECOTRACK_API_URL.replace(/\/+$/, "");
+  // Try the common path first, then the Noest-style public path as a fallback.
+  const candidates = [
+    base + "/api/v1/get/trackings/info",
+    base + "/api/public/get/trackings/info"
+  ];
+  let data = null;
+  for (const endpoint of candidates) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + env.ECOTRACK_TOKEN,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ trackings: codes, api_token: env.ECOTRACK_TOKEN })
+      });
+      const text = await res.text();
+      const attempt = { endpoint, status: res.status, body: String(text).slice(0, 1000) };
+      if (diag) diag.attempts.push(attempt);
+      if (!res.ok) continue;
+      try { data = JSON.parse(text); } catch (e) { if (diag) attempt.parseError = String(e); data = null; continue; }
+      if (data) break;
+    } catch (e) {
+      if (diag) diag.attempts.push({ endpoint, error: String(e) });
+    }
+  }
+  if (!data) return {};
+  if (diag) diag.parsedKeys = Array.isArray(data) ? ("array:" + data.length) : Object.keys(data);
   const out = {};
   for (const code of codes) {
-    const node = data[code] || (data.trackings && data.trackings[code]) || null;
+    let node = data[code] || (data.trackings && data.trackings[code]) || null;
+    if (!node && Array.isArray(data)) node = data.find(x => x && (x.tracking === code || x.tracking_id === code)) || null;
+    if (!node && data.data) node = data.data[code] || (Array.isArray(data.data) ? data.data.find(x => x && (x.tracking === code || x.tracking_id === code)) : null) || null;
     if (!node) continue;
     // Defensive: EcoTrack returns activity under "activity" | "activites" | "events".
-    const acts = node.activity || node.activites || node.events || node.OrderInfo && node.OrderInfo.activity || [];
+    const acts = node.activity || node.activites || node.events || (node.OrderInfo && node.OrderInfo.activity) || [];
     const timeline = (Array.isArray(acts) ? acts : []).map(a => ({
       date: a.date || a.created_at || a.event_date || "",
       status: a.event || a.status || a.activity || a.libelle || ""
