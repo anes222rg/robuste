@@ -172,7 +172,24 @@
     [`يرجى ملء البيانات`, `Please fill in the details`, `Veuillez remplir les informations`],
     [`رقم هاتف غير صحيح`, `Invalid phone number`, `Numéro de téléphone invalide`],
     [`حدث خطأ، حاول مجدداً`, `An error occurred, please try again`, `Une erreur s'est produite, réessayez`],
-    [`حدث خطأ`, `An error occurred`, `Une erreur s'est produite`]
+    [`حدث خطأ`, `An error occurred`, `Une erreur s'est produite`],
+
+    // ---- Added: order tracking / delivery / totals / footer ----
+    [`تتبع طلبي`, `Track my order`, `Suivre ma commande`],
+    [`طريقة التوصيل`, `Delivery method`, `Mode de livraison`],
+    [`🏠 للمنزل`, `🏠 Home`, `🏠 Domicile`],
+    [`🏢 للمكتب`, `🏢 Office`, `🏢 Bureau`],
+    [`المجموع الفرعي`, `Subtotal`, `Sous-total`],
+    [`المجموع الفرعي:`, `Subtotal:`, `Sous-total :`],
+    [`سعر التوصيل`, `Delivery cost`, `Frais de livraison`],
+    [`التوصيل:`, `Delivery:`, `Livraison :`],
+    [`المجموع الإجمالي`, `Grand total`, `Total général`],
+    [`عرض الكل`, `View all`, `Tout afficher`],
+    [`سياسة الخصوصية`, `Privacy policy`, `Politique de confidentialité`],
+    [`الاشتراك في فيسبوك`, `Follow on Facebook`, `Suivre sur Facebook`],
+    [`فتح الموقع على الخريطة`, `Open location on map`, `Ouvrir l'emplacement sur la carte`],
+    [`موقع متجر ROBUSTE EL EULMA`, `ROBUSTE EL EULMA store location`, `Emplacement du magasin ROBUSTE EL EULMA`],
+    [`العلمة، ولاية سطيف، الجزائر`, `El Eulma, Sétif Province, Algeria`, `El Eulma, Wilaya de Sétif, Algérie`]
   ];
 
   var T = {};
