@@ -150,7 +150,6 @@ gtag('config', 'G-GREM5BTR7T');
                 <li class="nav-item mx-2"><a class="nav-link active" href="index.html">الرئيسية</a></li>
                 <li class="nav-item"><a class="nav-link" href="#products">المنتجات</a></li>
                 <li class="nav-item"><a class="nav-link" href="#reviews">آراء العملاء</a></li>
-                <li class="nav-item"><a class="nav-link" href="tracking.html"><i class="bi bi-truck"></i> تتبع طلبي</a></li>
                 <li class="nav-item"><a class="nav-link" href="#contact">اتصل بنا</a></li>
             </ul>
         </div>
@@ -634,6 +633,18 @@ gtag('config', 'G-GREM5BTR7T');
                             </div>
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-truck"></i> طريقة التوصيل<span class="text-danger">*</span></label>
+                        <div class="delivery-type-group">
+                            <label class="dt-opt"><input type="radio" name="deliveryType" value="home"> 🏠 للمنزل</label>
+                            <label class="dt-opt"><input type="radio" name="deliveryType" value="office" checked> 🏢 للمكتب</label>
+                        </div>
+                    </div>
+                    <div class="order-summary-box">
+                        <div class="osb-row"><span>المجموع الفرعي</span><span id="sumSubtotal">0 د.ج</span></div>
+                        <div class="osb-row"><span><i class="bi bi-truck"></i> سعر التوصيل</span><span id="sumDelivery">اختر الولاية</span></div>
+                        <div class="osb-row osb-total"><span>المجموع الإجمالي</span><span id="sumTotal">0 د.ج</span></div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -774,7 +785,6 @@ gtag('config', 'G-GREM5BTR7T');
                     <li class="mb-2"><a href="#" class="text-white text-decoration-none">الرئيسية</a></li>
                     <li class="mb-2"><a href="#products" class="text-white text-decoration-none">المنتجات</a></li>
                     <li class="mb-2"><a href="#reviews" class="text-white text-decoration-none">آراء العملاء</a></li>
-                    <li class="mb-2"><a href="tracking.html" class="text-white text-decoration-none">تتبع طلبي</a></li>
                     <li class="mb-2"><a href="#contact" class="text-white text-decoration-none">اتصل بنا</a></li>
                 </ul>
             </div>
@@ -845,9 +855,25 @@ gtag('config', 'G-GREM5BTR7T');
         </div>
         
         <div class="cart-summary border-top pt-3">
+            <div class="cart-deliv-field mb-2">
+                <label class="form-label"><i class="bi bi-geo-alt"></i> الولاية</label>
+                <select id="cartWilaya" class="form-select form-select-sm"></select>
+            </div>
+            <div class="delivery-type-group cart-dt-group">
+                <label class="dt-opt"><input type="radio" name="cartDeliveryType" value="home"> 🏠 للمنزل</label>
+                <label class="dt-opt"><input type="radio" name="cartDeliveryType" value="office" checked> 🏢 للمكتب</label>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span>المجموع الفرعي:</span>
+                <span id="cartSubtotal">0 د.ج</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span><i class="bi bi-truck"></i> التوصيل:</span>
+                <span id="cartDelivery">اختر الولاية</span>
+            </div>
             <div class="d-flex justify-content-between mb-2">
-                <span>المجموع:</span>
-                <span id="cartTotal">0 دج</span>
+                <span class="fw-bold">المجموع:</span>
+                <span id="cartTotal" class="fw-bold text-primary">0 دج</span>
             </div>
             <button class="btn btn-orange w-100" onclick="checkout()" id="checkoutBtn" disabled aria-label="إنهاء الطلب">
                 <i class="bi bi-bag-check"></i> إنهاء الطلب
@@ -861,6 +887,7 @@ gtag('config', 'G-GREM5BTR7T');
 <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script defer src="main.js"></script>
+<script defer src="robuste-delivery-index.js"></script>
 <script defer src="i18n.js"></script>
 <script defer src="analytics.js"></script>
 <script defer src="telegram.js"></script>
