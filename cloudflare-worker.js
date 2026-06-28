@@ -439,6 +439,23 @@ async function handleIntake(request, env, ctx, cors) {
     return json({ ok: true }, 200, cors);
   }
 
+  // CAPI-only path: server-side Purchase for orders saved client-side (homepage/
+  // cart via main.js) WITHOUT re-writing Firestore or re-sending Telegram/email.
+  // Deduped against the browser Pixel via event_id "ord_"+id.
+  if (payload.capiOnly) {
+    const o = payload.order || {};
+    o.meta = o.meta || {};
+    const cf0 = request.cf || {};
+    o.meta.ip = request.headers.get("CF-Connecting-IP") || o.meta.ip || "";
+    o.meta.country = o.meta.country || cf0.country || "";
+    o.meta.city = o.meta.city || cf0.city || "";
+    o.meta.region = o.meta.region || cf0.region || "";
+    o.meta.userAgent = o.meta.userAgent || request.headers.get("User-Agent") || "";
+    const cp = sendMetaCapi(env, o, payload.id, payload.fb || {}, request);
+    if (ctx && ctx.waitUntil) ctx.waitUntil(cp); else await cp;
+    return json({ ok: true, capi: true }, 200, cors);
+  }
+
   const order = payload.order || {};
   const meta = payload.meta || {};
 
