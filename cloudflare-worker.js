@@ -477,7 +477,7 @@ async function handleIntake(request, env, ctx, cors) {
   try { id = await writeOrder(env, order); }
   catch (e) { return json({ error: "Firestore write failed", detail: String(e) }, 500, cors); }
 
-  const notify = Promise.allSettled([ notifyTelegram(env, order, id, risk), notifyEmail(env, order, id) ]);
+  const notify = Promise.allSettled([ notifyTelegram(env, order, id, risk), notifyEmail(env, order, id), sendMetaCapi(env, order, id, payload.fb || {}, request) ]);
   if (ctx && ctx.waitUntil) ctx.waitUntil(notify); else await notify;
 
   return json({ id, ref: shortRef(id), risk }, 200, cors);
@@ -485,6 +485,85 @@ async function handleIntake(request, env, ctx, cors) {
 
 function json(obj, status, cors) {
   return new Response(JSON.stringify(obj), { status: status || 200, headers: Object.assign({ "Content-Type": "application/json" }, cors || {}) });
+}
+
+/* ---------- Meta Conversions API (server-side Purchase) ----------
+   Fires a server-side "Purchase" event to Meta from the Worker, deduped against
+   the browser Pixel via a shared event_id ("ord_" + Firestore order id).
+   No-op unless META_PIXEL_ID and META_CAPI_TOKEN secrets are set. */
+async function sha256Hex(s) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+async function hashField(v) {
+  const s = String(v == null ? "" : v).trim().toLowerCase();
+  if (!s) return undefined;
+  return await sha256Hex(s);
+}
+function normPhoneE164(p) {
+  // Algerian local 0XXXXXXXXX -> 213XXXXXXXXX (digits only, no "+"), per Meta normalization.
+  let d = String(p || "").replace(/[^0-9]/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  if (d.startsWith("213")) return d;
+  if (d.startsWith("0")) return "213" + d.slice(1);
+  if (d.length === 9) return "213" + d;
+  return d;
+}
+async function sendMetaCapi(env, order, id, fb, request) {
+  try {
+    const PIXEL = env.META_PIXEL_ID, TOKEN = env.META_CAPI_TOKEN;
+    if (!PIXEL || !TOKEN) return; // not configured yet -> safe no-op
+    fb = fb || {};
+    const meta = order.meta || {};
+    const parts = String(order.customer || "").trim().split(/\s+/).filter(Boolean);
+    const first = parts.shift() || "";
+    const last = parts.join(" ");
+
+    const user_data = {};
+    const ph = await hashField(normPhoneE164(order.phone)); if (ph) user_data.ph = [ph];
+    const email = String(order.email || "").trim().toLowerCase();
+    if (email.includes("@")) { const em = await hashField(email); if (em) user_data.em = [em]; }
+    const fn = await hashField(first); if (fn) user_data.fn = [fn];
+    const ln = await hashField(last); if (ln) user_data.ln = [ln];
+    const ct = await hashField(meta.city); if (ct) user_data.ct = [ct];
+    const st = await hashField(order.wilaya || meta.region); if (st) user_data.st = [st];
+    const co = await hashField(meta.country || "dz"); if (co) user_data.country = [co];
+    const ip = meta.ip || request.headers.get("CF-Connecting-IP") || ""; if (ip) user_data.client_ip_address = ip;
+    const ua = meta.userAgent || request.headers.get("User-Agent") || ""; if (ua) user_data.client_user_agent = ua;
+    if (fb.fbp) user_data.fbp = fb.fbp;
+    if (fb.fbc) user_data.fbc = fb.fbc;
+
+    const products = Array.isArray(order.products) ? order.products : [];
+    const contents = products.map(p => ({ id: String(p.id != null ? p.id : (p.name || "")), quantity: p.quantity || 1, item_price: Number(p.price) || 0 }));
+    const num_items = products.reduce((a, p) => a + (p.quantity || 1), 0);
+
+    const event = {
+      event_name: "Purchase",
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: "ord_" + id,                 // dedup key: must match the browser Pixel
+      action_source: "website",
+      event_source_url: fb.event_source_url || ("https://" + (env.SITE_HOST || "www.robustedz.store") + "/product.html"),
+      user_data,
+      custom_data: {
+        currency: "DZD",
+        value: Number(order.totalPrice) || 0,
+        content_type: "product",
+        contents,
+        content_ids: contents.map(c => c.id),
+        num_items,
+        order_id: String(id || "")
+      }
+    };
+    const bodyObj = { data: [event] };
+    if (env.META_TEST_EVENT_CODE) bodyObj.test_event_code = env.META_TEST_EVENT_CODE;
+
+    const res = await fetch("https://graph.facebook.com/v19.0/" + PIXEL + "/events?access_token=" + encodeURIComponent(TOKEN), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bodyObj)
+    });
+    if (!res.ok) { const t = await res.text().catch(() => ""); console.error("Meta CAPI HTTP", res.status, t); }
+  } catch (e) { console.error("Meta CAPI exception", String(e)); }
 }
 
 /* ---------- Google service-account auth (RS256 JWT -> access token) ---------- */

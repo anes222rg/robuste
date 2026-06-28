@@ -13,6 +13,10 @@
   function track(name, params) {
     try { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); } catch (e) {}
   }
+  // Mirror to the Meta Pixel (queues safely even before fbq init).
+  function fbqTrack(name, params, opts) {
+    try { if (typeof window.fbq === "function") window.fbq("track", name, params || {}, opts || {}); } catch (e) {}
+  }
   function ready(fn) {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
     else fn();
@@ -60,6 +64,17 @@
       }
       if (items && items.length) params.items = items;
       track("purchase", params);
+      try {
+        var mContents = (items || []).map(function (i) { return { id: i.item_id, quantity: i.quantity || 1, item_price: i.price }; });
+        fbqTrack("Purchase", {
+          currency: "DZD",
+          value: params.value,
+          content_type: "product",
+          contents: mContents,
+          content_ids: mContents.map(function (c) { return c.id; }),
+          num_items: mContents.reduce(function (a, c) { return a + (c.quantity || 1); }, 0)
+        }, { eventID: "ord_" + id });
+      } catch (e) {}
       markSent(id);
     } catch (e) {}
   }
@@ -103,6 +118,7 @@
       var pid = null;
       try { pid = new URLSearchParams(location.search).get("pid"); } catch (e) {}
       if (pid || /product/i.test(location.pathname)) track("view_item", pid ? { item_id: pid } : {});
+      if (pid || /product/i.test(location.pathname)) fbqTrack("ViewContent", pid ? { content_ids: [pid], content_type: "product" } : {});
     } catch (e) {}
 
     // 2) WhatsApp clicks => contact (lead)
@@ -110,7 +126,7 @@
       try {
         var t = e.target;
         var a = t && t.closest ? t.closest('a[href*="wa.me"],a[href*="whatsapp"]') : null;
-        if (a) track("contact", { method: "whatsapp" });
+        if (a) { track("contact", { method: "whatsapp" }); fbqTrack("Lead", { method: "whatsapp" }); }
       } catch (er) {}
     }, true);
 
@@ -118,13 +134,13 @@
     try {
       if (typeof window.addToCart === "function" && !window.addToCart.__gaWrapped) {
         var orig = window.addToCart;
-        window.addToCart = function () { track("add_to_cart", {}); return orig.apply(this, arguments); };
+        window.addToCart = function () { track("add_to_cart", {}); fbqTrack("AddToCart", {}); return orig.apply(this, arguments); };
         window.addToCart.__gaWrapped = true;
       }
     } catch (e) {}
 
     // 4) begin_checkout => when the order modal opens
-    try { document.addEventListener("shown.bs.modal", function () { track("begin_checkout", {}); }); } catch (e) {}
+    try { document.addEventListener("shown.bs.modal", function () { track("begin_checkout", {}); fbqTrack("InitiateCheckout", {}); }); } catch (e) {}
 
     // 5) purchase => fallback detector, real order cards only, deduped.
     try {

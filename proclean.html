@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar" data-lang="ar">
 <head>
+<!-- ROBUSTE Meta Pixel: paste your Pixel ID below (one line) -->
+<script>window.RB_PIXEL_ID="1442050591275047";</script>
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+if(window.RB_PIXEL_ID&&window.RB_PIXEL_ID.indexOf("REPLACE")===-1){fbq("init",window.RB_PIXEL_ID);fbq("track","PageView");}
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1442050591275047&ev=PageView&noscript=1"/></noscript>
+<!-- End ROBUSTE Meta Pixel -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GREM5BTR7T"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GREM5BTR7T');</script>
 <meta charset="UTF-8">
@@ -611,6 +623,7 @@ document.getElementById('expressForm').addEventListener('submit',function(e){
   }).catch(function(){});
 
   if(typeof gtag!=='undefined'){gtag('event','purchase',{currency:'DZD',value:23500});}
+  if(typeof fbq!=='undefined'){fbq('track','Purchase',{currency:'DZD',value:23500,content_type:'product',content_ids:['proclean-4in1'],num_items:1});}
 
   setTimeout(function(){
     document.getElementById('expressForm').style.display='none';
