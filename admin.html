@@ -133,6 +133,7 @@
         <li class="nav-item"><button class="nav-link active" data-tab="orders"><i class="bi bi-list-check"></i> الطلبات</button></li>
         <li class="nav-item"><button class="nav-link" data-tab="analytics"><i class="bi bi-graph-up-arrow"></i> التحليلات</button></li>
         <li class="nav-item"><button class="nav-link" data-tab="tracking"><i class="bi bi-truck"></i> الشحن والتتبع</button></li>
+        <li class="nav-item"><button class="nav-link" data-tab="settlement"><i class="bi bi-cash-coin"></i> التسوية مع الوالد</button></li>
       </ul>
       <div class="d-flex gap-2 align-items-center">
         <span id="adminWho" class="text-muted d-none d-md-inline" style="font-size:.82rem;" dir="ltr"></span>
@@ -261,6 +262,21 @@
         </div>
       </div>
       <div id="trkCount" class="text-muted mt-2" style="font-size:.85rem;"></div>
+    </div>
+
+    <!-- ============ SETTLEMENT TAB ============ -->
+    <div id="tab-settlement" style="display:none;">
+      <div class="row g-3 mb-3">
+        <div class="col-md-4"><div class="stat-card mb-0"><div class="label">مستحق لك حالياً (غير مُسوّى)</div><div class="value" id="setPendingTotal">—</div><div class="sub">مجموع الهامش على الطلبات غير المُسوّاة</div></div></div>
+        <div class="col-md-4"><div class="stat-card mb-0"><div class="label">مستحق لوالدك (ثمن جملة)</div><div class="value" id="setCostTotal">—</div><div class="sub">غير المُسوّى</div></div></div>
+        <div class="col-md-4"><div class="stat-card mb-0"><div class="label">طلبات بلا ثمن جملة مُدخل</div><div class="value" id="setMissingCost">—</div><div class="sub">أدخل الثمن لحساب الهامش</div></div></div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap mb-2 align-items-center">
+        <input id="setSearch" class="form-control" style="max-width:260px;" placeholder="بحث (الاسم / الهاتف / رقم الطلب)">
+        <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" id="setOnlyPending" checked><label class="form-check-label" for="setOnlyPending" style="font-size:.85rem;">غير المُسوّى فقط</label></div>
+      </div>
+      <div class="table-wrap"><div id="setContent"></div></div>
+      <div id="setCount" class="text-muted mt-2" style="font-size:.85rem;"></div>
     </div>
 
   </div>
@@ -675,12 +691,28 @@
       + '<hr><h6 class="fw-bold mb-2"><i class="bi bi-arrow-repeat"></i> تغيير الحالة</h6>'
       + '<div class="d-flex flex-wrap gap-2" id="statusBtns">'+statusBtns+'</div>'
       + '<div id="statusMsg" class="mt-2" style="font-size:.85rem;"></div>'
+      + '<hr><h6 class="fw-bold mb-2"><i class="bi bi-truck"></i> الشحن التلقائي عبر Ecotrack</h6>'
+      + (d.ecotrackTracking
+          ? '<div class="info-row"><span class="k">رقم الشحنة</span><span class="v" dir="ltr">'+esc(d.ecotrackTracking)+'</span></div>'
+          : ('<input id="autoShipCommune" class="form-control form-control-sm mb-2" placeholder="البلدية (لو ناقصة أو تحتاج تصحيح)" value="'+esc(d.commune||d.baladiya||"")+'">'
+             + '<button id="autoShipBtn" class="btn btn-brand btn-sm"><i class="bi bi-truck"></i> شحن تلقائي عبر Ecotrack</button>'))
+      + '<div id="autoShipMsg" class="mt-2" style="font-size:.85rem;"></div>'
       + archiveBlock;
 
     $("modalInner").innerHTML = body;
     var btns = $("statusBtns").querySelectorAll('.status-set-btn');
     for (var i=0;i<btns.length;i++){ btns[i].addEventListener('click', function(){ updateStatus(id, this.getAttribute('data-status')); }); }
     var aBtn = $("archiveBtn"); if (aBtn){ aBtn.addEventListener('click', function(){ toggleArchive(id, !isArchived(d)); }); }
+    var asBtn = $("autoShipBtn");
+    if (asBtn){ asBtn.addEventListener('click', function(){
+      var msg = $("autoShipMsg"); var cv = (($("autoShipCommune") && $("autoShipCommune").value) || "").trim();
+      asBtn.disabled = true; msg.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> جاري إنشاء الشحنة...</span>';
+      autoShipEcotrack(id, cv ? { commune: cv } : {}).then(function(data){
+        msg.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> تم إنشاء الشحنة، رقم التتبّع: '+esc(data.tracking)+'</span>';
+        var r = getRec(id); if (r){ r.data.ecotrackTracking = data.tracking; r.data.status = data.status; }
+        renderStats(); renderCharts(); applyFilters();
+      }).catch(function(err){ asBtn.disabled = false; msg.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle"></i> '+esc(err.message||"تعذر إنشاء الشحنة")+'</span>'; });
+    }); }
   }
 
   /* ===== Edit form ===== */
@@ -866,12 +898,96 @@
     });
   }
 
+  /* ===== Ecotrack auto-ship (uses your existing Firebase login) ===== */
+  var WORKER_URL = (window.ROBUSTE_WORKER_URL || "https://robuste.aneslaidaoui06.workers.dev").replace(/\/+$/, "");
+  async function autoShipEcotrack(id, overrides){
+    var user = auth.currentUser;
+    if (!user) throw new Error("يجب تسجيل الدخول");
+    var idToken = await user.getIdToken();
+    var res = await fetch(WORKER_URL + "/admin/confirm-ship", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
+      body: JSON.stringify(Object.assign({ id: id }, overrides || {}))
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!res.ok) throw new Error(data.error || "فشل إنشاء الشحنة");
+    return data;
+  }
+
+  /* ===== Settlement with dad (direct Firestore write, same path as tracking) ===== */
+  function orderMargin(d){ var cost = Number(d.wholesaleCost); if (!isFinite(cost)) return null; return orderTotal(d) - cost; }
+  function settlementStatus(d){ return d.settlementStatus === 'settled' ? 'settled' : 'pending'; }
+  function writeSettlement(id, fields){
+    var patch = Object.assign({ updatedAt: new Date().toISOString() }, fields);
+    return db.collection('orders').doc(id).update(patch).then(function(){
+      var rec = getRec(id); if (rec){ Object.assign(rec.data, fields); rec.data.updatedAt = patch.updatedAt; }
+    });
+  }
+  function renderSettlement(){
+    var q = ($("setSearch").value || "").trim().toLowerCase();
+    var onlyPending = $("setOnlyPending").checked;
+    var rows = activeOrders().filter(function(o){
+      var d = o.data;
+      if (onlyPending && settlementStatus(d) === 'settled') return false;
+      if (q){ var hay = (customerName(d) + " " + (d.phone||"") + " " + o.id).toLowerCase(); if (hay.indexOf(q) === -1) return false; }
+      return true;
+    });
+    var pendingTotal = 0, costTotal = 0, missingCost = 0;
+    activeOrders().forEach(function(o){
+      var d = o.data;
+      if (settlementStatus(d) === 'settled') return;
+      var cost = Number(d.wholesaleCost);
+      if (!isFinite(cost)) { missingCost++; return; }
+      pendingTotal += (orderTotal(d) - cost); costTotal += cost;
+    });
+    $("setPendingTotal").textContent = fmtMoney(pendingTotal);
+    $("setCostTotal").textContent = fmtMoney(costTotal);
+    $("setMissingCost").textContent = missingCost.toLocaleString('ar-DZ');
+    var host = $("setContent");
+    if (!rows.length){ host.innerHTML = '<div class="empty-state"><i class="bi bi-cash-coin"></i><div class="mt-3">لا توجد طلبات مطابقة.</div></div>'; $("setCount").textContent = ""; return; }
+    var html = '<table class="orders"><thead><tr><th>رقم الطلب</th><th>العميل</th><th>الإجمالي المُحصّل</th><th>ثمن الجملة (والدك)</th><th>هامشك</th><th>الحالة</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(o){
+      var d = o.data; var total = orderTotal(d); var margin = orderMargin(d); var settled = settlementStatus(d) === 'settled';
+      html += '<tr data-id="'+esc(o.id)+'">'
+        + '<td><span class="order-id">'+esc(o.id)+'</span></td>'
+        + '<td>'+esc(customerName(d))+'</td>'
+        + '<td>'+esc(fmtMoney(total))+'</td>'
+        + '<td><input type="number" min="0" class="form-control form-control-sm set-cost-input" style="max-width:120px;" value="'+(d.wholesaleCost!=null?esc(d.wholesaleCost):'')+'" placeholder="أدخل الثمن"></td>'
+        + '<td>'+(margin==null?'<span class="text-muted">—</span>':esc(fmtMoney(margin)))+'</td>'
+        + '<td><span style="background:'+(settled?'#dcfce7;color:#166534':'#fef3c7;color:#92400e')+';padding:2px 8px;border-radius:999px;font-size:.78rem;">'+(settled?'مُسوّى':'معلّق')+'</span></td>'
+        + '<td class="d-flex gap-1"><button class="btn btn-sm btn-outline-secondary set-save"><i class="bi bi-save"></i> حفظ</button>'
+        + '<button class="btn btn-sm '+(settled?'btn-outline-secondary':'btn-brand')+' set-toggle" data-next="'+(settled?'pending':'settled')+'">'+(settled?'إعادة فتح':'تمت التسوية')+'</button></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>'; host.innerHTML = html;
+    $("setCount").textContent = rows.length.toLocaleString('ar-DZ') + " طلب";
+    var saves = host.querySelectorAll('.set-save');
+    for (var i=0;i<saves.length;i++){ saves[i].addEventListener('click', function(){
+      var row = this.closest('tr'); var id = row.getAttribute('data-id');
+      var inp = row.querySelector('.set-cost-input'); var raw = (inp.value||"").trim();
+      var cost = raw === "" ? null : Number(raw);
+      if (raw !== "" && (!isFinite(cost) || cost < 0)) { alert('ثمن الجملة غير صحيح'); return; }
+      var b = this; b.disabled = true; var old = b.innerHTML; b.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      writeSettlement(id, { wholesaleCost: cost }).then(function(){ b.innerHTML = '<i class="bi bi-check2"></i> تم'; setTimeout(function(){ b.disabled = false; b.innerHTML = old; renderSettlement(); }, 900); })
+        .catch(function(err){ b.disabled = false; b.innerHTML = old; alert((err && err.code === 'permission-denied') ? "لا توجد صلاحية للتعديل." : "تعذر الحفظ."); });
+    }); }
+    var toggles = host.querySelectorAll('.set-toggle');
+    for (var j=0;j<toggles.length;j++){ toggles[j].addEventListener('click', function(){
+      var row = this.closest('tr'); var id = row.getAttribute('data-id'); var next = this.getAttribute('data-next');
+      var b = this; b.disabled = true; var old = b.innerHTML; b.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      writeSettlement(id, { settlementStatus: next, settledAt: next === 'settled' ? new Date().toISOString() : null }).then(function(){ renderSettlement(); })
+        .catch(function(){ b.disabled = false; b.innerHTML = old; alert("تعذر تحديث حالة التسوية."); });
+    }); }
+  }
+
   /* ===== Tabs ===== */
   function switchTab(tab){
     $("tab-orders").style.display = (tab === 'orders') ? 'block' : 'none';
     $("tab-analytics").style.display = (tab === 'analytics') ? 'block' : 'none';
     $("tab-tracking").style.display = (tab === 'tracking') ? 'block' : 'none';
+    $("tab-settlement").style.display = (tab === 'settlement') ? 'block' : 'none';
     if (tab === 'tracking') renderTracking();
+    if (tab === 'settlement') renderSettlement();
     var btns = $("mainTabs").querySelectorAll('.nav-link');
     for (var i=0;i<btns.length;i++){ btns[i].classList.toggle('active', btns[i].getAttribute('data-tab') === tab); }
   }
@@ -893,6 +1009,8 @@
     $("clearFilters").addEventListener('click', function(){ $("searchInput").value=''; $("statusFilter").value=''; $("dateFrom").value=''; $("dateTo").value=''; applyFilters(); });
     $("trkSearch").addEventListener('input', renderTracking);
     $("trkOnlyMissing").addEventListener('change', renderTracking);
+    $("setSearch").addEventListener('input', renderSettlement);
+    $("setOnlyPending").addEventListener('change', renderSettlement);
     var tb = $("mainTabs").querySelectorAll('.nav-link');
     for (var i=0;i<tb.length;i++){ tb[i].addEventListener('click', function(){ switchTab(this.getAttribute('data-tab')); }); }
   });
