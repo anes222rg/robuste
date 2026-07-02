@@ -265,8 +265,20 @@ function catalogByName(name){var k=normName(name);if(_byName[k])return _byName[k
 function dadPrice(p){if(!p)return null;if(costOverrides[p.id]!=null)return Number(costOverrides[p.id]);return p.dad;}
 function orderCost(d){var a=Array.isArray(d.products)?d.products:[];var cost=0,complete=true,lines=[];a.forEach(function(l){var qty=Number(l.quantity)||1;var p=catalogById(l.id)||catalogByName(l.name);var dp=p?dadPrice(p):null;if(dp==null)complete=false;else cost+=dp*qty;lines.push({name:l.name||(p&&p.title)||"—",qty:qty,sell:Number(l.price)||(p&&p.sell)||0,dad:dp,matched:!!p});});return {cost:cost,complete:complete&&a.length>0,lines:lines};}
 function effectiveCost(d){if(d.wholesaleCost!=null&&isFinite(Number(d.wholesaleCost)))return {cost:Number(d.wholesaleCost),complete:true,manual:true};var c=orderCost(d);return {cost:c.cost,complete:c.complete,manual:false};}
-function orderProfit(d){var c=effectiveCost(d);if(!c.complete)return null;return orderTotal(d)-c.cost;}
+function orderProfit(d){var c=effectiveCost(d);if(!c.complete)return null;return orderTotal(d)-deliveryOf(d)-c.cost;}
 function settlementDone(d){return d.settlementStatus==='settled';}
+/* ===== delivery cost (wilaya -> [home, office]) — same table as the storefront ===== */
+var DELIVERY_FEES={"أدرار":[1200,600],"الشلف":[700,400],"الأغواط":[800,500],"أم البواقي":[700,400],"باتنة":[700,400],"بجاية":[650,400],"بسكرة":[800,470],"بشار":[1200,650],"البليدة":[650,350],"البويرة":[650,400],"تمنراست":[1600,800],"تبسة":[750,400],"تلمسان":[750,400],"تيارت":[750,400],"تيزي وزو":[650,400],"الجزائر":[500,350],"الجلفة":[800,470],"جيجل":[700,400],"سطيف":[500,350],"سعيدة":[750,400],"سكيكدة":[700,400],"سيدي بلعباس":[700,400],"عنابة":[650,400],"قالمة":[700,400],"قسنطينة":[650,400],"المدية":[700,400],"مستغانم":[700,400],"المسيلة":[700,400],"معسكر":[700,400],"ورقلة":[800,500],"وهران":[650,400],"البيض":[950,600],"إليزي":[1600,800],"برج بوعريريج":[650,400],"بومرداس":[600,400],"الطارف":[700,400],"تيندوف":[1200,600],"تيسمسيلت":[700,400],"الوادي":[800,500],"خنشلة":[750,400],"سوق أهراس":[750,400],"تيبازة":[650,400],"ميلة":[650,400],"عين الدفلى":[650,400],"النعامة":[900,600],"عين تموشنت":[700,400],"غرداية":[900,500],"غليزان":[700,400],"تيميمون":[1300,650],"أولاد جلال":[900,550],"بني عباس":[1300,650],"عين صالح":[1300,700],"توقرت":[850,600],"المغير":[850,null],"المنيعة":[900,500]};
+function normWil(s){var x=String(s||'').trim();x=x.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/^ال/,'').replace(/\s+/g,'');return x;}
+var _feeByNorm={};Object.keys(DELIVERY_FEES).forEach(function(k){_feeByNorm[normWil(k)]=DELIVERY_FEES[k];});
+function deliveryFeeFor(w,t){var f=DELIVERY_FEES[String(w||'').trim()]||_feeByNorm[normWil(w)];if(!f)return null;var home=f[0],office=f[1];if(t==='home')return home;return (office==null?home:office);}
+function deliveryTypeOf(d){var t=String((d&&(d.deliveryType||d.delivery_type||d.livraison))||'').toLowerCase();if(t.indexOf('home')!==-1||t.indexOf('منزل')!==-1||t.indexOf('domicile')!==-1)return 'home';return 'office';}
+function deliveryCostOf(d,tOverride){return deliveryFeeFor(orderWilaya(d),tOverride||deliveryTypeOf(d));}
+function stopDeskFor(t){return t==='home'?0:1;}
+/* delivery the customer ACTUALLY paid = total − product subtotal (total already includes delivery) */
+function productSubtotal(d){var a=Array.isArray(d.products)?d.products:[];var t=0;for(var i=0;i<a.length;i++)t+=(Number(a[i].price)||0)*(Number(a[i].quantity)||0);return t;}
+function deliveryOf(d){var tot=orderTotal(d);var sub=productSubtotal(d);if(sub>0&&tot>=sub)return tot-sub;var f=deliveryCostOf(d);return f==null?0:f;}
+function guessDeliveryType(d){var w=orderWilaya(d);var f=DELIVERY_FEES[String(w||'').trim()]||_feeByNorm[normWil(w)];var dv=deliveryOf(d);if(f){if(f[1]!=null&&dv===f[1])return 'office';if(dv===f[0])return 'home';}return deliveryTypeOf(d);}
 
 /* ===== firebase ===== */
 function initFirebase(){if(typeof firebase==='undefined'||!firebase.initializeApp){showLoginError("تعذر تحميل Firebase.");return false;}try{if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();return true;}catch(e){showLoginError("خطأ في تهيئة Firebase.");return false;}}
@@ -298,8 +310,8 @@ window.__renderRegistry.dashboard=function(){
   var biz=businessOrders();var host=$("sec-dashboard");
   var counts={};STATUSES.forEach(function(s){counts[s.key]=0;});biz.forEach(function(o){var k=statusKey(o.data);counts[k]=(counts[k]||0)+1;});
   var delivered=biz.filter(function(o){return statusKey(o.data)===DELIVERED;});
-  var revenue=0,owedDad=0,profit=0,pendingProfit=0,missing=0;
-  delivered.forEach(function(o){var d=o.data;revenue+=orderTotal(d);var c=effectiveCost(d);if(c.complete){owedDad+=c.cost;profit+=(orderTotal(d)-c.cost);if(!settlementDone(d))pendingProfit+=(orderTotal(d)-c.cost);}else missing++;});
+  var revenue=0,owedDad=0,profit=0,pendingProfit=0,missing=0,deliveryTot=0;
+  delivered.forEach(function(o){var d=o.data;revenue+=orderTotal(d);var df=deliveryOf(d);deliveryTot+=df;var c=effectiveCost(d);if(c.complete){owedDad+=c.cost;var pf=orderTotal(d)-df-c.cost;profit+=pf;if(!settlementDone(d))pendingProfit+=pf;}else missing++;});
   var pipeline=biz.filter(function(o){return inSet(["جديد","مؤكد","قيد التحضير"],statusKey(o.data));}).length;
   var toShip=biz.filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;}).length;
   var riskRed=biz.filter(function(o){return riskLevel(o.data)==='red';}).length;
@@ -311,6 +323,7 @@ window.__renderRegistry.dashboard=function(){
   html+=kpi("تم التسليم",fmtNum(delivered.length),"طلبات مسلّمة","bi-check2-circle","#dcfce7","#15803d");
   html+=kpi("إيراد محقّق",fmtMoney(revenue),"من الطلبات المسلّمة","bi-cash-stack","#dcfce7","#15803d");
   html+=kpi("مستحق للوالد",fmtMoney(owedDad),"ثمن الجملة","bi-person-badge","#fef2f2","#b91c1c");
+  html+=kpi("تكلفة التوصيل",fmtMoney(deliveryTot),"تُدفع لشركة التوصيل","bi-truck","#f1f5f9","#475569");
   html+=kpi("ربحك الإجمالي",fmtMoney(profit),"بعد خصم ثمن الوالد","bi-graph-up-arrow","#e0f2fe","#0369a1");
   html+=kpi("ربح غير مُسوّى",fmtMoney(pendingProfit),"بانتظار التسوية","bi-hourglass","#fef3c7","#b45309");
   html+='</div>';
@@ -361,23 +374,26 @@ function renderOrdersTable(){
 }
 
 /* ============ SHIPPING / ECOTRACK ============ */
-function shipProblems(d){var p=[];if(!PHONE_RE.test(String(orderPhone(d))))p.push('رقم هاتف غير صالح');if(!orderWilaya(d))p.push('الولاية ناقصة');if(!orderCommune(d))p.push('البلدية ناقصة');return p;}
+function shipChecks(d,communeOv){var name=customerName(d);var commune=(communeOv||orderCommune(d)||'').trim();var w=orderWilaya(d);var items=[{label:'الاسم',ok:!!name&&name!=='—',req:true},{label:'الهاتف',ok:PHONE_RE.test(String(orderPhone(d))),req:true},{label:'الولاية',ok:!!w&&deliveryFeeFor(w,'office')!=null,req:true},{label:'البلدية',ok:!!commune,req:true},{label:'العنوان',ok:!!String(d.address||'').trim(),req:false},{label:'المبلغ',ok:orderTotal(d)>0,req:true}];var missing=items.filter(function(x){return x.req&&!x.ok;});return {items:items,ok:missing.length===0,missing:missing};}
+function checklistHtml(c){return c.items.map(function(x){var col=x.ok?'#16a34a':(x.req?'#dc2626':'#d97706');var ic=x.ok?'bi-check-circle-fill':(x.req?'bi-x-circle-fill':'bi-exclamation-circle-fill');return '<span style="display:inline-flex;align-items:center;gap:3px;margin:0 4px 3px 0;font-size:.72rem;color:'+col+'"><i class="bi '+ic+'"></i>'+x.label+'</span>';}).join('');}
 window.__renderRegistry.shipping=function(){
   var host=$("sec-shipping");
   var queue=businessOrders().filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;});
   var shipped=businessOrders().filter(function(o){return !!o.data.ecotrackTracking;});
-  var html='<div class="alert alert-info py-2 mb-3" style="font-size:.85rem;"><i class="bi bi-info-circle"></i> الطلبات المؤكدة تظهر هنا. أكمل البيانات الناقصة ثم أرسلها إلى Ecotrack — يُنشأ الطرد ويعود رقم التتبع تلقائياً. لا يمكن شحن نفس الطلب مرتين.</div>';
+  var html='<div class="alert alert-info py-2 mb-3" style="font-size:.85rem;"><i class="bi bi-info-circle"></i> اختر <b>مكتب</b> (Stop Desk) أو <b>منزل</b> لكل طلب — يحدّد سعر التوصيل وطريقة التسليم في Ecotrack. قبل الإرسال يتحقق النظام من كل الحقول المطلوبة (✓/✗) ويمنع الإرسال إذا نقص حقل. لا يمكن شحن نفس الطلب مرتين.</div>';
   html+='<div class="panel mb-3"><h6><i class="bi bi-box-arrow-up"></i> قائمة الشحن ('+fmtNum(queue.length)+')</h6>';
   if(!queue.length)html+='<div class="empty"><i class="bi bi-check2-circle"></i><div class="mt-2">لا توجد طلبات جاهزة للشحن.</div></div>';
-  else{html+='<div class="table-wrap"><table class="tbl"><thead><tr><th>العميل</th><th>الهاتف</th><th>الولاية</th><th>البلدية</th><th>الإجمالي</th><th>التحقق</th><th>إرسال</th></tr></thead><tbody>';
-    queue.forEach(function(o){var d=o.data;var probs=shipProblems(d);var ok=probs.length===0;
+  else{html+='<div class="table-wrap"><table class="tbl"><thead><tr><th>العميل</th><th>الهاتف</th><th>الولاية</th><th>البلدية</th><th>التوصيل</th><th>سعر التوصيل</th><th>المبلغ (المُحصّل)</th><th>التحقق من الحقول</th><th>إرسال</th></tr></thead><tbody>';
+    queue.forEach(function(o){var d=o.data;var dt=guessDeliveryType(d);var c=shipChecks(d);var fee=deliveryOf(d);
       html+='<tr data-id="'+esc(o.id)+'">'
         +'<td>'+esc(customerName(d))+'</td>'
         +'<td dir="ltr" style="font-size:.82rem;">'+esc(orderPhone(d))+'</td>'
         +'<td>'+esc(orderWilaya(d))+'</td>'
-        +'<td>'+(orderCommune(d)?esc(orderCommune(d)):'<input class="form-control form-control-sm ship-commune" placeholder="أدخل البلدية" style="max-width:140px;">')+'</td>'
+        +'<td>'+(orderCommune(d)?esc(orderCommune(d)):'<input class="form-control form-control-sm ship-commune" placeholder="أدخل البلدية" style="max-width:130px;">')+'</td>'
+        +'<td><select class="form-select form-select-sm ship-dt" style="max-width:112px;"><option value="office"'+(dt==='office'?' selected':'')+'>🏢 مكتب</option><option value="home"'+(dt==='home'?' selected':'')+'>🏠 منزل</option></select></td>'
+        +'<td class="ship-fee" style="white-space:nowrap;">'+(fee==null?'<span class="text-muted">؟</span>':esc(fmtMoney(fee)))+'</td>'
         +'<td style="white-space:nowrap;">'+esc(fmtMoney(orderTotal(d)))+'</td>'
-        +'<td>'+(ok?'<span class="val-ok">جاهز</span>':'<span class="val-flag" title="'+esc(probs.join('، '))+'">'+esc(probs.join('، '))+'</span>')+'</td>'
+        +'<td class="ship-check">'+checklistHtml(c)+'</td>'
         +'<td><button class="btn btn-sm btn-brand ship-btn"><i class="bi bi-truck"></i> أرسل</button><div class="ship-msg" style="font-size:.72rem;"></div></td>'
         +'</tr>';});
     html+='</tbody></table></div>';}
@@ -389,15 +405,17 @@ window.__renderRegistry.shipping=function(){
     html+='</tbody></table></div>';}
   html+='</div>';
   host.innerHTML=html;
+  function refreshShipRow(row){var id=row.getAttribute('data-id');var d=getRec(id).data;var sel=row.querySelector('.ship-dt');var dt=sel?sel.value:'office';var ci=row.querySelector('.ship-commune');var commune=ci?(ci.value||'').trim():'';var feeCell=row.querySelector('.ship-fee');var fee=deliveryOf(d);if(feeCell)feeCell.innerHTML=(fee==null?'<span class="text-muted">؟</span>':esc(fmtMoney(fee)));var chk=row.querySelector('.ship-check');if(chk)chk.innerHTML=checklistHtml(shipChecks(d,commune));}
+  var dts=host.querySelectorAll('.ship-dt');for(var k=0;k<dts.length;k++)dts[k].addEventListener('change',function(){refreshShipRow(this.closest('tr'));});
+  var cms=host.querySelectorAll('.ship-commune');for(var m=0;m<cms.length;m++)cms[m].addEventListener('input',function(){refreshShipRow(this.closest('tr'));});
   var btns=host.querySelectorAll('.ship-btn');
   for(var i=0;i<btns.length;i++)btns[i].addEventListener('click',function(){
     var row=this.closest('tr');var id=row.getAttribute('data-id');var ci=row.querySelector('.ship-commune');var commune=ci?(ci.value||'').trim():'';
-    var msg=row.querySelector('.ship-msg');var b=this;var d=getRec(id).data;var probs=shipProblems(d);
-    if(!orderCommune(d)&&!commune){msg.innerHTML='<span class="text-danger">أدخل البلدية أولاً</span>';return;}
-    if(!PHONE_RE.test(String(orderPhone(d)))){msg.innerHTML='<span class="text-danger">رقم هاتف غير صالح — عدّله من صفحة الطلب</span>';return;}
-    if(!orderWilaya(d)){msg.innerHTML='<span class="text-danger">الولاية ناقصة</span>';return;}
+    var sel=row.querySelector('.ship-dt');var dt=sel?sel.value:'office';
+    var msg=row.querySelector('.ship-msg');var b=this;var d=getRec(id).data;var c=shipChecks(d,commune);
+    if(!c.ok){msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}
     b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span>';
-    var ov={};if(commune)ov.commune=commune;
+    var ov={stop_desk:stopDeskFor(dt)};if(commune)ov.commune=commune;
     autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}msg.innerHTML='<span class="text-success">تم ✓ '+esc(data.tracking||'')+'</span>';setTimeout(renderAll,900);}).catch(function(err){b.disabled=false;b.innerHTML='<i class="bi bi-truck"></i> أرسل';msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message))+'</span>';});
   });
 };
@@ -436,7 +454,7 @@ window.__renderRegistry.settlement=function(){
   var host=$("sec-settlement");
   var pool=businessOrders().filter(function(o){return setDeliveredOnly?statusKey(o.data)===DELIVERED:true;});
   var pendingProfit=0,owed=0,missing=0;
-  pool.forEach(function(o){var d=o.data;if(settlementDone(d))return;var c=effectiveCost(d);if(!c.complete){missing++;return;}owed+=c.cost;pendingProfit+=(orderTotal(d)-c.cost);});
+  pool.forEach(function(o){var d=o.data;if(settlementDone(d))return;var c=effectiveCost(d);if(!c.complete){missing++;return;}owed+=c.cost;pendingProfit+=(orderTotal(d)-deliveryOf(d)-c.cost);});
   var rows=pool.filter(function(o){return setPending?!settlementDone(o.data):true;});
   var html='<div class="row g-3 mb-3">'
     +'<div class="col-md-4"><div class="kpi"><div class="label">ربح معلّق (غير مُسوّى)</div><div class="value">'+fmtMoney(pendingProfit)+'</div></div></div>'
@@ -447,12 +465,13 @@ window.__renderRegistry.settlement=function(){
     +'&nbsp;&nbsp;<button id="setD1" class="'+(setDeliveredOnly?'active':'')+'">المسلّمة فقط</button><button id="setD2" class="'+(!setDeliveredOnly?'active':'')+'">كل الحالات</button></div></div>';
   html+='<div class="table-wrap">';
   if(!rows.length)html+='<div class="empty"><i class="bi bi-cash-coin"></i><div class="mt-2">لا توجد طلبات مطابقة.</div></div>';
-  else{html+='<table class="tbl"><thead><tr><th>رقم</th><th>العميل</th><th>المُحصّل</th><th>ثمن الجملة</th><th>هامشك</th><th>الحالة</th><th></th></tr></thead><tbody>';
-    rows.forEach(function(o){var d=o.data;var ec=effectiveCost(d);var margin=ec.complete?orderTotal(d)-ec.cost:null;var settled=settlementDone(d);var costVal=d.wholesaleCost!=null?d.wholesaleCost:(ec.complete?ec.cost:'');
+  else{html+='<table class="tbl"><thead><tr><th>رقم</th><th>العميل</th><th>المُحصّل</th><th>التوصيل</th><th>ثمن الجملة</th><th>هامشك</th><th>الحالة</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(o){var d=o.data;var ec=effectiveCost(d);var settled=settlementDone(d);var costVal=d.wholesaleCost!=null?d.wholesaleCost:(ec.complete?ec.cost:'');var dfee=deliveryOf(d);var margin=ec.complete?orderTotal(d)-dfee-ec.cost:null;
       html+='<tr data-id="'+esc(o.id)+'">'
         +'<td><span class="order-id">'+esc(String(o.id).slice(-6).toUpperCase())+'</span></td>'
         +'<td>'+esc(customerName(d))+'</td>'
         +'<td style="white-space:nowrap;">'+esc(fmtMoney(orderTotal(d)))+'</td>'
+        +'<td style="white-space:nowrap;color:#64748b;font-size:.82rem;">'+(dfee==null?'—':esc(fmtMoney(dfee)))+'</td>'
         +'<td><input type="number" min="0" class="form-control form-control-sm set-cost" style="max-width:120px;" value="'+(costVal!==''?esc(costVal):'')+'" placeholder="'+(ec.complete?'':'أدخل')+'">'+(ec.complete&&!ec.manual?'<div style="font-size:.66rem;color:#6b7280">تلقائي من الكتالوج</div>':'')+'</td>'
         +'<td>'+(margin==null?'<span class="text-muted">؟</span>':'<span class="'+(margin>=0?'money-pos':'money-neg')+'">'+esc(fmtMoney(margin))+'</span>')+'</td>'
         +'<td><span style="background:'+(settled?'#dcfce7;color:#166534':'#fef3c7;color:#92400e')+';padding:2px 8px;border-radius:999px;font-size:.76rem;">'+(settled?'مُسوّى':'معلّق')+'</span></td>'
@@ -523,18 +542,20 @@ window.__renderRegistry.settings=function(){
 };
 
 /* ============ ORDER MODAL ============ */
-function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=orderCost(d);var eff=effectiveCost(d);var profit=eff.complete?orderTotal(d)-eff.cost:null;
+function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=orderCost(d);var eff=effectiveCost(d);var dlv=deliveryOf(d);var profit=eff.complete?orderTotal(d)-dlv-eff.cost:null;
   var statusOpts='';STATUSES.forEach(function(s){statusOpts+='<option value="'+esc(s.key)+'"'+(statusKey(d)===s.key?' selected':'')+'>'+esc(s.key)+'</option>';});
   var prodRows='';ec.lines.forEach(function(l){prodRows+='<div class="prod-line"><div style="flex-grow:1"><div style="font-weight:600;font-size:.88rem">'+esc(l.name)+(l.matched?'':' <span class="chip" style="background:#fef2f2;color:#b91c1c">غير مطابق</span>')+'</div><div style="font-size:.75rem;color:#6b7280">×'+l.qty+' · بيع '+fmtNum(l.sell)+(l.dad!=null?' · جملة '+fmtNum(l.dad):' · جملة ؟')+'</div></div><div style="font-weight:700">'+fmtNum(l.sell*l.qty)+'</div></div>';});
   var notes=Array.isArray(d.adminNotes)?d.adminNotes:[];var notesHtml='';notes.slice().reverse().forEach(function(n){notesHtml+='<div class="note-item">'+esc(n.text)+'<div class="meta">'+esc(n.by||'')+' · '+esc(fmtDate(parseDate(n.at)))+'</div></div>';});
   var phone=orderPhone(d);var wa=intlPhone(phone);var arch=isArchived(d);
-  var shipBlock=d.ecotrackTracking?('<div class="val-ok">مشحون · رقم التتبع: <span dir="ltr">'+esc(d.ecotrackTracking)+'</span></div>'):(inSet(SHIPPABLE_SET,statusKey(d))?'<button class="btn btn-brand btn-sm" id="mShip"><i class="bi bi-truck"></i> أرسل إلى Ecotrack</button> <span id="mShipMsg" style="font-size:.78rem"></span>':'<span class="text-muted" style="font-size:.82rem">أكّد الطلب أولاً ليصبح قابلاً للشحن.</span>');
+  var mdt=guessDeliveryType(d);var mchecks=shipChecks(d);
+  var shipBlock=d.ecotrackTracking?('<div class="val-ok">مشحون · رقم التتبع: <span dir="ltr">'+esc(d.ecotrackTracking)+'</span></div>'):(inSet(SHIPPABLE_SET,statusKey(d))?('<div class="mb-2">'+checklistHtml(mchecks)+'</div><div class="d-flex gap-2 align-items-center flex-wrap"><select id="mShipDt" class="form-select form-select-sm" style="max-width:130px;"><option value="office"'+(mdt==='office'?' selected':'')+'>🏢 مكتب</option><option value="home"'+(mdt==='home'?' selected':'')+'>🏠 منزل</option></select><span id="mShipFee" style="font-size:.8rem;color:#475569"></span><button class="btn btn-brand btn-sm" id="mShip"><i class="bi bi-truck"></i> أرسل إلى Ecotrack</button></div><div id="mShipMsg" style="font-size:.78rem;margin-top:4px"></div>'):'<span class="text-muted" style="font-size:.82rem">أكّد الطلب أولاً ليصبح قابلاً للشحن.</span>');
   var html='<div class="modal-header"><div><h5 class="modal-title">'+esc(customerName(d))+' '+badge(d)+'</h5><div class="order-id">'+esc(id)+'</div></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>'
     +'<div class="modal-body"><div class="row g-3">'
     +'<div class="col-md-7"><div class="panel"><h6>المنتجات</h6>'+(prodRows||'<div class="text-muted">لا منتجات</div>')
       +'<div class="info-row mt-2"><span class="k">الإجمالي المُحصّل</span><span class="v">'+fmtMoney(orderTotal(d))+'</span></div>'
       +'<div class="info-row"><span class="k">ثمن الجملة (والدك)</span><span class="v">'+(eff.complete?fmtMoney(eff.cost)+(eff.manual?' (يدوي)':' (تلقائي)'):'<span class="text-danger">ناقص</span>')+'</span></div>'
       +'<div class="info-row"><span class="k">ربحك</span><span class="v">'+(profit==null?'؟':'<span class="'+(profit>=0?"money-pos":"money-neg")+'">'+fmtMoney(profit)+'</span>')+'</span></div>'
+      +'<div class="info-row"><span class="k">تكلفة التوصيل ('+((guessDeliveryType(d)==='home')?'منزل':'مكتب')+')</span><span class="v">'+fmtMoney(dlv)+' <span style="font-size:.7rem;color:#94a3b8">مضمّنة في المُحصّل — لشركة التوصيل</span></span></div>'
       +'</div>'
       +'<div class="panel mt-3"><h6>الشحن</h6>'+shipBlock+'</div>'
       +'<div class="panel mt-3"><h6>ملاحظات داخلية</h6><div id="mNotes">'+(notesHtml||'<div class="text-muted" style="font-size:.82rem">لا ملاحظات بعد.</div>')+'</div><div class="input-group mt-2"><input id="mNoteInput" class="form-control" placeholder="أضف ملاحظة (مثال: مزال مربوطناش، معاود نعيط)"><button class="btn btn-outline-secondary" id="mNoteAdd">إضافة</button></div></div>'
@@ -566,7 +587,8 @@ function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=o
   $("mTest").onclick=function(){patchOrder(id,{status:'تجريبي'}).then(function(){orderModal.hide();renderAll();});};
   $("mArch").onclick=function(){patchOrder(id,{archived:!arch}).then(function(){orderModal.hide();renderAll();});};
   var addBtn=$("mNoteAdd");if(addBtn)addBtn.onclick=function(){var inp=$("mNoteInput");var t=(inp.value||'').trim();if(!t)return;var cur=Array.isArray(d.adminNotes)?d.adminNotes.slice():[];cur.push({text:t,at:new Date().toISOString(),by:(auth.currentUser&&auth.currentUser.email)||''});addBtn.disabled=true;patchOrder(id,{adminNotes:cur}).then(function(){openOrder(id);}).catch(function(){addBtn.disabled=false;alert('تعذر حفظ الملاحظة');});};
-  var sb=$("mShip");if(sb)sb.onclick=function(){var msg=$("mShipMsg");var need=!orderCommune(d);var commune='';if(need){commune=prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:');if(!commune)return;}sb.disabled=true;sb.innerHTML='<span class="spinner-border spinner-border-sm"></span>';var ov={};if(commune)ov.commune=commune;autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}renderAll();openOrder(id);}).catch(function(err){sb.disabled=false;sb.innerHTML='<i class="bi bi-truck"></i> أرسل إلى Ecotrack';if(msg)msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message))+'</span>';});};
+  var mdtSel=$("mShipDt");function updModalFee(){var el=$("mShipFee");if(el)el.textContent=('توصيل مدفوع: '+fmtMoney(deliveryOf(d)));}if(mdtSel){updModalFee();}
+  var sb=$("mShip");if(sb)sb.onclick=function(){var msg=$("mShipMsg");var dt=mdtSel?mdtSel.value:'office';var commune=orderCommune(d);if(!commune){commune=(prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:')||'').trim();if(!commune)return;}var c=shipChecks(d,commune);if(!c.ok){if(msg)msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}sb.disabled=true;sb.innerHTML='<span class="spinner-border spinner-border-sm"></span>';var ov={stop_desk:stopDeskFor(dt)};if(commune&&!orderCommune(d))ov.commune=commune;autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}renderAll();openOrder(id);}).catch(function(err){sb.disabled=false;sb.innerHTML='<i class="bi bi-truck"></i> أرسل إلى Ecotrack';if(msg)msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message))+'</span>';});};
 }
 
 /* ============ shared write ============ */
