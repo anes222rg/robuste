@@ -1,613 +1,786 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<title>ROBUSTE · مركز التحكم</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<style>
-  :root{--brand:#ff6b00;--brand-dark:#e85d00;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--bg:#f4f5f7;--sidebar:#0f172a;--sidebar-2:#1e293b;}
-  *{box-sizing:border-box;}
-  body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);margin:0;}
-  a{text-decoration:none;}
-  /* login */
-  #loginGate{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;z-index:3000;}
-  #loginGate .card{width:min(92vw,400px);border:none;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
-  #loginGate .brand-dot{width:54px;height:54px;border-radius:14px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.6rem;}
-  .btn-brand{background:var(--brand);border-color:var(--brand);color:#fff;}
-  .btn-brand:hover{background:var(--brand-dark);border-color:var(--brand-dark);color:#fff;}
-  /* layout */
-  #app{display:none;}
-  .layout{display:flex;min-height:100vh;}
-  .sidebar{width:250px;background:var(--sidebar);color:#cbd5e1;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
-  .sidebar .brand{padding:20px 20px 14px;font-weight:800;font-size:1.25rem;color:#fff;letter-spacing:.5px;display:flex;align-items:center;gap:10px;}
-  .sidebar .brand .dot{width:34px;height:34px;border-radius:9px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;}
-  .sidebar .brand small{display:block;font-size:.62rem;color:#64748b;font-weight:600;letter-spacing:1px;}
-  .nav-item2{display:flex;align-items:center;gap:12px;padding:11px 20px;color:#94a3b8;font-weight:600;font-size:.92rem;cursor:pointer;border-right:3px solid transparent;transition:all .15s;}
-  .nav-item2 i{font-size:1.15rem;width:22px;text-align:center;}
-  .nav-item2:hover{background:var(--sidebar-2);color:#e2e8f0;}
-  .nav-item2.active{background:var(--sidebar-2);color:#fff;border-right-color:var(--brand);}
-  .nav-item2 .badge2{margin-right:auto;background:var(--brand);color:#fff;font-size:.68rem;padding:.15em .5em;border-radius:999px;min-width:20px;text-align:center;}
-  .sidebar .foot{margin-top:auto;padding:16px 20px;border-top:1px solid #1e293b;font-size:.8rem;color:#64748b;}
-  .main{flex-grow:1;min-width:0;}
-  .topbar{background:#fff;border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:900;}
-  .topbar .page-title{font-weight:800;font-size:1.15rem;}
-  .topbar .who{margin-right:auto;font-size:.85rem;color:var(--muted);}
-  .content{padding:22px 24px 60px;}
-  .section{display:none;}
-  .section.active{display:block;animation:fade .2s ease;}
-  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
-  /* cards */
-  .kpi{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 17px;height:100%;transition:transform .15s,box-shadow .15s;}
-  .kpi:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.06);}
-  .kpi .label{color:var(--muted);font-size:.78rem;font-weight:600;}
-  .kpi .value{font-size:1.5rem;font-weight:800;margin-top:3px;}
-  .kpi .sub{font-size:.7rem;color:var(--muted);margin-top:2px;}
-  .kpi .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px 20px;}
-  .panel h6{font-weight:800;margin-bottom:14px;}
-  .table-wrap{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:auto;}
-  table.tbl{width:100%;border-collapse:collapse;min-width:760px;}
-  table.tbl th{background:#fafbfc;font-size:.77rem;color:var(--muted);text-align:right;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;}
-  table.tbl td{padding:9px 12px;border-bottom:1px solid #f1f2f4;font-size:.86rem;vertical-align:middle;}
-  table.tbl tbody tr:hover{background:#fff8f2;}
-  .order-id{font-family:monospace;font-size:.76rem;color:var(--muted);}
-  .badge-status{font-size:.74rem;font-weight:700;padding:.35em .7em;border-radius:999px;white-space:nowrap;}
-  .s-new{background:#e0f2fe;color:#0369a1;}.s-confirmed{background:#ede9fe;color:#6d28d9;}.s-preparing{background:#fef3c7;color:#b45309;}
-  .s-delivered{background:#dcfce7;color:#15803d;}.s-noanswer{background:#f3f4f6;color:#4b5563;}.s-cancelled{background:#fee2e2;color:#b91c1c;}.s-returned{background:#ffe4e6;color:#9f1239;}
-  .s-fake{background:#fae8ff;color:#a21caf;}.s-test{background:#e2e8f0;color:#475569;}
-  .risk-dot{display:inline-block;width:10px;height:10px;border-radius:50%;}
-  .rd-green{background:#22c55e;}.rd-yellow{background:#f59e0b;}.rd-red{background:#ef4444;}
-  .chip{font-size:.68rem;background:#f1f5f9;color:#475569;padding:.2em .55em;border-radius:6px;white-space:nowrap;}
-  .money-pos{color:#15803d;font-weight:700;}.money-neg{color:#b91c1c;font-weight:700;}
-  .mini-btn{--bs-btn-padding-y:.2rem;--bs-btn-padding-x:.5rem;--bs-btn-font-size:.74rem;}
-  .empty{text-align:center;padding:50px 20px;color:var(--muted);}.empty i{font-size:2.6rem;opacity:.4;}
-  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
-  .bar-label{width:110px;font-size:.76rem;color:var(--muted);flex-shrink:0;}
-  .bar-track{flex-grow:1;background:#f1f2f4;border-radius:8px;height:20px;overflow:hidden;}
-  .bar-fill{height:100%;border-radius:8px;min-width:2px;transition:width .45s;}
-  .bar-val{font-size:.78rem;font-weight:700;width:54px;text-align:left;flex-shrink:0;}
-  .val-flag{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:8px;padding:2px 8px;font-size:.72rem;}
-  .val-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:8px;padding:2px 8px;font-size:.72rem;}
-  .info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #eef0f2;font-size:.9rem;gap:10px;}
-  .info-row:last-child{border-bottom:none;}.info-row .k{color:var(--muted);}.info-row .v{font-weight:700;text-align:left;}
-  .prod-line{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f2f4;}
-  .note-item{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:.85rem;margin-bottom:7px;}
-  .note-item .meta{font-size:.68rem;color:var(--muted);margin-top:3px;}
-  .seg{display:inline-flex;background:#f1f2f4;border-radius:10px;padding:3px;flex-wrap:wrap;}
-  .seg button{border:none;background:transparent;font-size:.8rem;font-weight:700;color:var(--muted);padding:6px 12px;border-radius:8px;}
-  .seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12);}
-  .mobile-toggle{display:none;}
-  @media(max-width:900px){.sidebar{position:fixed;z-index:1200;right:0;transform:translateX(100%);transition:transform .2s;}.sidebar.open{transform:none;}.mobile-toggle{display:inline-flex;}}
-</style>
-</head>
-<body>
+/* ROBUSTE — Cloudflare Worker (Phase 3 + Tracking).
+ * Two responsibilities:
+ *   1) POST /            → secure order INTAKE (IP/geo, risk, Firestore write, Telegram/EmailJS)
+ *   2) GET  /track?phone → customer ORDER TRACKING (find orders by phone, read LIVE EcoTrack status)
+ *
+ * All secrets live here, never in the browser.
+ *
+ * Worker secrets / vars to set (`wrangler secret put` or dashboard):
+ *   FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+ *   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+ *   EMAILJS_SERVICE, EMAILJS_TEMPLATE, EMAILJS_PUBLIC_KEY, EMAILJS_PRIVATE_KEY (optional)
+ *   ALLOWED_ORIGIN   e.g. https://www.robustedz.store   (NEVER leave as "*" in prod)
+ *   ECOTRACK_API_URL e.g. https://assildelivery.ecotrack.dz
+ *   ECOTRACK_TOKEN   the API STANDARD token from the EcoTrack dashboard
+ *   ADMIN_KEY        long random string; gate for the /admin/* routes (you only)
+ */
 
-<!-- LOGIN -->
-<div id="loginGate">
-  <div class="card p-4">
-    <div class="d-flex align-items-center gap-3 mb-3">
-      <div class="brand-dot"><i class="bi bi-shield-lock"></i></div>
-      <div><div class="fw-bold" style="font-size:1.1rem;">مركز تحكم ROBUSTE</div><div class="text-muted" style="font-size:.82rem;">دخول الإدارة</div></div>
-    </div>
-    <label class="form-label fw-semibold">البريد الإلكتروني</label>
-    <input type="email" id="adminEmail" class="form-control form-control-lg mb-2" dir="ltr" placeholder="admin@example.com" autocomplete="username">
-    <label class="form-label fw-semibold">كلمة المرور</label>
-    <input type="password" id="adminPass" class="form-control form-control-lg" placeholder="........" autocomplete="current-password">
-    <div id="loginError" class="text-danger mt-2" style="font-size:.85rem;display:none;"></div>
-    <button id="loginBtn" class="btn btn-brand btn-lg w-100 mt-3"><i class="bi bi-box-arrow-in-left"></i> دخول</button>
-  </div>
-</div>
+const PHONE_RE = /^0[5-7][0-9]{8}$/;
 
-<!-- APP -->
-<div id="app">
-  <div class="layout">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand"><span class="dot"><i class="bi bi-box-seam"></i></span><div>ROBUSTE<small>ADMIN CONTROL</small></div></div>
-      <nav id="navMenu">
-        <div class="nav-item2 active" data-sec="dashboard"><i class="bi bi-speedometer2"></i> لوحة القيادة</div>
-        <div class="nav-item2" data-sec="orders"><i class="bi bi-receipt"></i> الطلبات <span class="badge2" id="navOrders">0</span></div>
-        <div class="nav-item2" data-sec="shipping"><i class="bi bi-truck"></i> الشحن / Ecotrack <span class="badge2" id="navShip">0</span></div>
-        <div class="nav-item2" data-sec="products"><i class="bi bi-tags"></i> المنتجات والأسعار</div>
-        <div class="nav-item2" data-sec="settlement"><i class="bi bi-cash-coin"></i> تسوية الوالد</div>
-        <div class="nav-item2" data-sec="fake"><i class="bi bi-shield-exclamation"></i> طلبات وهمية / تجريبية <span class="badge2" id="navFake">0</span></div>
-        <div class="nav-item2" data-sec="settings"><i class="bi bi-gear"></i> الإعدادات</div>
-      </nav>
-      <div class="foot">ROBUSTE EL EULMA<br><span id="footWho"></span></div>
-    </aside>
-    <div class="main">
-      <div class="topbar">
-        <button class="btn btn-light mobile-toggle" id="menuToggle"><i class="bi bi-list"></i></button>
-        <div class="page-title" id="pageTitle">لوحة القيادة</div>
-        <div class="who"><i class="bi bi-person-circle"></i> <span id="adminWho"></span></div>
-        <button class="btn btn-sm btn-outline-secondary" id="refreshBtn"><i class="bi bi-arrow-clockwise"></i></button>
-        <button class="btn btn-sm btn-outline-danger" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> خروج</button>
-      </div>
-      <div class="content" id="content">
-        <div class="spin-wrap text-center text-muted" id="bootSpin" style="padding:70px;"><div class="spinner-border text-warning"></div><div class="mt-2">جاري التحميل...</div></div>
-        <div class="section active" id="sec-dashboard"></div>
-        <div class="section" id="sec-orders"></div>
-        <div class="section" id="sec-shipping"></div>
-        <div class="section" id="sec-products"></div>
-        <div class="section" id="sec-settlement"></div>
-        <div class="section" id="sec-fake"></div>
-        <div class="section" id="sec-settings"></div>
-      </div>
-    </div>
-  </div>
-</div>
+export default {
+  async fetch(request, env, ctx) {
+    const origin = env.ALLOWED_ORIGIN || "*";
+    const cors = {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, Authorization"
+    };
+    if (request.method === "OPTIONS") return new Response(null, { headers: cors });
 
-<!-- ORDER MODAL -->
-<div class="modal fade" id="orderModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content" id="orderModalContent"></div></div></div>
+    const url = new URL(request.url);
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-(function(){
-'use strict';
+    // ---------- Customer order tracking (read-only, phone lookup) ----------
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/track")) {
+      return handleTrack(url, env, cors);
+    }
 
-var firebaseConfig = {
-  apiKey: "AIzaSyBTrnKCYOtfSSDYtmVQbzP2HcwgkLT565Y",
-  authDomain: "robuste-c8e0f.firebaseapp.com",
-  projectId: "robuste-c8e0f",
-  storageBucket: "robuste-c8e0f.appspot.com",
-  messagingSenderId: "975609984963",
-  appId: "1:975609984963:web:a481efb493a88d7bc7af76"
+    // ---------- Admin (protected by X-Admin-Key) ----------
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/admin/orders")) {
+      return handleAdminOrders(url, request, env, cors);
+    }
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/set-tracking")) {
+      return handleAdminSetTracking(request, env, cors);
+    }
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/confirm-ship")) {
+      return handleAdminConfirmShip(request, env, cors);
+    }
+
+    if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
+    return handleIntake(request, env, ctx, cors);
+  }
 };
-var WORKER_URL = (window.ROBUSTE_WORKER_URL || "https://robuste.aneslaidaoui06.workers.dev").replace(/\/+$/,"");
 
-/* ===== Product catalog: siteId + dad code + sell price + WHOLESALE (dad) price ===== */
-/* dad = null means wholesale price not provided yet (editable in Products tab). */
-var PRODUCTS = [
-  {id:1,title:"SECHE CHEVEUX PRO2000",sell:4200,cat:"coiffure",stock:15,code:"SC",dad:3200},
-  {id:2,title:"LISSEUR CHEVEUX SW 207",sell:4100,cat:"coiffure",stock:12,code:"LCSW",dad:2600},
-  {id:3,title:"LISSEUR CHEVEUX BROSSE LCB200N",sell:3400,cat:"coiffure",stock:8,code:"LCB200N",dad:2600},
-  {id:4,title:"FRITEUSE DF 900 W",sell:5950,cat:"cuisine",stock:10,code:"DF09",dad:4600},
-  {id:5,title:"EPILATEUR SES 3",sell:3900,cat:"beauté",stock:7,code:"SES3",dad:3000},
-  {id:6,title:"BROSSE NETTOYANTE VISAGE BNV 4",sell:2400,cat:"beauté",stock:15,code:"BNV4",dad:1900},
-  {id:7,title:"MINI HACHOIR EN VERRE MH 400",sell:5900,cat:"cuisine",stock:9,code:"",dad:null},
-  {id:8,title:"HACHOIR LEGUMES 4 LAMES EN VERRE",sell:6000,cat:"cuisine",stock:6,code:"",dad:null},
-  {id:9,title:"HACHOIR HN19 350 W",sell:4300,cat:"cuisine",stock:11,code:"",dad:null},
-  {id:10,title:"HACHOIRE LEGUME 400 W HLS 350",sell:4300,cat:"cuisine",stock:8,code:"HL350",dad:3300},
-  {id:11,title:"PETRIN 1000 W PK2",sell:16900,cat:"cuisine",stock:4,code:"PK2",dad:13200},
-  {id:12,title:"HACHOIR 400 W 2L DAILY",sell:6600,cat:"cuisine",stock:13,code:"",dad:null},
-  {id:13,title:"Fer à repasser Robuste",sell:4600,cat:"maison",stock:18,code:"FC2000",dad:3600},
-  {id:14,title:"ROBOT 26F",sell:14200,cat:"cuisine",stock:5,code:"R26",dad:10900},
-  {id:15,title:"CENTRALE VAPEUR SMART 2400W",sell:12600,cat:"maison",stock:7,code:"",dad:null},
-  {id:16,title:"ASPIRATEUR SOUFFLEUR A MAIN AM80",sell:5100,cat:"jardin",stock:14,code:"ASP-SOUF-MAIN",dad:3500},
-  {id:17,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22900,cat:"maison",stock:3,code:"A00000455",dad:19200},
-  {id:19,title:"CAFETIERE ELECTRIQUE CBL15B",sell:15300,cat:"café",stock:9,code:"CFTRE",dad:11800},
-  {id:20,title:"CAFETIERE ELECTRIQUE C850",sell:14300,cat:"café",stock:11,code:"CFE1.8",dad:11000},
-  {id:21,title:"CAFETIERE ELECTRIQUE A BRAS MOKA 850 W",sell:14300,cat:"café",stock:6,code:"A00000362",dad:11000},
-  {id:22,title:"CAFETIERE ELECTRIQUE A BRAS ROMA 1000 W",sell:16600,cat:"café",stock:4,code:"A00000363",dad:12800},
-  {id:23,title:"FRITEUSE ELECTRIQUE SANS HUILE 3.2L",sell:13000,cat:"cuisine",stock:8,code:"",dad:null},
-  {id:24,title:"FRITEUSE ELECTRIQUE SANS HUILE MAX 10L",sell:24000,cat:"cuisine",stock:3,code:"",dad:null},
-  {id:29,title:"FRITEUSE ELECTRIQUE SANS HUILE 5.7 TACTILE",sell:15000,cat:"cuisine",stock:7,code:"",dad:null},
-  {id:25,title:"PETRIN PROMAX 8L",sell:20500,cat:"cuisine",stock:2,code:"",dad:null},
-  {id:26,title:"CAFETIERE A CAPSULES AUTO ITALIA",sell:18900,cat:"café",stock:10,code:"",dad:null},
-  {id:27,title:"PLANCHE MODERNE",sell:2900,cat:"cuisine",stock:25,code:"",dad:null},
-  {id:28,title:"PANINEUSE 2000W",sell:14500,cat:"cuisine",stock:6,code:"",dad:null},
-  {id:100,title:"Defroisseur Vapeur",sell:6600,cat:"maison",stock:15,code:"A00000323",dad:5200},
-  {id:101,title:"ASPIRATEUR SOUFFLEUR A MAIN",sell:5100,cat:"maison",stock:8,code:"ASP-SOUF-MAIN",dad:3500},
-  {id:102,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22900,cat:"maison",stock:5,code:"A00000455",dad:19200},
-  {id:103,title:"ROBUSTE PANINEUSE ET GRILL 1000W",sell:6900,cat:"cuisine",stock:10,code:"",dad:null},
-  {id:104,title:"Autocuiseur & Marmite 2 en 1 – 6 litres",sell:12500,cat:"cuisine",stock:8,code:"A00000336",dad:10600},
-  {id:105,title:"ROBO 26F",sell:15900,cat:"cuisine",stock:5,code:"R26",dad:10900}
-];
-/* Wholesale items from dad's list not yet linked to a store product (kept so nothing is lost). */
-var UNLINKED_DAD = [
-  {code:"A00000458",name:"AIRFRYER 8 L AF8",dad:13200},
-  {code:"A00000450",name:"BLENDER BH550 INCASSABLE",dad:3900},
-  {code:"A00000470",name:"MIXEUR INOX 600W",dad:3800},
-  {code:"BI250",name:"BATTEUR INOX BI 250",dad:3600},
-  {code:"A00000471",name:"PRESSE AGRUMES MAXVIT600",dad:2200},
-  {code:"A00000366",name:"GRILLADE ELECTRIQUE M/M TASTY",dad:4300},
-  {code:"25F",name:"ROBOT MULTI FONCTION 25F",dad:10300},
-  {code:"R3FVC",name:"RECHAUD 3 FEUX VETRO CERAMIQUE",dad:7600},
-  {code:"BLIX",name:"BOUILLOIRE INOX WK-8239S",dad:4000}
-];
+/* =========================================================================
+   TRACKING  —  GET /track?phone=0XXXXXXXXX
+   Privacy note: phone-only lookup means anyone with a valid phone can see
+   that order. We therefore return MINIMAL, sanitized data (no full address,
+   no email, first name only) and the front-end is rate-limited at the edge.
+   ========================================================================= */
+async function handleTrack(url, env, cors) {
+  const phone = (url.searchParams.get("phone") || "").trim();
+  if (!PHONE_RE.test(phone)) return json({ error: "invalid_phone" }, 400, cors);
 
-var STATUSES = [
-  {key:"جديد",css:"s-new",color:"#0ea5e9"},
-  {key:"مؤكد",css:"s-confirmed",color:"#8b5cf6"},
-  {key:"قيد التحضير",css:"s-preparing",color:"#f59e0b"},
-  {key:"تم التسليم",css:"s-delivered",color:"#22c55e"},
-  {key:"لم يرد",css:"s-noanswer",color:"#9ca3af"},
-  {key:"ملغى",css:"s-cancelled",color:"#ef4444"},
-  {key:"مرتجع",css:"s-returned",color:"#be123c"},
-  {key:"وهمي",css:"s-fake",color:"#a21caf"},
-  {key:"تجريبي",css:"s-test",color:"#64748b"}
-];
-var DEFAULT_STATUS="جديد";
-var CONFIRMED_SET=["مؤكد","قيد التحضير","تم التسليم"];
-var SHIPPABLE_SET=["مؤكد","قيد التحضير"];
-var EXCLUDE_STATUS=["وهمي","تجريبي"];
-var DELIVERED="تم التسليم";
-var PHONE_RE=/^0[5-7][0-9]{8}$/;
-function inSet(s,k){return s.indexOf(k)!==-1;}
+  let docs = [];
+  try { docs = await ordersByPhone(env, phone); }
+  catch (e) { return json({ error: "lookup_failed", detail: String(e) }, 500, cors); }
 
-/* ===== state ===== */
-var auth=null,db=null,allOrders=[],ordersLoaded=false,section="dashboard",costOverrides={},costSource="local",orderModal=null;
+  if (!docs.length) return json({ orders: [] }, 200, cors);
 
-/* ===== helpers ===== */
-function $(id){return document.getElementById(id);}
-function esc(v){if(v==null)return"";return String(v).replace(/[&<>\"']/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"})[c];});}
-function fmtMoney(n){var x=Number(n);if(!isFinite(x))x=0;return x.toLocaleString('ar-DZ')+" د.ج";}
-function fmtNum(n){var x=Number(n)||0;return x.toLocaleString('ar-DZ');}
-function pct(a,b){if(!b)return"0%";return Math.round((a/b)*100)+"%";}
-function parseDate(ts){if(!ts)return null;try{if(typeof ts==='string'){var d=new Date(ts);return isNaN(d.getTime())?null:d;}if(typeof ts==='object'){if(typeof ts.toDate==='function')return ts.toDate();if(typeof ts.seconds==='number')return new Date(ts.seconds*1000);}}catch(e){}return null;}
-function fmtDate(d){if(!d)return"—";try{return d.toLocaleString('ar-DZ',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(e){return d.toISOString();}}
-function orderDate(d){return parseDate(d&&d.createdAt)||parseDate(d&&d.timestamp);}
-function customerName(d){return d.customer||d.customerName||d.fullName||d.name||"—";}
-function orderPhone(d){return d.phone||d.telephone||"";}
-function orderWilaya(d){return d.wilaya||"";}
-function orderCommune(d){return d.commune||d.baladiya||d.municipality||"";}
-function orderTotal(d){if(d.totalPrice!=null)return Number(d.totalPrice)||0;if(d.total!=null)return Number(d.total)||0;var a=Array.isArray(d.products)?d.products:[];var t=0;for(var i=0;i<a.length;i++)t+=(Number(a[i].price)||0)*(Number(a[i].quantity)||0);return t;}
-function riskLevel(d){return (d.risk&&d.risk.level)||"green";}
-function isArchived(d){return d&&d.archived===true;}
-function statusKey(d){var s=(d.status==null||String(d.status).trim()==="")?DEFAULT_STATUS:String(d.status).trim();return s;}
-function statusMeta(raw){var s=(raw==null||String(raw).trim()==="")?DEFAULT_STATUS:String(raw).trim();for(var i=0;i<STATUSES.length;i++)if(STATUSES[i].key===s)return STATUSES[i];return {key:s,css:"s-new",color:"#0ea5e9"};}
-function isExcluded(d){return isArchived(d)||inSet(EXCLUDE_STATUS,statusKey(d));}
-function intlPhone(p){var s=String(p||"").replace(/[^0-9]/g,"");if(s.indexOf("0")===0)s="213"+s.slice(1);return s;}
-function badge(d){var m=statusMeta(statusKey(d));return '<span class="badge-status '+m.css+'">'+esc(m.key)+'</span>';}
-function riskDot(d){var l=riskLevel(d);var c=l==='red'?'rd-red':l==='yellow'?'rd-yellow':'rd-green';return '<span class="risk-dot '+c+'" title="'+esc(l)+'"></span>';}
+  // Collect tracking numbers that exist, fetch their live EcoTrack status in one call.
+  const codes = docs.map(d => d.ecotrackTracking).filter(Boolean);
+  const wantDebug = url.searchParams.get("debug") === "1";
+  const diag = wantDebug ? { attempts: [] } : null;
+  let live = {};
+  if (codes.length) { try { live = await ecotrackTrackings(env, codes, diag); } catch (e) { if (diag) diag.fatal = String(e); live = {}; } }
 
-/* ===== product cost matching ===== */
-function normName(s){return String(s||"").toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();}
-var _byId={},_byName={};
-PRODUCTS.forEach(function(p){_byId[p.id]=p;_byName[normName(p.title)]=p;});
-function catalogById(id){if(id==null)return null;return _byId[id]||_byId[Number(id)]||null;}
-function catalogByName(name){var k=normName(name);if(_byName[k])return _byName[k];var best=null,bs=0;PRODUCTS.forEach(function(p){var a=normName(p.title).split(' '),b=k.split(' ');var setB={};b.forEach(function(w){setB[w]=1;});var ov=0;a.forEach(function(w){if(setB[w])ov++;});var sc=ov/Math.max(1,Math.max(a.length,b.length));if(sc>bs){bs=sc;best=p;}});return bs>=0.6?best:null;}
-function dadPrice(p){if(!p)return null;if(costOverrides[p.id]!=null)return Number(costOverrides[p.id]);return p.dad;}
-function orderCost(d){var a=Array.isArray(d.products)?d.products:[];var cost=0,complete=true,lines=[];a.forEach(function(l){var qty=Number(l.quantity)||1;var p=catalogById(l.id)||catalogByName(l.name);var dp=p?dadPrice(p):null;if(dp==null)complete=false;else cost+=dp*qty;lines.push({name:l.name||(p&&p.title)||"—",qty:qty,sell:Number(l.price)||(p&&p.sell)||0,dad:dp,matched:!!p});});return {cost:cost,complete:complete&&a.length>0,lines:lines};}
-function effectiveCost(d){if(d.wholesaleCost!=null&&isFinite(Number(d.wholesaleCost)))return {cost:Number(d.wholesaleCost),complete:true,manual:true};var c=orderCost(d);return {cost:c.cost,complete:c.complete,manual:false};}
-function orderProfit(d){var c=effectiveCost(d);if(!c.complete)return null;return orderTotal(d)-deliveryOf(d)-c.cost;}
-function settlementDone(d){return d.settlementStatus==='settled';}
-/* ===== delivery cost (wilaya -> [home, office]) — same table as the storefront ===== */
-var DELIVERY_FEES={"أدرار":[1200,600],"الشلف":[700,400],"الأغواط":[800,500],"أم البواقي":[700,400],"باتنة":[700,400],"بجاية":[650,400],"بسكرة":[800,470],"بشار":[1200,650],"البليدة":[650,350],"البويرة":[650,400],"تمنراست":[1600,800],"تبسة":[750,400],"تلمسان":[750,400],"تيارت":[750,400],"تيزي وزو":[650,400],"الجزائر":[500,350],"الجلفة":[800,470],"جيجل":[700,400],"سطيف":[500,350],"سعيدة":[750,400],"سكيكدة":[700,400],"سيدي بلعباس":[700,400],"عنابة":[650,400],"قالمة":[700,400],"قسنطينة":[650,400],"المدية":[700,400],"مستغانم":[700,400],"المسيلة":[700,400],"معسكر":[700,400],"ورقلة":[800,500],"وهران":[650,400],"البيض":[950,600],"إليزي":[1600,800],"برج بوعريريج":[650,400],"بومرداس":[600,400],"الطارف":[700,400],"تيندوف":[1200,600],"تيسمسيلت":[700,400],"الوادي":[800,500],"خنشلة":[750,400],"سوق أهراس":[750,400],"تيبازة":[650,400],"ميلة":[650,400],"عين الدفلى":[650,400],"النعامة":[900,600],"عين تموشنت":[700,400],"غرداية":[900,500],"غليزان":[700,400],"تيميمون":[1300,650],"أولاد جلال":[900,550],"بني عباس":[1300,650],"عين صالح":[1300,700],"توقرت":[850,600],"المغير":[850,null],"المنيعة":[900,500]};
-function normWil(s){var x=String(s||'').trim();x=x.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/^ال/,'').replace(/\s+/g,'');return x;}
-var _feeByNorm={};Object.keys(DELIVERY_FEES).forEach(function(k){_feeByNorm[normWil(k)]=DELIVERY_FEES[k];});
-function deliveryFeeFor(w,t){var f=DELIVERY_FEES[String(w||'').trim()]||_feeByNorm[normWil(w)];if(!f)return null;var home=f[0],office=f[1];if(t==='home')return home;return (office==null?home:office);}
-function deliveryTypeOf(d){var t=String((d&&(d.deliveryType||d.delivery_type||d.livraison))||'').toLowerCase();if(t.indexOf('home')!==-1||t.indexOf('منزل')!==-1||t.indexOf('domicile')!==-1)return 'home';return 'office';}
-function deliveryCostOf(d,tOverride){return deliveryFeeFor(orderWilaya(d),tOverride||deliveryTypeOf(d));}
-function stopDeskFor(t){return t==='home'?0:1;}
-/* delivery the customer ACTUALLY paid = total − product subtotal (total already includes delivery) */
-function productSubtotal(d){var a=Array.isArray(d.products)?d.products:[];var t=0;for(var i=0;i<a.length;i++)t+=(Number(a[i].price)||0)*(Number(a[i].quantity)||0);return t;}
-function deliveryOf(d){var tot=orderTotal(d);var sub=productSubtotal(d);if(sub>0&&tot>=sub)return tot-sub;var f=deliveryCostOf(d);return f==null?0:f;}
-function guessDeliveryType(d){var w=orderWilaya(d);var f=DELIVERY_FEES[String(w||'').trim()]||_feeByNorm[normWil(w)];var dv=deliveryOf(d);if(f){if(f[1]!=null&&dv===f[1])return 'office';if(dv===f[0])return 'home';}return deliveryTypeOf(d);}
-
-/* ===== firebase ===== */
-function initFirebase(){if(typeof firebase==='undefined'||!firebase.initializeApp){showLoginError("تعذر تحميل Firebase.");return false;}try{if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();return true;}catch(e){showLoginError("خطأ في تهيئة Firebase.");return false;}}
-function showLoginError(m){var el=$("loginError");el.innerHTML='<i class="bi bi-exclamation-circle"></i> '+esc(m);el.style.display='block';}
-function tryLogin(){if(!auth){if(!initFirebase())return;}var email=($("adminEmail").value||"").trim(),pass=$("adminPass").value;if(!email||!pass){showLoginError("أدخل البريد وكلمة المرور.");return;}$("loginError").style.display='none';var b=$("loginBtn");b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span> جاري...';auth.signInWithEmailAndPassword(email,pass).catch(function(err){var map={'auth/invalid-email':"البريد غير صالح.",'auth/user-not-found':"لا يوجد حساب.",'auth/wrong-password':"كلمة المرور غير صحيحة.",'auth/invalid-credential':"بيانات الدخول غير صحيحة.",'auth/too-many-requests':"محاولات كثيرة."};showLoginError(map[err&&err.code]||"تعذر تسجيل الدخول.");}).finally(function(){b.disabled=false;b.innerHTML='<i class="bi bi-box-arrow-in-left"></i> دخول';});}
-function logout(){if(auth)auth.signOut();}
-function onAuth(user){if(user){$("loginGate").style.display='none';$("app").style.display='block';$("adminWho").textContent=user.email||'';$("footWho").textContent=user.email||'';if(!ordersLoaded){loadCostOverrides().then(loadOrders);}}else{ordersLoaded=false;$("app").style.display='none';$("loginGate").style.display='flex';var p=$("adminPass");if(p)p.value='';}}
-
-/* ===== cost overrides (shared via Firestore config/productCosts, fallback localStorage) ===== */
-function loadCostOverrides(){return db.collection('config').doc('productCosts').get().then(function(doc){costOverrides=(doc.exists&&doc.data()&&doc.data().map)||{};costSource="cloud";}).catch(function(){try{costOverrides=JSON.parse(localStorage.getItem('robuste_costs')||'{}');}catch(e){costOverrides={};}costSource="local";});}
-function saveCostOverride(id,val){costOverrides[id]=val;if(costSource==="cloud"){return db.collection('config').doc('productCosts').set({map:costOverrides,updatedAt:new Date().toISOString()},{merge:true}).catch(function(){costSource="local";localStorage.setItem('robuste_costs',JSON.stringify(costOverrides));});}else{localStorage.setItem('robuste_costs',JSON.stringify(costOverrides));return Promise.resolve();}}
-
-/* ===== load orders ===== */
-function loadOrders(){$("bootSpin").style.display='block';db.collection('orders').get().then(function(snap){ordersLoaded=true;allOrders=[];snap.forEach(function(doc){allOrders.push({id:doc.id,data:doc.data()||{}});});allOrders.sort(function(a,b){var da=orderDate(a.data),dbb=orderDate(b.data);if(da&&dbb)return dbb-da;if(da)return -1;if(dbb)return 1;return 0;});$("bootSpin").style.display='none';renderAll();}).catch(function(err){$("bootSpin").style.display='none';$("sec-"+section).innerHTML='<div class="empty"><i class="bi bi-exclamation-triangle"></i><div class="mt-3 fw-semibold">'+((err&&err.code==='permission-denied')?"لا توجد صلاحية لقراءة الطلبات. تأكد من قواعد Firestore.":"تعذر تحميل الطلبات.")+'</div></div>';});}
-function getRec(id){for(var i=0;i<allOrders.length;i++)if(allOrders[i].id===id)return allOrders[i];return null;}
-function businessOrders(){return allOrders.filter(function(o){return !isExcluded(o.data);});}
-
-window.__ROBUSTE_ADMIN={PRODUCTS:PRODUCTS,UNLINKED_DAD:UNLINKED_DAD};
-
-/* renderAll + section renderers are defined below */
-window.__renderRegistry={};
-function renderAll(){updateBadges();var r=window.__renderRegistry[section];if(r)r();}
-function updateBadges(){var biz=businessOrders();$("navOrders").textContent=fmtNum(biz.length);var ship=biz.filter(function(o){var d=o.data;return inSet(SHIPPABLE_SET,statusKey(d))&&!d.ecotrackTracking;}).length;$("navShip").textContent=fmtNum(ship);var fake=allOrders.filter(function(o){return inSet(EXCLUDE_STATUS,statusKey(o.data))||isArchived(o.data);}).length;$("navFake").textContent=fmtNum(fake);}
-
-function showSection(name){section=name;var items=document.querySelectorAll('.nav-item2');for(var i=0;i<items.length;i++)items[i].classList.toggle('active',items[i].getAttribute('data-sec')===name);var secs=document.querySelectorAll('.section');for(var j=0;j<secs.length;j++)secs[j].classList.remove('active');var el=$("sec-"+name);if(el)el.classList.add('active');var titles={dashboard:"لوحة القيادة",orders:"الطلبات",shipping:"الشحن / Ecotrack",products:"المنتجات والأسعار",settlement:"تسوية الوالد",fake:"طلبات وهمية / تجريبية",settings:"الإعدادات"};$("pageTitle").textContent=titles[name]||"";var sb=$("sidebar");if(sb)sb.classList.remove('open');if(ordersLoaded)renderAll();}
-
-/* ============ DASHBOARD ============ */
-window.__renderRegistry.dashboard=function(){
-  var biz=businessOrders();var host=$("sec-dashboard");
-  var counts={};STATUSES.forEach(function(s){counts[s.key]=0;});biz.forEach(function(o){var k=statusKey(o.data);counts[k]=(counts[k]||0)+1;});
-  var delivered=biz.filter(function(o){return statusKey(o.data)===DELIVERED;});
-  var revenue=0,owedDad=0,profit=0,pendingProfit=0,missing=0,deliveryTot=0;
-  delivered.forEach(function(o){var d=o.data;revenue+=orderTotal(d);var df=deliveryOf(d);deliveryTot+=df;var c=effectiveCost(d);if(c.complete){owedDad+=c.cost;var pf=orderTotal(d)-df-c.cost;profit+=pf;if(!settlementDone(d))pendingProfit+=pf;}else missing++;});
-  var pipeline=biz.filter(function(o){return inSet(["جديد","مؤكد","قيد التحضير"],statusKey(o.data));}).length;
-  var toShip=biz.filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;}).length;
-  var riskRed=biz.filter(function(o){return riskLevel(o.data)==='red';}).length;
-  function kpi(label,val,sub,icon,bg,fg){return '<div class="col-6 col-md-4 col-xl-3"><div class="kpi d-flex gap-3 align-items-start"><div class="ic" style="background:'+bg+';color:'+fg+'"><i class="bi '+icon+'"></i></div><div><div class="label">'+label+'</div><div class="value">'+val+'</div><div class="sub">'+(sub||'')+'</div></div></div></div>';}
-  var html='<div class="row g-3 mb-1">';
-  html+=kpi("إجمالي الطلبات",fmtNum(biz.length),"دون الوهمي/التجريبي","bi-receipt","#e0f2fe","#0369a1");
-  html+=kpi("قيد المعالجة",fmtNum(pipeline),"جديد + مؤكد + تحضير","bi-hourglass-split","#fef3c7","#b45309");
-  html+=kpi("جاهز للشحن",fmtNum(toShip),"بدون رقم تتبع","bi-truck","#ede9fe","#6d28d9");
-  html+=kpi("تم التسليم",fmtNum(delivered.length),"طلبات مسلّمة","bi-check2-circle","#dcfce7","#15803d");
-  html+=kpi("إيراد محقّق",fmtMoney(revenue),"من الطلبات المسلّمة","bi-cash-stack","#dcfce7","#15803d");
-  html+=kpi("مستحق للوالد",fmtMoney(owedDad),"ثمن الجملة","bi-person-badge","#fef2f2","#b91c1c");
-  html+=kpi("تكلفة التوصيل",fmtMoney(deliveryTot),"تُدفع لشركة التوصيل","bi-truck","#f1f5f9","#475569");
-  html+=kpi("ربحك الإجمالي",fmtMoney(profit),"بعد خصم ثمن الوالد","bi-graph-up-arrow","#e0f2fe","#0369a1");
-  html+=kpi("ربح غير مُسوّى",fmtMoney(pendingProfit),"بانتظار التسوية","bi-hourglass","#fef3c7","#b45309");
-  html+='</div>';
-  if(missing>0)html+='<div class="alert alert-warning py-2 mt-3 mb-0" style="font-size:.86rem;"><i class="bi bi-exclamation-triangle"></i> '+fmtNum(missing)+' طلب مسلّم بدون ثمن جملة كامل — أضف الأسعار الناقصة في تبويب المنتجات لدقة الأرباح.</div>';
-  if(riskRed>0)html+='<div class="alert alert-danger py-2 mt-2 mb-0" style="font-size:.86rem;"><i class="bi bi-shield-exclamation"></i> '+fmtNum(riskRed)+' طلب بخطورة مرتفعة (أحمر) — راجعها قبل التأكيد.</div>';
-  html+='<div class="row g-3 mt-1"><div class="col-lg-6"><div class="panel"><h6><i class="bi bi-bar-chart"></i> الطلبات حسب الحالة</h6>'+statusBars(counts,biz.length)+'</div></div>';
-  html+='<div class="col-lg-6"><div class="panel"><h6><i class="bi bi-trophy"></i> أفضل المنتجات مبيعاً</h6>'+topProducts(biz)+'</div></div></div>';
-  host.innerHTML=html;
-};
-function statusBars(counts,total){var html='';STATUSES.forEach(function(s){var c=counts[s.key]||0;if(c===0&&inSet(EXCLUDE_STATUS,s.key))return;html+='<div class="bar-row"><div class="bar-label">'+esc(s.key)+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct(c,total)+';background:'+s.color+'"></div></div><div class="bar-val">'+fmtNum(c)+'</div></div>';});return html||'<div class="empty">لا توجد بيانات.</div>';}
-function topProducts(biz){var tally={};biz.forEach(function(o){var a=Array.isArray(o.data.products)?o.data.products:[];a.forEach(function(l){var p=catalogById(l.id)||catalogByName(l.name);var name=(p&&p.title)||l.name||"—";var qty=Number(l.quantity)||1;tally[name]=(tally[name]||0)+qty;});});var arr=Object.keys(tally).map(function(k){return {name:k,qty:tally[k]};}).sort(function(a,b){return b.qty-a.qty;}).slice(0,6);if(!arr.length)return '<div class="empty">لا توجد مبيعات.</div>';var mx=arr[0].qty;var html='';arr.forEach(function(r){html+='<div class="bar-row"><div class="bar-label" title="'+esc(r.name)+'">'+esc(r.name.slice(0,18))+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct(r.qty,mx)+';background:#ff6b00"></div></div><div class="bar-val">'+fmtNum(r.qty)+'</div></div>';});return html;}
-
-/* ============ ORDERS ============ */
-var oFilter={q:'',status:'',arch:false};
-window.__renderRegistry.orders=function(){
-  var host=$("sec-orders");
-  var opts='<option value="">كل الحالات</option>';STATUSES.forEach(function(s){opts+='<option value="'+esc(s.key)+'"'+(oFilter.status===s.key?' selected':'')+'>'+esc(s.key)+'</option>';});
-  host.innerHTML='<div class="panel mb-3"><div class="row g-2 align-items-center">'
-    +'<div class="col-md-5"><input id="oSearch" class="form-control" placeholder="بحث بالاسم / الهاتف / رقم الطلب" value="'+esc(oFilter.q)+'"></div>'
-    +'<div class="col-md-4"><select id="oStatus" class="form-select">'+opts+'</select></div>'
-    +'<div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" id="oArch" '+(oFilter.arch?'checked':'')+'><label class="form-check-label" for="oArch">إظهار المؤرشفة</label></div></div>'
-    +'</div></div><div class="table-wrap" id="oTableWrap"></div>';
-  $("oSearch").addEventListener('input',function(){oFilter.q=this.value;renderOrdersTable();});
-  $("oStatus").addEventListener('change',function(){oFilter.status=this.value;renderOrdersTable();});
-  $("oArch").addEventListener('change',function(){oFilter.arch=this.checked;renderOrdersTable();});
-  renderOrdersTable();
-};
-function filteredOrders(){var q=oFilter.q.trim().toLowerCase();return allOrders.filter(function(o){var d=o.data;if(!oFilter.arch&&isArchived(d))return false;if(oFilter.status&&statusKey(d)!==oFilter.status)return false;if(q){var hay=(customerName(d)+' '+orderPhone(d)+' '+o.id).toLowerCase();if(hay.indexOf(q)===-1)return false;}return true;});}
-function renderOrdersTable(){
-  var rows=filteredOrders();var host=$("oTableWrap");
-  if(!rows.length){host.innerHTML='<div class="empty"><i class="bi bi-inbox"></i><div class="mt-2">لا توجد طلبات مطابقة.</div></div>';return;}
-  var html='<table class="tbl"><thead><tr><th>رقم</th><th>التاريخ</th><th>العميل</th><th>الهاتف</th><th>الولاية</th><th>الإجمالي</th><th>ربحك</th><th>الحالة</th><th>خطورة</th><th>تتبع</th></tr></thead><tbody>';
-  rows.forEach(function(o){var d=o.data;var pr=orderProfit(d);var prTxt=pr==null?'<span class="text-muted">؟</span>':'<span class="'+(pr>=0?'money-pos':'money-neg')+'">'+fmtNum(pr)+'</span>';
-    html+='<tr data-id="'+esc(o.id)+'" class="orow">'
-      +'<td><span class="order-id">'+esc(String(o.id).slice(-6).toUpperCase())+'</span>'+(isArchived(d)?' <span class="chip">مؤرشف</span>':'')+'</td>'
-      +'<td style="white-space:nowrap;font-size:.78rem;">'+esc(fmtDate(orderDate(d)))+'</td>'
-      +'<td>'+esc(customerName(d))+'</td>'
-      +'<td dir="ltr" style="font-size:.82rem;">'+esc(orderPhone(d))+'</td>'
-      +'<td>'+esc(orderWilaya(d))+'</td>'
-      +'<td style="white-space:nowrap;">'+esc(fmtMoney(orderTotal(d)))+'</td>'
-      +'<td>'+prTxt+'</td>'
-      +'<td>'+badge(d)+'</td>'
-      +'<td>'+riskDot(d)+'</td>'
-      +'<td>'+(d.ecotrackTracking?'<span class="chip" dir="ltr">'+esc(d.ecotrackTracking)+'</span>':'<span class="text-muted">—</span>')+'</td>'
-      +'</tr>';});
-  html+='</tbody></table>';host.innerHTML=html;
-  var trs=host.querySelectorAll('tr.orow');for(var i=0;i<trs.length;i++)trs[i].addEventListener('click',function(){openOrder(this.getAttribute('data-id'));});
-}
-
-/* ============ SHIPPING / ECOTRACK ============ */
-function shipChecks(d,communeOv){var name=customerName(d);var commune=(communeOv||orderCommune(d)||'').trim();var w=orderWilaya(d);var items=[{label:'الاسم',ok:!!name&&name!=='—',req:true},{label:'الهاتف',ok:PHONE_RE.test(String(orderPhone(d))),req:true},{label:'الولاية',ok:!!w&&deliveryFeeFor(w,'office')!=null,req:true},{label:'البلدية',ok:!!commune,req:true},{label:'العنوان',ok:!!String(d.address||'').trim(),req:false},{label:'المبلغ',ok:orderTotal(d)>0,req:true}];var missing=items.filter(function(x){return x.req&&!x.ok;});return {items:items,ok:missing.length===0,missing:missing};}
-function checklistHtml(c){return c.items.map(function(x){var col=x.ok?'#16a34a':(x.req?'#dc2626':'#d97706');var ic=x.ok?'bi-check-circle-fill':(x.req?'bi-x-circle-fill':'bi-exclamation-circle-fill');return '<span style="display:inline-flex;align-items:center;gap:3px;margin:0 4px 3px 0;font-size:.72rem;color:'+col+'"><i class="bi '+ic+'"></i>'+x.label+'</span>';}).join('');}
-window.__renderRegistry.shipping=function(){
-  var host=$("sec-shipping");
-  var queue=businessOrders().filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;});
-  var shipped=businessOrders().filter(function(o){return !!o.data.ecotrackTracking;});
-  var html='<div class="alert alert-info py-2 mb-3" style="font-size:.85rem;"><i class="bi bi-info-circle"></i> اختر <b>مكتب</b> (Stop Desk) أو <b>منزل</b> لكل طلب — يحدّد سعر التوصيل وطريقة التسليم في Ecotrack. قبل الإرسال يتحقق النظام من كل الحقول المطلوبة (✓/✗) ويمنع الإرسال إذا نقص حقل. لا يمكن شحن نفس الطلب مرتين.</div>';
-  html+='<div class="panel mb-3"><h6><i class="bi bi-box-arrow-up"></i> قائمة الشحن ('+fmtNum(queue.length)+')</h6>';
-  if(!queue.length)html+='<div class="empty"><i class="bi bi-check2-circle"></i><div class="mt-2">لا توجد طلبات جاهزة للشحن.</div></div>';
-  else{html+='<div class="table-wrap"><table class="tbl"><thead><tr><th>العميل</th><th>الهاتف</th><th>الولاية</th><th>البلدية</th><th>التوصيل</th><th>سعر التوصيل</th><th>المبلغ (المُحصّل)</th><th>التحقق من الحقول</th><th>إرسال</th></tr></thead><tbody>';
-    queue.forEach(function(o){var d=o.data;var dt=guessDeliveryType(d);var c=shipChecks(d);var fee=deliveryOf(d);
-      html+='<tr data-id="'+esc(o.id)+'">'
-        +'<td>'+esc(customerName(d))+'</td>'
-        +'<td dir="ltr" style="font-size:.82rem;">'+esc(orderPhone(d))+'</td>'
-        +'<td>'+esc(orderWilaya(d))+'</td>'
-        +'<td>'+(orderCommune(d)?esc(orderCommune(d)):'<input class="form-control form-control-sm ship-commune" placeholder="أدخل البلدية" style="max-width:130px;">')+'</td>'
-        +'<td><select class="form-select form-select-sm ship-dt" style="max-width:112px;"><option value="office"'+(dt==='office'?' selected':'')+'>🏢 مكتب</option><option value="home"'+(dt==='home'?' selected':'')+'>🏠 منزل</option></select></td>'
-        +'<td class="ship-fee" style="white-space:nowrap;">'+(fee==null?'<span class="text-muted">؟</span>':esc(fmtMoney(fee)))+'</td>'
-        +'<td style="white-space:nowrap;">'+esc(fmtMoney(orderTotal(d)))+'</td>'
-        +'<td class="ship-check">'+checklistHtml(c)+'</td>'
-        +'<td><button class="btn btn-sm btn-brand ship-btn"><i class="bi bi-truck"></i> أرسل</button><div class="ship-msg" style="font-size:.72rem;"></div></td>'
-        +'</tr>';});
-    html+='</tbody></table></div>';}
-  html+='</div>';
-  html+='<div class="panel"><h6><i class="bi bi-truck"></i> طلبات تم شحنها ('+fmtNum(shipped.length)+')</h6>';
-  if(!shipped.length)html+='<div class="empty"><i class="bi bi-box"></i><div class="mt-2">لا شيء بعد.</div></div>';
-  else{html+='<div class="table-wrap"><table class="tbl"><thead><tr><th>العميل</th><th>الولاية</th><th>رقم التتبع</th><th>الحالة</th></tr></thead><tbody>';
-    shipped.forEach(function(o){var d=o.data;html+='<tr><td>'+esc(customerName(d))+'</td><td>'+esc(orderWilaya(d))+'</td><td dir="ltr"><span class="chip">'+esc(d.ecotrackTracking)+'</span></td><td>'+badge(d)+'</td></tr>';});
-    html+='</tbody></table></div>';}
-  html+='</div>';
-  host.innerHTML=html;
-  function refreshShipRow(row){var id=row.getAttribute('data-id');var d=getRec(id).data;var sel=row.querySelector('.ship-dt');var dt=sel?sel.value:'office';var ci=row.querySelector('.ship-commune');var commune=ci?(ci.value||'').trim():'';var feeCell=row.querySelector('.ship-fee');var fee=deliveryOf(d);if(feeCell)feeCell.innerHTML=(fee==null?'<span class="text-muted">؟</span>':esc(fmtMoney(fee)));var chk=row.querySelector('.ship-check');if(chk)chk.innerHTML=checklistHtml(shipChecks(d,commune));}
-  var dts=host.querySelectorAll('.ship-dt');for(var k=0;k<dts.length;k++)dts[k].addEventListener('change',function(){refreshShipRow(this.closest('tr'));});
-  var cms=host.querySelectorAll('.ship-commune');for(var m=0;m<cms.length;m++)cms[m].addEventListener('input',function(){refreshShipRow(this.closest('tr'));});
-  var btns=host.querySelectorAll('.ship-btn');
-  for(var i=0;i<btns.length;i++)btns[i].addEventListener('click',function(){
-    var row=this.closest('tr');var id=row.getAttribute('data-id');var ci=row.querySelector('.ship-commune');var commune=ci?(ci.value||'').trim():'';
-    var sel=row.querySelector('.ship-dt');var dt=sel?sel.value:'office';
-    var msg=row.querySelector('.ship-msg');var b=this;var d=getRec(id).data;var c=shipChecks(d,commune);
-    if(!c.ok){msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}
-    b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span>';
-    var ov={stop_desk:stopDeskFor(dt)};if(commune)ov.commune=commune;
-    autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}msg.innerHTML='<span class="text-success">تم ✓ '+esc(data.tracking||'')+'</span>';setTimeout(renderAll,900);}).catch(function(err){b.disabled=false;b.innerHTML='<i class="bi bi-truck"></i> أرسل';msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message))+'</span>';});
+  const orders = docs.map(d => {
+    const code = d.ecotrackTracking || null;
+    const liveOne = code && live[code] ? live[code] : null;
+    return {
+      ref: shortRef(d.id),
+      placedAt: d.createdAt || d.timestamp || null,
+      productCount: Array.isArray(d.products) ? d.products.length : 0,
+      total: Number(d.totalPrice || 0),
+      wilaya: d.wilaya || "",
+      customerFirst: firstName(d.customer),
+      internalStatus: d.status || "",
+      stage: liveOne ? liveOne.stage : internalStage(d.status),
+      stageLabel: liveOne ? liveOne.label : internalLabel(d.status),
+      tracking: code,
+      timeline: liveOne ? liveOne.timeline : internalTimeline(d)
+    };
   });
-};
-function ecotrackErr(code){var m={'already_shipped':'الطلب مشحون مسبقاً','order_not_found':'الطلب غير موجود','invalid_parcel':'بيانات الطرد ناقصة','ecotrack_create_failed':'فشل الإنشاء في Ecotrack','unauthorized':'انتهت الجلسة — سجّل الدخول من جديد','wilaya non reconnue':'الولاية غير معروفة','commune manquante':'البلدية ناقصة'};return m[code]||code||'فشل الإرسال';}
-async function autoShipEcotrack(id,overrides){var user=auth.currentUser;if(!user)throw new Error('unauthorized');var idToken=await user.getIdToken();var res=await fetch(WORKER_URL+"/admin/confirm-ship",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},body:JSON.stringify(Object.assign({id:id},overrides||{}))});var data=await res.json().catch(function(){return {};});if(!res.ok)throw new Error(data.error||data.detail||"فشل الإرسال");return data;}
 
-/* ============ PRODUCTS ============ */
-window.__renderRegistry.products=function(){
-  var host=$("sec-products");
-  var srcTxt=costSource==='cloud'?'محفوظة في السحابة (Firestore) ومشتركة بين أجهزتك':'محفوظة محلياً على هذا المتصفح (تعذّر الوصول للسحابة)';
-  var html='<div class="alert alert-secondary py-2 mb-3" style="font-size:.83rem;"><i class="bi bi-hdd-network"></i> أسعار الجملة المعدّلة يدوياً: '+srcTxt+'.</div>';
-  html+='<div class="panel mb-3"><h6><i class="bi bi-tags"></i> منتجات المتجر — الهامش التلقائي</h6><div class="table-wrap"><table class="tbl"><thead><tr><th>ID</th><th>كود الوالد</th><th>المنتج</th><th>سعر البيع</th><th>ثمن الجملة</th><th>هامشك</th><th>%</th><th></th></tr></thead><tbody>';
-  PRODUCTS.forEach(function(p){var dp=dadPrice(p);var margin=dp==null?null:p.sell-dp;var mp=dp==null||!p.sell?null:Math.round((margin/p.sell)*100);
-    html+='<tr data-id="'+p.id+'">'
-      +'<td class="order-id">'+p.id+'</td>'
-      +'<td>'+(p.code?'<span class="chip">'+esc(p.code)+'</span>':'<span class="text-muted">—</span>')+'</td>'
-      +'<td style="min-width:180px;">'+esc(p.title)+'</td>'
-      +'<td style="white-space:nowrap;">'+fmtNum(p.sell)+'</td>'
-      +'<td><input type="number" min="0" class="form-control form-control-sm prod-dad" style="max-width:110px;" value="'+(dp!=null?dp:'')+'" placeholder="أدخل"></td>'
-      +'<td>'+(margin==null?'<span class="text-muted">—</span>':'<span class="'+(margin>=0?'money-pos':'money-neg')+'">'+fmtNum(margin)+'</span>')+'</td>'
-      +'<td>'+(mp==null?'<span class="text-muted">—</span>':esc(mp+'%'))+'</td>'
-      +'<td><button class="btn btn-sm btn-outline-secondary prod-save"><i class="bi bi-save"></i></button></td>'
-      +'</tr>';});
-  html+='</tbody></table></div></div>';
-  html+='<div class="panel"><h6><i class="bi bi-link-45deg"></i> أصناف جملة عند الوالد غير مربوطة بمنتج في المتجر</h6><div class="table-wrap"><table class="tbl"><thead><tr><th>كود</th><th>الصنف</th><th>ثمن الجملة</th></tr></thead><tbody>';
-  UNLINKED_DAD.forEach(function(u){html+='<tr><td><span class="chip">'+esc(u.code)+'</span></td><td>'+esc(u.name)+'</td><td>'+fmtNum(u.dad)+'</td></tr>';});
-  html+='</tbody></table></div><div class="funnel-note mt-2 text-muted" style="font-size:.78rem;">هذه أصناف من قائمة والدك لم أجد لها منتجاً مطابقاً في المتجر. إن كانت تُباع، أضفها للمتجر وسأربطها.</div></div>';
-  host.innerHTML=html;
-  var saves=host.querySelectorAll('.prod-save');
-  for(var i=0;i<saves.length;i++)saves[i].addEventListener('click',function(){var row=this.closest('tr');var id=Number(row.getAttribute('data-id'));var inp=row.querySelector('.prod-dad');var raw=(inp.value||'').trim();var val=raw===''?null:Number(raw);if(raw!==''&&(!isFinite(val)||val<0)){alert('ثمن غير صحيح');return;}var b=this;b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span>';saveCostOverride(id,val).then(function(){b.innerHTML='<i class="bi bi-check2"></i>';setTimeout(function(){b.disabled=false;b.innerHTML='<i class="bi bi-save"></i>';renderAll();},700);});});
-};
-
-/* ============ SETTLEMENT ============ */
-var setPending=true,setDeliveredOnly=true;
-window.__renderRegistry.settlement=function(){
-  var host=$("sec-settlement");
-  var pool=businessOrders().filter(function(o){return setDeliveredOnly?statusKey(o.data)===DELIVERED:true;});
-  var pendingProfit=0,owed=0,missing=0;
-  pool.forEach(function(o){var d=o.data;if(settlementDone(d))return;var c=effectiveCost(d);if(!c.complete){missing++;return;}owed+=c.cost;pendingProfit+=(orderTotal(d)-deliveryOf(d)-c.cost);});
-  var rows=pool.filter(function(o){return setPending?!settlementDone(o.data):true;});
-  var html='<div class="row g-3 mb-3">'
-    +'<div class="col-md-4"><div class="kpi"><div class="label">ربح معلّق (غير مُسوّى)</div><div class="value">'+fmtMoney(pendingProfit)+'</div></div></div>'
-    +'<div class="col-md-4"><div class="kpi"><div class="label">مستحق للوالد (معلّق)</div><div class="value">'+fmtMoney(owed)+'</div></div></div>'
-    +'<div class="col-md-4"><div class="kpi"><div class="label">طلبات بدون ثمن جملة</div><div class="value">'+fmtNum(missing)+'</div></div></div>'
-    +'</div>';
-  html+='<div class="panel mb-3"><div class="seg"><button id="setP1" class="'+(setPending?'active':'')+'">المعلّقة فقط</button><button id="setP2" class="'+(!setPending?'active':'')+'">الكل</button>'
-    +'&nbsp;&nbsp;<button id="setD1" class="'+(setDeliveredOnly?'active':'')+'">المسلّمة فقط</button><button id="setD2" class="'+(!setDeliveredOnly?'active':'')+'">كل الحالات</button></div></div>';
-  html+='<div class="table-wrap">';
-  if(!rows.length)html+='<div class="empty"><i class="bi bi-cash-coin"></i><div class="mt-2">لا توجد طلبات مطابقة.</div></div>';
-  else{html+='<table class="tbl"><thead><tr><th>رقم</th><th>العميل</th><th>المُحصّل</th><th>التوصيل</th><th>ثمن الجملة</th><th>هامشك</th><th>الحالة</th><th></th></tr></thead><tbody>';
-    rows.forEach(function(o){var d=o.data;var ec=effectiveCost(d);var settled=settlementDone(d);var costVal=d.wholesaleCost!=null?d.wholesaleCost:(ec.complete?ec.cost:'');var dfee=deliveryOf(d);var margin=ec.complete?orderTotal(d)-dfee-ec.cost:null;
-      html+='<tr data-id="'+esc(o.id)+'">'
-        +'<td><span class="order-id">'+esc(String(o.id).slice(-6).toUpperCase())+'</span></td>'
-        +'<td>'+esc(customerName(d))+'</td>'
-        +'<td style="white-space:nowrap;">'+esc(fmtMoney(orderTotal(d)))+'</td>'
-        +'<td style="white-space:nowrap;color:#64748b;font-size:.82rem;">'+(dfee==null?'—':esc(fmtMoney(dfee)))+'</td>'
-        +'<td><input type="number" min="0" class="form-control form-control-sm set-cost" style="max-width:120px;" value="'+(costVal!==''?esc(costVal):'')+'" placeholder="'+(ec.complete?'':'أدخل')+'">'+(ec.complete&&!ec.manual?'<div style="font-size:.66rem;color:#6b7280">تلقائي من الكتالوج</div>':'')+'</td>'
-        +'<td>'+(margin==null?'<span class="text-muted">؟</span>':'<span class="'+(margin>=0?'money-pos':'money-neg')+'">'+esc(fmtMoney(margin))+'</span>')+'</td>'
-        +'<td><span style="background:'+(settled?'#dcfce7;color:#166534':'#fef3c7;color:#92400e')+';padding:2px 8px;border-radius:999px;font-size:.76rem;">'+(settled?'مُسوّى':'معلّق')+'</span></td>'
-        +'<td class="d-flex gap-1"><button class="btn btn-sm btn-outline-secondary set-save"><i class="bi bi-save"></i></button><button class="btn btn-sm '+(settled?'btn-outline-secondary':'btn-brand')+' set-toggle" data-next="'+(settled?'pending':'settled')+'">'+(settled?'فتح':'سوّي')+'</button></td>'
-        +'</tr>';});
-    html+='</tbody></table>';}
-  html+='</div>';host.innerHTML=html;
-  $("setP1").onclick=function(){setPending=true;renderAll();};$("setP2").onclick=function(){setPending=false;renderAll();};
-  $("setD1").onclick=function(){setDeliveredOnly=true;renderAll();};$("setD2").onclick=function(){setDeliveredOnly=false;renderAll();};
-  var saves=host.querySelectorAll('.set-save');for(var i=0;i<saves.length;i++)saves[i].addEventListener('click',function(){var row=this.closest('tr');var id=row.getAttribute('data-id');var inp=row.querySelector('.set-cost');var raw=(inp.value||'').trim();var cost=raw===''?null:Number(raw);if(raw!==''&&(!isFinite(cost)||cost<0)){alert('ثمن غير صحيح');return;}var b=this;b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span>';patchOrder(id,{wholesaleCost:cost}).then(function(){b.innerHTML='<i class="bi bi-check2"></i>';setTimeout(renderAll,700);}).catch(function(){b.disabled=false;b.innerHTML='<i class="bi bi-save"></i>';alert('تعذر الحفظ');});});
-  var tgs=host.querySelectorAll('.set-toggle');for(var j=0;j<tgs.length;j++)tgs[j].addEventListener('click',function(){var row=this.closest('tr');var id=row.getAttribute('data-id');var next=this.getAttribute('data-next');var b=this;b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span>';patchOrder(id,{settlementStatus:next,settledAt:next==='settled'?new Date().toISOString():null}).then(renderAll).catch(function(){b.disabled=false;alert('تعذر التحديث');});});
-};
-
-/* ============ FAKE / TEST ============ */
-var fFilter='';
-window.__renderRegistry.fake=function(){
-  var host=$("sec-fake");
-  var q=fFilter.trim().toLowerCase();
-  var rows=allOrders.filter(function(o){var d=o.data;if(q){var hay=(customerName(d)+' '+orderPhone(d)+' '+o.id).toLowerCase();return hay.indexOf(q)!==-1;}return inSet(EXCLUDE_STATUS,statusKey(d))||isArchived(d);});
-  var html='<div class="alert alert-warning py-2 mb-3" style="font-size:.84rem;"><i class="bi bi-shield-exclamation"></i> علّم الطلبات الوهمية أو التجريبية لاستبعادها من الأرباح والإحصائيات. الأرشفة تخفيها بأمان. الحذف نهائي — استعمله فقط لطلبات الاختبار.</div>';
-  html+='<div class="panel mb-3"><input id="fSearch" class="form-control" placeholder="ابحث في كل الطلبات لتعليمها وهمية/تجريبية..." value="'+esc(fFilter)+'"></div>';
-  html+='<div class="table-wrap">';
-  if(!rows.length)html+='<div class="empty"><i class="bi bi-shield-check"></i><div class="mt-2">لا توجد طلبات وهمية أو تجريبية أو مؤرشفة.'+(q?'':' ابحث بالأعلى لتعليم أي طلب.')+'</div></div>';
-  else{html+='<table class="tbl"><thead><tr><th>رقم</th><th>العميل</th><th>الهاتف</th><th>الإجمالي</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>';
-    rows.forEach(function(o){var d=o.data;var arch=isArchived(d);
-      html+='<tr data-id="'+esc(o.id)+'">'
-        +'<td><span class="order-id">'+esc(String(o.id).slice(-6).toUpperCase())+'</span></td>'
-        +'<td>'+esc(customerName(d))+'</td>'
-        +'<td dir="ltr" style="font-size:.82rem;">'+esc(orderPhone(d))+'</td>'
-        +'<td style="white-space:nowrap;">'+esc(fmtMoney(orderTotal(d)))+'</td>'
-        +'<td>'+badge(d)+(arch?' <span class="chip">مؤرشف</span>':'')+'</td>'
-        +'<td class="d-flex gap-1 flex-wrap">'
-        +'<button class="btn btn-sm btn-outline-secondary mini-btn f-act" data-act="fake">وهمي</button>'
-        +'<button class="btn btn-sm btn-outline-secondary mini-btn f-act" data-act="test">تجريبي</button>'
-        +'<button class="btn btn-sm btn-outline-primary mini-btn f-act" data-act="restore">استعادة</button>'
-        +'<button class="btn btn-sm btn-outline-warning mini-btn f-act" data-act="'+(arch?'unarchive':'archive')+'">'+(arch?'إلغاء الأرشفة':'أرشفة')+'</button>'
-        +'<button class="btn btn-sm btn-outline-danger mini-btn f-act" data-act="delete">حذف</button>'
-        +'</td></tr>';});
-    html+='</tbody></table>';}
-  html+='</div>';host.innerHTML=html;
-  $("fSearch").addEventListener('input',function(){fFilter=this.value;window.__renderRegistry.fake();});
-  var acts=host.querySelectorAll('.f-act');for(var i=0;i<acts.length;i++)acts[i].addEventListener('click',function(){var row=this.closest('tr');var id=row.getAttribute('data-id');var act=this.getAttribute('data-act');doFakeAction(id,act);});
-};
-function doFakeAction(id,act){
-  if(act==='fake')patchOrder(id,{status:'وهمي'}).then(renderAll);
-  else if(act==='test')patchOrder(id,{status:'تجريبي'}).then(renderAll);
-  else if(act==='restore')patchOrder(id,{status:'جديد',archived:false}).then(renderAll);
-  else if(act==='archive')patchOrder(id,{archived:true}).then(renderAll);
-  else if(act==='unarchive')patchOrder(id,{archived:false}).then(renderAll);
-  else if(act==='delete'){if(!confirm('حذف هذا الطلب نهائياً؟ لا يمكن التراجع.'))return;db.collection('orders').doc(id).delete().then(function(){allOrders=allOrders.filter(function(o){return o.id!==id;});renderAll();}).catch(function(){alert('تعذر الحذف — تحقق من صلاحيات Firestore.');});}
+  const resp = { orders };
+  if (wantDebug) resp._debug = { codes, diag };
+  return json(resp, 200, cors);
 }
 
-/* ============ SETTINGS ============ */
-window.__renderRegistry.settings=function(){
-  var host=$("sec-settings");var biz=businessOrders();
-  var rules='rules_version = \'2\';\nservice cloud.firestore {\n  match /databases/{db}/documents {\n    match /orders/{id} {\n      allow read, update, delete: if request.auth != null;\n      allow create: if true;\n    }\n    match /config/{doc} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}';
-  var html='<div class="row g-3">';
-  html+='<div class="col-lg-6"><div class="panel"><h6><i class="bi bi-hdd-network"></i> الاتصال</h6>'
-    +'<div class="info-row"><span class="k">Worker URL</span><span class="v" dir="ltr" style="font-size:.78rem;">'+esc(WORKER_URL)+'</span></div>'
-    +'<div class="info-row"><span class="k">مشروع Firebase</span><span class="v" dir="ltr">'+esc(firebaseConfig.projectId)+'</span></div>'
-    +'<div class="info-row"><span class="k">تخزين أسعار الجملة</span><span class="v">'+(costSource==='cloud'?'السحابة (مشترك)':'محلي (هذا المتصفح)')+'</span></div>'
-    +'<div class="info-row"><span class="k">عدد الطلبات المحمّلة</span><span class="v">'+fmtNum(allOrders.length)+'</span></div>'
-    +'</div></div>';
-  html+='<div class="col-lg-6"><div class="panel"><h6><i class="bi bi-telegram"></i> إشعارات تيليجرام</h6><p style="font-size:.85rem;color:#6b7280;margin:0">تيليجرام يعمل كإشعارات فقط (طلب جديد / تقييم) من الـ Worker. هذه اللوحة هي مصدر الحقيقة للإدارة — لا تدر أعمالك من رسائل واتساب/تيليجرام. الردود التي تكتبها هناك لا تُحفظ؛ استعمل «ملاحظات» داخل صفحة الطلب بدلاً منها.</p></div>'
-    +'<div class="panel mt-3"><h6><i class="bi bi-shield-lock"></i> حماية الشحن</h6><p style="font-size:.85rem;color:#6b7280;margin:0">زر الإرسال إلى Ecotrack يستعمل تسجيل دخولك (رمز Firebase). لقصر الشحن على بريدك فقط، أضف متغيّر <code>ADMIN_EMAIL</code> في إعدادات الـ Worker بقيمة بريدك.</p></div></div>';
-  html+='<div class="col-12"><div class="panel"><h6><i class="bi bi-file-earmark-code"></i> قواعد Firestore المقترحة</h6><p style="font-size:.82rem;color:#6b7280">لتعمل كل الميزات (قراءة/تعديل/حذف الطلبات + حفظ أسعار الجملة في السحابة)، انشر هذه القواعد:</p><pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:10px;font-size:.76rem;overflow:auto;" dir="ltr">'+esc(rules)+'</pre></div></div>';
-  html+='</div>';host.innerHTML=html;
-};
-
-/* ============ ORDER MODAL ============ */
-function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=orderCost(d);var eff=effectiveCost(d);var dlv=deliveryOf(d);var profit=eff.complete?orderTotal(d)-dlv-eff.cost:null;
-  var statusOpts='';STATUSES.forEach(function(s){statusOpts+='<option value="'+esc(s.key)+'"'+(statusKey(d)===s.key?' selected':'')+'>'+esc(s.key)+'</option>';});
-  var prodRows='';ec.lines.forEach(function(l){prodRows+='<div class="prod-line"><div style="flex-grow:1"><div style="font-weight:600;font-size:.88rem">'+esc(l.name)+(l.matched?'':' <span class="chip" style="background:#fef2f2;color:#b91c1c">غير مطابق</span>')+'</div><div style="font-size:.75rem;color:#6b7280">×'+l.qty+' · بيع '+fmtNum(l.sell)+(l.dad!=null?' · جملة '+fmtNum(l.dad):' · جملة ؟')+'</div></div><div style="font-weight:700">'+fmtNum(l.sell*l.qty)+'</div></div>';});
-  var notes=Array.isArray(d.adminNotes)?d.adminNotes:[];var notesHtml='';notes.slice().reverse().forEach(function(n){notesHtml+='<div class="note-item">'+esc(n.text)+'<div class="meta">'+esc(n.by||'')+' · '+esc(fmtDate(parseDate(n.at)))+'</div></div>';});
-  var phone=orderPhone(d);var wa=intlPhone(phone);var arch=isArchived(d);
-  var mdt=guessDeliveryType(d);var mchecks=shipChecks(d);
-  var shipBlock=d.ecotrackTracking?('<div class="val-ok">مشحون · رقم التتبع: <span dir="ltr">'+esc(d.ecotrackTracking)+'</span></div>'):(inSet(SHIPPABLE_SET,statusKey(d))?('<div class="mb-2">'+checklistHtml(mchecks)+'</div><div class="d-flex gap-2 align-items-center flex-wrap"><select id="mShipDt" class="form-select form-select-sm" style="max-width:130px;"><option value="office"'+(mdt==='office'?' selected':'')+'>🏢 مكتب</option><option value="home"'+(mdt==='home'?' selected':'')+'>🏠 منزل</option></select><span id="mShipFee" style="font-size:.8rem;color:#475569"></span><button class="btn btn-brand btn-sm" id="mShip"><i class="bi bi-truck"></i> أرسل إلى Ecotrack</button></div><div id="mShipMsg" style="font-size:.78rem;margin-top:4px"></div>'):'<span class="text-muted" style="font-size:.82rem">أكّد الطلب أولاً ليصبح قابلاً للشحن.</span>');
-  var html='<div class="modal-header"><div><h5 class="modal-title">'+esc(customerName(d))+' '+badge(d)+'</h5><div class="order-id">'+esc(id)+'</div></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>'
-    +'<div class="modal-body"><div class="row g-3">'
-    +'<div class="col-md-7"><div class="panel"><h6>المنتجات</h6>'+(prodRows||'<div class="text-muted">لا منتجات</div>')
-      +'<div class="info-row mt-2"><span class="k">الإجمالي المُحصّل</span><span class="v">'+fmtMoney(orderTotal(d))+'</span></div>'
-      +'<div class="info-row"><span class="k">ثمن الجملة (والدك)</span><span class="v">'+(eff.complete?fmtMoney(eff.cost)+(eff.manual?' (يدوي)':' (تلقائي)'):'<span class="text-danger">ناقص</span>')+'</span></div>'
-      +'<div class="info-row"><span class="k">ربحك</span><span class="v">'+(profit==null?'؟':'<span class="'+(profit>=0?"money-pos":"money-neg")+'">'+fmtMoney(profit)+'</span>')+'</span></div>'
-      +'<div class="info-row"><span class="k">تكلفة التوصيل ('+((guessDeliveryType(d)==='home')?'منزل':'مكتب')+')</span><span class="v">'+fmtMoney(dlv)+' <span style="font-size:.7rem;color:#94a3b8">مضمّنة في المُحصّل — لشركة التوصيل</span></span></div>'
-      +'</div>'
-      +'<div class="panel mt-3"><h6>الشحن</h6>'+shipBlock+'</div>'
-      +'<div class="panel mt-3"><h6>ملاحظات داخلية</h6><div id="mNotes">'+(notesHtml||'<div class="text-muted" style="font-size:.82rem">لا ملاحظات بعد.</div>')+'</div><div class="input-group mt-2"><input id="mNoteInput" class="form-control" placeholder="أضف ملاحظة (مثال: مزال مربوطناش، معاود نعيط)"><button class="btn btn-outline-secondary" id="mNoteAdd">إضافة</button></div></div>'
-      +'</div>'
-    +'<div class="col-md-5"><div class="panel"><h6>معلومات العميل</h6>'
-      +'<div class="info-row"><span class="k">الهاتف</span><span class="v" dir="ltr">'+esc(phone||'—')+'</span></div>'
-      +'<div class="info-row"><span class="k">الولاية</span><span class="v">'+esc(orderWilaya(d)||'—')+'</span></div>'
-      +'<div class="info-row"><span class="k">البلدية</span><span class="v">'+esc(orderCommune(d)||'—')+'</span></div>'
-      +'<div class="info-row"><span class="k">العنوان</span><span class="v">'+esc(d.address||'—')+'</span></div>'
-      +'<div class="info-row"><span class="k">التاريخ</span><span class="v">'+esc(fmtDate(orderDate(d)))+'</span></div>'
-      +'<div class="info-row"><span class="k">الخطورة</span><span class="v">'+riskDot(d)+' '+esc(riskLevel(d))+'</span></div>'
-      +'<div class="info-row"><span class="k">IP</span><span class="v" dir="ltr" style="font-size:.78rem">'+esc((d.meta&&d.meta.ip)||'—')+'</span></div>'
-      +'<div class="d-flex gap-2 mt-2"><a class="btn btn-success btn-sm flex-grow-1" href="https://wa.me/'+esc(wa)+'" target="_blank"><i class="bi bi-whatsapp"></i> واتساب</a><a class="btn btn-outline-secondary btn-sm flex-grow-1" href="tel:'+esc(phone)+'"><i class="bi bi-telephone"></i> اتصال</a></div>'
-      +'</div>'
-      +'<div class="panel mt-3"><h6>الحالة والإجراءات</h6>'
-      +'<label class="form-label" style="font-size:.82rem">تغيير الحالة</label><select id="mStatus" class="form-select form-select-sm mb-2">'+statusOpts+'</select>'
-      +'<div class="d-flex gap-2 flex-wrap">'
-      +'<button class="btn btn-sm btn-outline-danger" id="mFake">وهمي</button>'
-      +'<button class="btn btn-sm btn-outline-secondary" id="mTest">تجريبي</button>'
-      +'<button class="btn btn-sm btn-outline-warning" id="mArch">'+(arch?'إلغاء الأرشفة':'أرشفة')+'</button>'
-      +'</div></div>'
-      +'</div>'
-    +'</div></div>';
-  $("orderModalContent").innerHTML=html;
-  if(!orderModal)orderModal=new bootstrap.Modal($("orderModal"));
-  orderModal.show();
-  $("mStatus").addEventListener('change',function(){var v=this.value;patchOrder(id,{status:v}).then(function(){renderAll();openOrder(id);});});
-  $("mFake").onclick=function(){patchOrder(id,{status:'وهمي'}).then(function(){orderModal.hide();renderAll();});};
-  $("mTest").onclick=function(){patchOrder(id,{status:'تجريبي'}).then(function(){orderModal.hide();renderAll();});};
-  $("mArch").onclick=function(){patchOrder(id,{archived:!arch}).then(function(){orderModal.hide();renderAll();});};
-  var addBtn=$("mNoteAdd");if(addBtn)addBtn.onclick=function(){var inp=$("mNoteInput");var t=(inp.value||'').trim();if(!t)return;var cur=Array.isArray(d.adminNotes)?d.adminNotes.slice():[];cur.push({text:t,at:new Date().toISOString(),by:(auth.currentUser&&auth.currentUser.email)||''});addBtn.disabled=true;patchOrder(id,{adminNotes:cur}).then(function(){openOrder(id);}).catch(function(){addBtn.disabled=false;alert('تعذر حفظ الملاحظة');});};
-  var mdtSel=$("mShipDt");function updModalFee(){var el=$("mShipFee");if(el)el.textContent=('توصيل مدفوع: '+fmtMoney(deliveryOf(d)));}if(mdtSel){updModalFee();}
-  var sb=$("mShip");if(sb)sb.onclick=function(){var msg=$("mShipMsg");var dt=mdtSel?mdtSel.value:'office';var commune=orderCommune(d);if(!commune){commune=(prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:')||'').trim();if(!commune)return;}var c=shipChecks(d,commune);if(!c.ok){if(msg)msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}sb.disabled=true;sb.innerHTML='<span class="spinner-border spinner-border-sm"></span>';var ov={stop_desk:stopDeskFor(dt)};if(commune&&!orderCommune(d))ov.commune=commune;autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}renderAll();openOrder(id);}).catch(function(err){sb.disabled=false;sb.innerHTML='<i class="bi bi-truck"></i> أرسل إلى Ecotrack';if(msg)msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message))+'</span>';});};
+/* =========================================================================
+   ADMIN  —  protected by the X-Admin-Key header (set the ADMIN_KEY secret).
+   GET  /admin/orders?phone=...   full (unsanitized) orders for a phone
+   POST /admin/set-tracking       { id, tracking, status? } -> patch the order
+   ========================================================================= */
+// Verifies a Firebase login ID token (the same login used by admin.html) with no new secret.
+let _fbJwksCache = null;
+async function getFirebaseJwks() {
+  if (_fbJwksCache && _fbJwksCache.exp > Date.now()) return _fbJwksCache.keys;
+  const res = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
+  if (!res.ok) throw new Error("jwks_fetch_failed");
+  const data = await res.json();
+  _fbJwksCache = { keys: data.keys, exp: Date.now() + 60 * 60 * 1000 };
+  return _fbJwksCache.keys;
+}
+function b64urlToBytes(b64url) {
+  const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = b64.length % 4 === 0 ? "" : "=".repeat(4 - (b64.length % 4));
+  const raw = atob(b64 + pad);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+async function verifyFirebaseIdToken(idToken, env) {
+  const parts = idToken.split(".");
+  if (parts.length !== 3) throw new Error("bad_token");
+  const [headerB64, payloadB64, sigB64] = parts;
+  const header = JSON.parse(new TextDecoder().decode(b64urlToBytes(headerB64)));
+  const payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(payloadB64)));
+  if (header.alg !== "RS256") throw new Error("bad_alg");
+  const jwks = await getFirebaseJwks();
+  const jwk = jwks.find(k => k.kid === header.kid);
+  if (!jwk) throw new Error("key_not_found");
+  const cryptoKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+  const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", cryptoKey, b64urlToBytes(sigB64), new TextEncoder().encode(headerB64 + "." + payloadB64));
+  if (!ok) throw new Error("bad_signature");
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp < now) throw new Error("expired");
+  if (payload.aud !== env.FIREBASE_PROJECT_ID) throw new Error("bad_aud");
+  if (payload.iss !== "https://securetoken.google.com/" + env.FIREBASE_PROJECT_ID) throw new Error("bad_iss");
+  if (!payload.sub) throw new Error("no_sub");
+  if (env.ADMIN_EMAIL && payload.email !== env.ADMIN_EMAIL) throw new Error("not_admin");
+  return payload;
 }
 
-/* ============ shared write ============ */
-function patchOrder(id,patch){patch.updatedAt=new Date().toISOString();return db.collection('orders').doc(id).update(patch).then(function(){var r=getRec(id);if(r)Object.assign(r.data,patch);});}
+// Accepts EITHER the legacy X-Admin-Key header (admin-tracking.html) OR a Firebase login token (admin.html).
+async function adminOk(request, env) {
+  const key = request.headers.get("X-Admin-Key");
+  if (env.ADMIN_KEY && key === env.ADMIN_KEY) return true;
+  const auth = request.headers.get("Authorization") || "";
+  const m = auth.match(/^Bearer\s+(.+)$/i);
+  if (!m) return false;
+  try { await verifyFirebaseIdToken(m[1], env); return true; } catch (e) { return false; }
+}
 
-/* ============ init ============ */
-document.addEventListener('DOMContentLoaded',function(){
-  initFirebase();
-  $("loginBtn").addEventListener('click',tryLogin);
-  $("adminPass").addEventListener('keydown',function(e){if(e.key==='Enter')tryLogin();});
-  $("adminEmail").addEventListener('keydown',function(e){if(e.key==='Enter')tryLogin();});
-  $("logoutBtn").addEventListener('click',logout);
-  $("refreshBtn").addEventListener('click',function(){if(ordersLoaded){ordersLoaded=false;loadCostOverrides().then(loadOrders);}});
-  var mt=$("menuToggle");if(mt)mt.addEventListener('click',function(){$("sidebar").classList.toggle('open');});
-  var items=document.querySelectorAll('.nav-item2');for(var i=0;i<items.length;i++)items[i].addEventListener('click',function(){showSection(this.getAttribute('data-sec'));});
-  if(auth)auth.onAuthStateChanged(onAuth);
-});
+async function handleAdminOrders(url, request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  const phone = (url.searchParams.get("phone") || "").trim();
+  if (!PHONE_RE.test(phone)) return json({ error: "invalid_phone" }, 400, cors);
+  let docs = [];
+  try { docs = await ordersByPhone(env, phone); }
+  catch (e) { return json({ error: "lookup_failed", detail: String(e) }, 500, cors); }
+  const orders = docs.map(d => ({
+    id: d.id, ref: shortRef(d.id), customer: d.customer || "", phone: d.phone || "",
+    wilaya: d.wilaya || "", commune: d.commune || "", address: d.address || "", total: Number(d.totalPrice || 0),
+    status: d.status || "", ecotrackTracking: d.ecotrackTracking || null,
+    placedAt: d.createdAt || d.timestamp || null,
+    productCount: Array.isArray(d.products) ? d.products.length : 0
+  }));
+  return json({ orders }, 200, cors);
+}
 
-})();
-</script>
-</body>
-</html>
+async function handleAdminSetTracking(request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  const id = String(body.id || "").trim();
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
+  const fields = {};
+  if (body.tracking !== undefined) fields.ecotrackTracking = body.tracking ? String(body.tracking).trim() : null;
+  if (body.status !== undefined && body.status) fields.status = String(body.status).trim();
+  if (!Object.keys(fields).length) return json({ error: "nothing_to_update" }, 400, cors);
+  try { await updateOrderFields(env, id, fields); }
+  catch (e) { return json({ error: "update_failed", detail: String(e) }, 500, cors); }
+  return json({ ok: true, id, updated: fields }, 200, cors);
+}
+
+/* POST /admin/confirm-ship  { id, commune?, code_wilaya?, adresse?, type?, stop_desk?, status?, remarque? }
+ * The TRUE auto path: creates the parcel in EcoTrack via the API, which RETURNS the
+ * tracking number in the response. We then store ecotrackTracking on the order — no
+ * manual paste, no guessing. Creating a parcel = a REAL shipment, so this is gated by
+ * ADMIN_KEY and is idempotent (refuses if the order already has a tracking number). */
+async function handleAdminConfirmShip(request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  const id = String(body.id || "").trim();
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
+
+  let order;
+  try { order = await getOrderById(env, id); }
+  catch (e) { return json({ error: "lookup_failed", detail: String(e) }, 500, cors); }
+  if (!order) return json({ error: "order_not_found" }, 404, cors);
+  if (order.ecotrackTracking) return json({ error: "already_shipped", tracking: order.ecotrackTracking }, 409, cors);
+
+  let payload;
+  try { payload = buildEcotrackPayload(order, body); }
+  catch (e) { return json({ error: "invalid_parcel", detail: String(e.message || e) }, 400, cors); }
+
+  let created;
+  try { created = await ecotrackCreateOrder(env, payload); }
+  catch (e) { return json({ error: "ecotrack_create_failed", detail: String(e.message || e) }, 502, cors); }
+
+  const tracking = created.tracking;
+  const fields = { ecotrackTracking: tracking, status: (body.status && String(body.status).trim()) || "\u062a\u0645 \u0627\u0644\u062a\u0623\u0643\u064a\u062f" };
+  try { await updateOrderFields(env, id, fields); }
+  catch (e) { return json({ error: "saved_parcel_but_db_update_failed", tracking, detail: String(e) }, 500, cors); }
+
+  return json({ ok: true, id, tracking, status: fields.status }, 200, cors);
+}
+
+async function getOrderById(env, id) {
+  const token = await accessToken(env);
+  const res = await fetch(baseUrl(env) + "/orders/" + encodeURIComponent(id), { headers: { "Authorization": "Bearer " + token } });
+  if (res.status === 404) return null;
+  if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("get " + res.status + " " + t.slice(0, 300)); }
+  const data = await res.json();
+  const o = decodeFields(data.fields || {});
+  o.id = data.name.split("/").pop();
+  return o;
+}
+
+/* Build + validate the EcoTrack create/order body. Field names & rules verified against
+ * the CourierDZ EcoTrack integration (api/v1/create/order):
+ *   nom_client*, telephone* (9-10 digits), adresse*, commune*, code_wilaya* (1-58),
+ *   montant*, type* (1=Livraison,2=Echange,3=Pickup,4=Recouvrement), stop_desk(0/1),
+ *   reference?, telephone_2?, produit?, remarque?
+ * Admin can override the fields an order may lack (commune, code_wilaya, adresse). */
+function buildEcotrackPayload(order, ov) {
+  ov = ov || {};
+  const phone = String(order.phone || "").replace(/\s+/g, "");
+  if (!/^0[5-7][0-9]{8}$/.test(phone)) throw new Error("telephone invalide");
+
+  const wilayaRaw = (ov.code_wilaya != null && ov.code_wilaya !== "") ? ov.code_wilaya : order.wilaya;
+  const code_wilaya = resolveWilayaCode(wilayaRaw);
+  if (!code_wilaya) throw new Error("wilaya non reconnue: \"" + (order.wilaya || "") + "\" (envoyez code_wilaya entre 1 et 58)");
+
+  const commune = String(ov.commune || order.commune || order.baladiya || "").trim();
+  if (!commune) throw new Error("commune manquante");
+
+  const nom_client = String(order.customer || "").trim();
+  if (!nom_client) throw new Error("nom client manquant");
+
+  const adresse = (String(ov.adresse || order.address || "").trim()) || commune;
+  const montant = Number(order.totalPrice || 0);
+  if (!(montant > 0)) throw new Error("montant invalide");
+
+  const produit = ((Array.isArray(order.products) ? order.products : [])
+    .map(p => String(p.name || "") + (p.quantity ? " x" + p.quantity : "")).join(", ") || "Commande").slice(0, 255);
+
+  const payload = {
+    nom_client: nom_client.slice(0, 255),
+    telephone: phone,
+    adresse: adresse.slice(0, 255),
+    commune: commune.slice(0, 255),
+    code_wilaya,
+    montant,
+    produit,
+    type: Number(ov.type || 1),
+    stop_desk: ov.stop_desk != null ? Number(ov.stop_desk) : 0
+  };
+  const reference = order.id ? String(order.id).slice(-12) : "";
+  if (reference) payload.reference = reference;
+  if (ov.remarque) payload.remarque = String(ov.remarque).slice(0, 255);
+  return payload;
+}
+
+async function ecotrackCreateOrder(env, payload) {
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) throw new Error("ecotrack non configure");
+  const endpoint = env.ECOTRACK_API_URL.replace(/\/+$/, "") + "/api/v1/create/order";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + env.ECOTRACK_TOKEN, "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(Object.assign({ api_token: env.ECOTRACK_TOKEN }, payload))
+  });
+  const text = await res.text();
+  let data = null; try { data = JSON.parse(text); } catch {}
+  if (!res.ok) throw new Error("HTTP " + res.status + " " + text.slice(0, 300));
+  if (data && data.success === false) throw new Error(data.message || "creation refusee");
+  const tracking = data && (data.tracking || data.tracking_id || data.trackingNumber ||
+    (data.order && (data.order.tracking || data.order.tracking_id)) ||
+    (data.data && (data.data.tracking || data.data.tracking_id)) || data.id);
+  if (!tracking) throw new Error("pas de numero de suivi dans la reponse: " + text.slice(0, 300));
+  return { tracking: String(tracking), raw: data };
+}
+
+/* ---- Wilaya name -> code (1..58). Accepts a numeric code, an Arabic name, or a
+ * French/Latin name. Both the input and the table are passed through normWilaya so
+ * accents, spaces, apostrophes, tashkeel and the Arabic article "\u0627\u0644" don't matter. */
+function resolveWilayaCode(input) {
+  if (input == null) return null;
+  const n = Number(String(input).trim());
+  if (Number.isInteger(n) && n >= 1 && n <= 58) return n;
+  const key = normWilaya(String(input));
+  return key ? (WILAYA_LOOKUP[key] || null) : null;
+}
+function normWilaya(s) {
+  let x = String(s || "").trim().toLowerCase();
+  x = x.normalize("NFD").replace(/[\u0300-\u036f]/g, "");                 // latin accents
+  x = x.replace(/[\u064B-\u0652\u0670]/g, "")                              // arabic tashkeel
+       .replace(/[\u0623\u0625\u0622\u0627]/g, "\u0627")                   // alef variants
+       .replace(/\u0649/g, "\u064a")                                       // alef maqsura -> ya
+       .replace(/\u0629/g, "\u0647");                                      // ta marbuta -> ha
+  x = x.replace(/^\u0627\u0644/, "");                                      // arabic article "al"
+  x = x.replace(/[^0-9a-z\u0621-\u064a]/g, "");                            // keep latin+arabic letters/digits
+  return x;
+}
+const WILAYAS = [
+  [1,"Adrar","\u0623\u062f\u0631\u0627\u0631"],[2,"Chlef","\u0627\u0644\u0634\u0644\u0641"],[3,"Laghouat","\u0627\u0644\u0623\u063a\u0648\u0627\u0637"],
+  [4,"Oum El Bouaghi","\u0623\u0645 \u0627\u0644\u0628\u0648\u0627\u0642\u064a"],[5,"Batna","\u0628\u0627\u062a\u0646\u0629"],[6,"Bejaia","\u0628\u062c\u0627\u064a\u0629"],
+  [7,"Biskra","\u0628\u0633\u0643\u0631\u0629"],[8,"Bechar","\u0628\u0634\u0627\u0631"],[9,"Blida","\u0627\u0644\u0628\u0644\u064a\u062f\u0629"],
+  [10,"Bouira","\u0627\u0644\u0628\u0648\u064a\u0631\u0629"],[11,"Tamanrasset","\u062a\u0645\u0646\u0631\u0627\u0633\u062a"],[12,"Tebessa","\u062a\u0628\u0633\u0629"],
+  [13,"Tlemcen","\u062a\u0644\u0645\u0633\u0627\u0646"],[14,"Tiaret","\u062a\u064a\u0627\u0631\u062a"],[15,"Tizi Ouzou","\u062a\u064a\u0632\u064a \u0648\u0632\u0648"],
+  [16,"Alger","\u0627\u0644\u062c\u0632\u0627\u0626\u0631"],[17,"Djelfa","\u0627\u0644\u062c\u0644\u0641\u0629"],[18,"Jijel","\u062c\u064a\u062c\u0644"],
+  [19,"Setif","\u0633\u0637\u064a\u0641"],[20,"Saida","\u0633\u0639\u064a\u062f\u0629"],[21,"Skikda","\u0633\u0643\u064a\u0643\u062f\u0629"],
+  [22,"Sidi Bel Abbes","\u0633\u064a\u062f\u064a \u0628\u0644\u0639\u0628\u0627\u0633"],[23,"Annaba","\u0639\u0646\u0627\u0628\u0629"],[24,"Guelma","\u0642\u0627\u0644\u0645\u0629"],
+  [25,"Constantine","\u0642\u0633\u0646\u0637\u064a\u0646\u0629"],[26,"Medea","\u0627\u0644\u0645\u062f\u064a\u0629"],[27,"Mostaganem","\u0645\u0633\u062a\u063a\u0627\u0646\u0645"],
+  [28,"Msila","\u0627\u0644\u0645\u0633\u064a\u0644\u0629"],[29,"Mascara","\u0645\u0639\u0633\u0643\u0631"],[30,"Ouargla","\u0648\u0631\u0642\u0644\u0629"],
+  [31,"Oran","\u0648\u0647\u0631\u0627\u0646"],[32,"El Bayadh","\u0627\u0644\u0628\u064a\u0636"],[33,"Illizi","\u0625\u0644\u064a\u0632\u064a"],
+  [34,"Bordj Bou Arreridj","\u0628\u0631\u062c \u0628\u0648\u0639\u0631\u064a\u0631\u064a\u062c"],[35,"Boumerdes","\u0628\u0648\u0645\u0631\u062f\u0627\u0633"],[36,"El Tarf","\u0627\u0644\u0637\u0627\u0631\u0641"],
+  [37,"Tindouf","\u062a\u0646\u062f\u0648\u0641"],[38,"Tissemsilt","\u062a\u064a\u0633\u0645\u0633\u064a\u0644\u062a"],[39,"El Oued","\u0627\u0644\u0648\u0627\u062f\u064a"],
+  [40,"Khenchela","\u062e\u0646\u0634\u0644\u0629"],[41,"Souk Ahras","\u0633\u0648\u0642 \u0623\u0647\u0631\u0627\u0633"],[42,"Tipaza","\u062a\u064a\u0628\u0627\u0632\u0629"],
+  [43,"Mila","\u0645\u064a\u0644\u0629"],[44,"Ain Defla","\u0639\u064a\u0646 \u0627\u0644\u062f\u0641\u0644\u0649"],[45,"Naama","\u0627\u0644\u0646\u0639\u0627\u0645\u0629"],
+  [46,"Ain Temouchent","\u0639\u064a\u0646 \u062a\u0645\u0648\u0634\u0646\u062a"],[47,"Ghardaia","\u063a\u0631\u062f\u0627\u064a\u0629"],[48,"Relizane","\u063a\u0644\u064a\u0632\u0627\u0646"],
+  [49,"El Mghair","\u0627\u0644\u0645\u063a\u064a\u0631"],[50,"El Meniaa","\u0627\u0644\u0645\u0646\u064a\u0639\u0629"],[51,"Ouled Djellal","\u0623\u0648\u0644\u0627\u062f \u062c\u0644\u0627\u0644"],
+  [52,"Bordj Baji Mokhtar","\u0628\u0631\u062c \u0628\u0627\u062c\u064a \u0645\u062e\u062a\u0627\u0631"],[53,"Beni Abbes","\u0628\u0646\u064a \u0639\u0628\u0627\u0633"],[54,"Timimoun","\u062a\u064a\u0645\u064a\u0645\u0648\u0646"],
+  [55,"Touggourt","\u062a\u0642\u0631\u062a"],[56,"Djanet","\u062c\u0627\u0646\u062a"],[57,"In Salah","\u0639\u064a\u0646 \u0635\u0627\u0644\u062d"],[58,"In Guezzam","\u0639\u064a\u0646 \u0642\u0632\u0627\u0645"]
+];
+const WILAYA_LOOKUP = (() => { const m = {}; for (const [c, fr, ar] of WILAYAS) { m[normWilaya(fr)] = c; m[normWilaya(ar)] = c; } return m; })();
+
+async function updateOrderFields(env, id, fields) {
+  const token = await accessToken(env);
+  const masks = Object.keys(fields).map(k => "updateMask.fieldPaths=" + encodeURIComponent(k)).join("&");
+  const res = await fetch(baseUrl(env) + "/orders/" + encodeURIComponent(id) + "?" + masks, {
+    method: "PATCH",
+    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: encodeFields(fields) })
+  });
+  if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("patch " + res.status + " " + t.slice(0, 300)); }
+  return true;
+}
+
+async function ordersByPhone(env, phone) {
+  const token = await accessToken(env);
+  // No orderBy here on purpose: filtering by `phone` and ordering by a DIFFERENT
+  // field (`createdAt`) would require a Firestore composite index. We filter only
+  // (single-field index, always present) and sort in JS below.
+  const q = { structuredQuery: {
+    from: [{ collectionId: "orders" }],
+    where: { fieldFilter: { field: { fieldPath: "phone" }, op: "EQUAL", value: { stringValue: phone } } },
+    limit: 25
+  } };
+  const res = await fetch(baseUrl(env) + ":runQuery", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify(q)
+  });
+  if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("runQuery " + res.status + " " + t.slice(0, 300)); }
+  const rows = await res.json();
+  const docs = rows.filter(r => r.document).map(r => {
+    const o = decodeFields(r.document.fields || {});
+    o.id = r.document.name.split("/").pop();
+    return o;
+  });
+  docs.sort((a, b) => String(b.createdAt || b.timestamp || "").localeCompare(String(a.createdAt || a.timestamp || "")));
+  return docs.slice(0, 10);
+}
+
+/* ---- EcoTrack live status ----
+ * Standard EcoTrack/Noest read endpoint. VERIFY the exact path against the
+ * "Information" button in YOUR dashboard — most tenants use one of:
+ *   POST {API_URL}/api/v1/get/trackings/info     (most common)
+ *   POST {API_URL}/api/public/get/trackings/info  (Noest-style)
+ * Body: { trackings: ["CODE1", ...] }  Header: Authorization: Bearer <token>
+ * Response: object keyed by tracking code, each with an activity/events array.
+ */
+async function ecotrackTrackings(env, codes, diag) {
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) { if (diag) diag.error = "ecotrack_not_configured"; return {}; }
+  const base = env.ECOTRACK_API_URL.replace(/\/+$/, "");
+  // Try the common path first, then the Noest-style public path as a fallback.
+  const candidates = [
+    base + "/api/v1/get/trackings/info",
+    base + "/api/public/get/trackings/info"
+  ];
+  let data = null;
+  for (const endpoint of candidates) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + env.ECOTRACK_TOKEN,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ trackings: codes, api_token: env.ECOTRACK_TOKEN })
+      });
+      const text = await res.text();
+      const attempt = { endpoint, status: res.status, body: String(text).slice(0, 1000) };
+      if (diag) diag.attempts.push(attempt);
+      if (!res.ok) continue;
+      try { data = JSON.parse(text); } catch (e) { if (diag) attempt.parseError = String(e); data = null; continue; }
+      if (data) break;
+    } catch (e) {
+      if (diag) diag.attempts.push({ endpoint, error: String(e) });
+    }
+  }
+  if (!data) return {};
+  if (diag) diag.parsedKeys = Array.isArray(data) ? ("array:" + data.length) : Object.keys(data);
+  const out = {};
+  for (const code of codes) {
+    let node = data[code] || (data.trackings && data.trackings[code]) || null;
+    if (!node && Array.isArray(data)) node = data.find(x => x && (x.tracking === code || x.tracking_id === code)) || null;
+    if (!node && data.data) node = data.data[code] || (Array.isArray(data.data) ? data.data.find(x => x && (x.tracking === code || x.tracking_id === code)) : null) || null;
+    if (!node) continue;
+    // Defensive: EcoTrack returns activity under "activity" | "activites" | "events".
+    const acts = node.activity || node.activites || node.events || (node.OrderInfo && node.OrderInfo.activity) || [];
+    const timeline = (Array.isArray(acts) ? acts : []).map(a => ({
+      date: a.date || a.created_at || a.event_date || "",
+      status: a.event || a.status || a.activity || a.libelle || ""
+    })).filter(t => t.status);
+    const lastRaw = timeline.length ? timeline[0].status : (node.status || node.last_status || "");
+    const mapped = mapEcotrackStatus(lastRaw);
+    out[code] = { stage: mapped.stage, label: mapped.label, timeline };
+  }
+  return out;
+}
+
+/* Map raw EcoTrack status text (FR/AR) to a customer-facing stage + Arabic label. */
+function mapEcotrackStatus(raw) {
+  const s = String(raw || "").toLowerCase();
+  if (/livr|livr\u00e9|delivered|\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645/.test(s)) return { stage: "delivered", label: "\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645" };
+  if (/retour|returned|\u0625\u0631\u062c\u0627\u0639|\u0631\u0627\u062c\u0639/.test(s)) return { stage: "returned", label: "\u0645\u0631\u062a\u062c\u0639" };
+  if (/sortie|out for|en livraison|\u062e\u0631\u062c|\u0644\u0644\u062a\u0648\u0635\u064a\u0644/.test(s)) return { stage: "out_for_delivery", label: "\u062e\u0631\u062c \u0644\u0644\u062a\u0648\u0635\u064a\u0644" };
+  if (/transit|achemin|exp\u00e9di|ramass|collect|\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642/.test(s)) return { stage: "in_transit", label: "\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642" };
+  if (/pr\u00eat|ready|prepar|\u062c\u0627\u0647\u0632/.test(s)) return { stage: "preparing", label: "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631" };
+  return { stage: "in_transit", label: raw || "\u0642\u064a\u062f \u0627\u0644\u0645\u0639\u0627\u0644\u062c\u0629" };
+}
+
+/* Internal status (before a parcel/tracking number exists). */
+function internalStage(st) {
+  const s = String(st || "").toLowerCase();
+  if (/\u0623\u0643\u062f|confirm/.test(s)) return "confirmed";
+  if (/\u062a\u062d\u0636\u064a\u0631|prepar/.test(s)) return "preparing";
+  if (/\u0625\u0644\u063a|cancel/.test(s)) return "cancelled";
+  return "received";
+}
+function internalLabel(st) {
+  switch (internalStage(st)) {
+    case "confirmed": return "\u062a\u0645 \u062a\u0623\u0643\u064a\u062f \u0627\u0644\u0637\u0644\u0628";
+    case "preparing": return "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631";
+    case "cancelled": return "\u0645\u0644\u063a\u0649";
+    default: return "\u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0637\u0644\u0628\u0643";
+  }
+}
+function internalTimeline(d) {
+  const t = [{ date: d.createdAt || d.timestamp || "", status: "\u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0627\u0644\u0637\u0644\u0628" }];
+  if (internalStage(d.status) === "confirmed") t.unshift({ date: "", status: "\u062a\u0645 \u0627\u0644\u062a\u0623\u0643\u064a\u062f" });
+  return t;
+}
+
+function firstName(full) { return String(full || "").trim().split(/\s+/)[0] || ""; }
+function shortRef(id) { return id ? String(id).slice(-6).toUpperCase() : ""; }
+
+/* =========================================================================
+   ORDER INTAKE  —  POST /
+   ========================================================================= */
+async function handleIntake(request, env, ctx, cors) {
+  let payload;
+  try { payload = await request.json(); } catch { return json({ error: "Bad JSON" }, 400, cors); }
+
+  // Cap payload size defensively (junk/abuse protection).
+  try { if (JSON.stringify(payload).length > 20000) return json({ error: "payload_too_large" }, 413, cors); } catch {}
+
+  if (payload.type === "review") {
+    const rp = notifyReviewTelegram(env, payload.review || {});
+    if (ctx && ctx.waitUntil) ctx.waitUntil(rp); else await rp;
+    return json({ ok: true }, 200, cors);
+  }
+
+  // CAPI-only path: server-side Purchase for orders saved client-side (homepage/
+  // cart via main.js) WITHOUT re-writing Firestore or re-sending Telegram/email.
+  // Deduped against the browser Pixel via event_id "ord_"+id.
+  if (payload.capiOnly) {
+    const o = payload.order || {};
+    o.meta = o.meta || {};
+    const cf0 = request.cf || {};
+    o.meta.ip = request.headers.get("CF-Connecting-IP") || o.meta.ip || "";
+    o.meta.country = o.meta.country || cf0.country || "";
+    o.meta.city = o.meta.city || cf0.city || "";
+    o.meta.region = o.meta.region || cf0.region || "";
+    o.meta.userAgent = o.meta.userAgent || request.headers.get("User-Agent") || "";
+    const cp = sendMetaCapi(env, o, payload.id, payload.fb || {}, request);
+    if (ctx && ctx.waitUntil) ctx.waitUntil(cp); else await cp;
+    return json({ ok: true, capi: true }, 200, cors);
+  }
+
+  const order = payload.order || {};
+  const meta = payload.meta || {};
+
+  // Minimal schema validation before persisting.
+  if (!order.phone || !PHONE_RE.test(String(order.phone))) return json({ error: "invalid_order_phone" }, 400, cors);
+  if (!order.customer || !order.wilaya) return json({ error: "missing_fields" }, 400, cors);
+  if (!Array.isArray(order.products) || order.products.length === 0) return json({ error: "empty_cart" }, 400, cors);
+
+  meta.ip = request.headers.get("CF-Connecting-IP") || "";
+  const cf = request.cf || {};
+  meta.country = cf.country || ""; meta.city = cf.city || ""; meta.region = cf.region || ""; meta.isp = cf.asOrganization || "";
+  meta.serverTimestamp = new Date().toISOString();
+
+  let watch = { phones: [], ips: [] };
+  try { watch = await readWatchlist(env); } catch {}
+  const flags = Array.isArray(payload.risk && payload.risk.flags) ? payload.risk.flags.slice() : [];
+  if (order.phone && watch.phones.includes(order.phone)) flags.push({ key: "watchlisted_phone", level: "red", label: "Phone on watchlist" });
+  if (meta.ip && watch.ips.includes(meta.ip)) flags.push({ key: "watchlisted_ip", level: "red", label: "IP on watchlist" });
+
+  try {
+    const recent = await countRecentByIp(env, meta.ip);
+    if (recent >= 3) flags.push({ key: "repeat_ip", level: recent >= 5 ? "red" : "yellow", label: "IP used " + recent + "x / 24h" });
+  } catch {}
+
+  const level = flags.some(f => f.level === "red") ? "red" : flags.some(f => f.level === "yellow") ? "yellow" : "green";
+  const score = Math.min(100, flags.reduce((a, f) => a + (f.level === "red" ? 60 : 25), 0));
+  const risk = { flags, level, score };
+
+  order.meta = meta; order.risk = risk;
+  if (!order.status) order.status = "\u062c\u062f\u064a\u062f";
+  if (!order.timestamp) order.timestamp = new Date().toISOString();
+  order.createdAt = new Date().toISOString();
+  order.ecotrackTracking = order.ecotrackTracking || null; // set later, when the parcel ships
+
+  let id = null;
+  try { id = await writeOrder(env, order); }
+  catch (e) { return json({ error: "Firestore write failed", detail: String(e) }, 500, cors); }
+
+  const notify = Promise.allSettled([ notifyTelegram(env, order, id, risk), notifyEmail(env, order, id), sendMetaCapi(env, order, id, payload.fb || {}, request) ]);
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify); else await notify;
+
+  return json({ id, ref: shortRef(id), risk }, 200, cors);
+}
+
+function json(obj, status, cors) {
+  return new Response(JSON.stringify(obj), { status: status || 200, headers: Object.assign({ "Content-Type": "application/json" }, cors || {}) });
+}
+
+/* ---------- Meta Conversions API (server-side Purchase) ----------
+   Fires a server-side "Purchase" event to Meta from the Worker, deduped against
+   the browser Pixel via a shared event_id ("ord_" + Firestore order id).
+   No-op unless META_PIXEL_ID and META_CAPI_TOKEN secrets are set. */
+async function sha256Hex(s) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+async function hashField(v) {
+  const s = String(v == null ? "" : v).trim().toLowerCase();
+  if (!s) return undefined;
+  return await sha256Hex(s);
+}
+function normPhoneE164(p) {
+  // Algerian local 0XXXXXXXXX -> 213XXXXXXXXX (digits only, no "+"), per Meta normalization.
+  let d = String(p || "").replace(/[^0-9]/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  if (d.startsWith("213")) return d;
+  if (d.startsWith("0")) return "213" + d.slice(1);
+  if (d.length === 9) return "213" + d;
+  return d;
+}
+async function sendMetaCapi(env, order, id, fb, request) {
+  try {
+    const PIXEL = env.META_PIXEL_ID, TOKEN = env.META_CAPI_TOKEN;
+    if (!PIXEL || !TOKEN) return; // not configured yet -> safe no-op
+    fb = fb || {};
+    const meta = order.meta || {};
+    const parts = String(order.customer || "").trim().split(/\s+/).filter(Boolean);
+    const first = parts.shift() || "";
+    const last = parts.join(" ");
+
+    const user_data = {};
+    const ph = await hashField(normPhoneE164(order.phone)); if (ph) user_data.ph = [ph];
+    const email = String(order.email || "").trim().toLowerCase();
+    if (email.includes("@")) { const em = await hashField(email); if (em) user_data.em = [em]; }
+    const fn = await hashField(first); if (fn) user_data.fn = [fn];
+    const ln = await hashField(last); if (ln) user_data.ln = [ln];
+    const ct = await hashField(meta.city); if (ct) user_data.ct = [ct];
+    const st = await hashField(order.wilaya || meta.region); if (st) user_data.st = [st];
+    const co = await hashField(meta.country || "dz"); if (co) user_data.country = [co];
+    const ip = meta.ip || request.headers.get("CF-Connecting-IP") || ""; if (ip) user_data.client_ip_address = ip;
+    const ua = meta.userAgent || request.headers.get("User-Agent") || ""; if (ua) user_data.client_user_agent = ua;
+    if (fb.fbp) user_data.fbp = fb.fbp;
+    if (fb.fbc) user_data.fbc = fb.fbc;
+
+    const products = Array.isArray(order.products) ? order.products : [];
+    const contents = products.map(p => ({ id: String(p.id != null ? p.id : (p.name || "")), quantity: p.quantity || 1, item_price: Number(p.price) || 0 }));
+    const num_items = products.reduce((a, p) => a + (p.quantity || 1), 0);
+
+    const event = {
+      event_name: "Purchase",
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: "ord_" + id,                 // dedup key: must match the browser Pixel
+      action_source: "website",
+      event_source_url: fb.event_source_url || ("https://" + (env.SITE_HOST || "www.robustedz.store") + "/product.html"),
+      user_data,
+      custom_data: {
+        currency: "DZD",
+        value: Number(order.totalPrice) || 0,
+        content_type: "product",
+        contents,
+        content_ids: contents.map(c => c.id),
+        num_items,
+        order_id: String(id || "")
+      }
+    };
+    const bodyObj = { data: [event] };
+    if (env.META_TEST_EVENT_CODE) bodyObj.test_event_code = env.META_TEST_EVENT_CODE;
+
+    const res = await fetch("https://graph.facebook.com/v19.0/" + PIXEL + "/events?access_token=" + encodeURIComponent(TOKEN), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bodyObj)
+    });
+    if (!res.ok) { const t = await res.text().catch(() => ""); console.error("Meta CAPI HTTP", res.status, t); }
+  } catch (e) { console.error("Meta CAPI exception", String(e)); }
+}
+
+/* ---------- Google service-account auth (RS256 JWT -> access token) ---------- */
+let _token = null, _exp = 0;
+async function accessToken(env) {
+  const now = Math.floor(Date.now() / 1000);
+  if (_token && now < _exp - 60) return _token;
+  const header = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claim = b64url(JSON.stringify({
+    iss: env.FIREBASE_CLIENT_EMAIL,
+    scope: "https://www.googleapis.com/auth/datastore",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now, exp: now + 3600
+  }));
+  const unsigned = header + "." + claim;
+  const key = await importKey(env.FIREBASE_PRIVATE_KEY);
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsigned));
+  const jwt = unsigned + "." + b64urlBytes(new Uint8Array(sig));
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + jwt
+  });
+  const data = await res.json();
+  if (!data.access_token) throw new Error("token: " + JSON.stringify(data));
+  _token = data.access_token; _exp = now + (data.expires_in || 3600);
+  return _token;
+}
+async function importKey(pem) {
+  const body = (pem || "").replace(/-----BEGIN PRIVATE KEY-----/, "").replace(/-----END PRIVATE KEY-----/, "").replace(/\\n/g, "").replace(/\s+/g, "");
+  const der = Uint8Array.from(atob(body), c => c.charCodeAt(0));
+  return crypto.subtle.importKey("pkcs8", der.buffer, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+}
+function b64url(str) { return b64urlBytes(new TextEncoder().encode(str)); }
+function b64urlBytes(bytes) {
+  let bin = ""; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/* ---------- Firestore REST ---------- */
+function baseUrl(env) { return "https://firestore.googleapis.com/v1/projects/" + env.FIREBASE_PROJECT_ID + "/databases/(default)/documents"; }
+async function writeOrder(env, order) {
+  const token = await accessToken(env);
+  const res = await fetch(baseUrl(env) + "/orders", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: encodeFields(order) })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data.name.split("/").pop();
+}
+async function readWatchlist(env) {
+  const token = await accessToken(env);
+  const res = await fetch(baseUrl(env) + "/config/watchlist", { headers: { "Authorization": "Bearer " + token } });
+  if (!res.ok) return { phones: [], ips: [] };
+  const data = await res.json();
+  const f = data.fields || {};
+  return { phones: decodeArray(f.phones), ips: decodeArray(f.ips) };
+}
+async function countRecentByIp(env, ip) {
+  if (!ip) return 0;
+  const token = await accessToken(env);
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const q = { structuredQuery: {
+    from: [{ collectionId: "orders" }],
+    where: { compositeFilter: { op: "AND", filters: [
+      { fieldFilter: { field: { fieldPath: "meta.ip" }, op: "EQUAL", value: { stringValue: ip } } },
+      { fieldFilter: { field: { fieldPath: "createdAt" }, op: "GREATER_THAN", value: { stringValue: since } } }
+    ] } }, limit: 50
+  } };
+  const res = await fetch(baseUrl(env) + ":runQuery", {
+    method: "POST", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }, body: JSON.stringify(q)
+  });
+  if (!res.ok) return 0;
+  const rows = await res.json();
+  return rows.filter(r => r.document).length;
+}
+function decodeArray(field) {
+  if (!field || !field.arrayValue || !field.arrayValue.values) return [];
+  return field.arrayValue.values.map(v => v.stringValue).filter(Boolean);
+}
+function encodeFields(obj) { const out = {}; for (const k in obj) out[k] = encodeValue(obj[k]); return out; }
+function encodeValue(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === "boolean") return { booleanValue: v };
+  if (typeof v === "number") return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+  if (typeof v === "string") return { stringValue: v };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map(encodeValue) } };
+  if (typeof v === "object") return { mapValue: { fields: encodeFields(v) } };
+  return { stringValue: String(v) };
+}
+/* Decode Firestore REST value shapes back into plain JS (used by tracking lookup). */
+function decodeFields(fields) { const out = {}; for (const k in fields) out[k] = decodeValue(fields[k]); return out; }
+function decodeValue(v) {
+  if (!v || typeof v !== "object") return v;
+  if ("nullValue" in v) return null;
+  if ("booleanValue" in v) return v.booleanValue;
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("doubleValue" in v) return v.doubleValue;
+  if ("stringValue" in v) return v.stringValue;
+  if ("timestampValue" in v) return v.timestampValue;
+  if ("arrayValue" in v) return (v.arrayValue.values || []).map(decodeValue);
+  if ("mapValue" in v) return decodeFields(v.mapValue.fields || {});
+  return null;
+}
+
+/* ---------- Notifications (unchanged) ---------- */
+async function notifyTelegram(env, order, id, risk) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+  const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const items = (order.products || []).map(p => "\u2022 " + esc(p.name) + " \u00d7" + p.quantity + " = " + ((p.price || 0) * (p.quantity || 0)).toLocaleString() + " \u062f\u062c").join("\n");
+  const riskLine = risk.level !== "green" ? ("\n\u26a0\ufe0f <b>\u062a\u0646\u0628\u064a\u0647:</b> " + esc(risk.level) + " \u2014 " + risk.flags.map(f => esc(f.label || f.key)).join("\u060c ")) : "";
+  const text =
+    "\ud83d\udecd <b>\u0637\u0644\u0628 \u062c\u062f\u064a\u062f \u2014 ROBUSTE</b>\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
+    (items ? "\ud83d\udce6 <b>\u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a:</b>\n" + items + "\n" : "") +
+    "\ud83d\udc64 <b>\u0627\u0644\u0627\u0633\u0645:</b> " + esc(order.customer) + "\n\ud83d\udcde <b>\u0627\u0644\u0647\u0627\u062a\u0641:</b> " + esc(order.phone) + "\n" +
+    "\ud83d\udccd <b>\u0627\u0644\u0648\u0644\u0627\u064a\u0629:</b> " + esc(order.wilaya) + "\n\ud83c\udfe0 <b>\u0627\u0644\u0639\u0646\u0648\u0627\u0646:</b> " + esc(order.address) + "\n" +
+    "\ud83d\udcb0 <b>\u0627\u0644\u0645\u062c\u0645\u0648\u0639:</b> " + Number(order.totalPrice || 0).toLocaleString() + " \u062f\u062c\n" +
+    "\ud83c\udf10 <b>IP:</b> " + esc(order.meta && order.meta.ip) + " (" + esc(order.meta && order.meta.country) + ")\n\ud83c\udd94 " + esc(id) + riskLine;
+  await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN + "/sendMessage", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text, parse_mode: "HTML", disable_web_page_preview: true })
+  });
+}
+async function notifyReviewTelegram(env, review) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+  const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  let r = Number(review.rating || 0); if (isNaN(r) || r < 1) r = 5; if (r > 5) r = 5;
+  let stars = ""; for (let i = 0; i < 5; i++) stars += (i < r ? "\u2b50" : "\u2606");
+  const text =
+    "\ud83d\udcdd <b>\u062a\u0642\u064a\u064a\u0645 \u062c\u062f\u064a\u062f \u2014 ROBUSTE</b>\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
+    "\ud83d\udc64 <b>\u0627\u0644\u0627\u0633\u0645:</b> " + esc(review.name || "-") + "\n" +
+    (review.productName ? ("\ud83d\udce6 <b>\u0627\u0644\u0645\u0646\u062a\u062c:</b> " + esc(review.productName) + "\n") : "") +
+    "\u2b50 <b>\u0627\u0644\u062a\u0642\u064a\u064a\u0645:</b> " + stars + " (" + r + "/5)\n\ud83d\udcac <b>\u0627\u0644\u0631\u0623\u064a:</b> " + esc(review.comment || "-");
+  await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN + "/sendMessage", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text, parse_mode: "HTML", disable_web_page_preview: true })
+  });
+}
+async function notifyEmail(env, order, id) {
+  if (!env.EMAILJS_SERVICE || !env.EMAILJS_TEMPLATE || !env.EMAILJS_PRIVATE_KEY) return;
+  const rows = (order.products || []).map(p => "<div><strong>" + p.name + "</strong> \u00d7" + p.quantity + " = " + ((p.price || 0) * (p.quantity || 0)).toLocaleString() + " \u062f.\u062c</div>").join("");
+  await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      service_id: env.EMAILJS_SERVICE, template_id: env.EMAILJS_TEMPLATE,
+      user_id: env.EMAILJS_PUBLIC_KEY, accessToken: env.EMAILJS_PRIVATE_KEY,
+      template_params: {
+        order_id: id, customer_name: order.customer, customer_phone: order.phone,
+        customer_email: order.email, wilaya: order.wilaya, address: order.address,
+        total_price: Number(order.totalPrice || 0).toLocaleString(), payment_method: order.payment,
+        order_date: new Date().toLocaleString("ar-DZ"), products: rows
+      }
+    })
+  });
+}
