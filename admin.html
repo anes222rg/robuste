@@ -98,9 +98,10 @@
     <label class="form-label fw-semibold">البريد الإلكتروني</label>
     <input type="email" id="adminEmail" class="form-control form-control-lg mb-2" dir="ltr" placeholder="admin@example.com" autocomplete="username">
     <label class="form-label fw-semibold">كلمة المرور</label>
-    <input type="password" id="adminPass" class="form-control form-control-lg" placeholder="........" autocomplete="current-password">
+    <input type="password" id="adminPass" class="form-control form-control-lg" placeholder="........" autocomplete="current-password" onkeydown="if(event.key==='Enter'){try{window.tryLogin&&window.tryLogin()}catch(e){}}">
     <div id="loginError" class="text-danger mt-2" style="font-size:.85rem;display:none;"></div>
-    <button id="loginBtn" class="btn btn-brand btn-lg w-100 mt-3"><i class="bi bi-box-arrow-in-left"></i> دخول</button>
+    <button id="loginBtn" type="button" onclick="try{window.tryLogin&&window.tryLogin()}catch(e){}" class="btn btn-brand btn-lg w-100 mt-3"><i class="bi bi-box-arrow-in-left"></i> دخول</button>
+    <div class="text-center text-muted mt-2" style="font-size:.7rem;letter-spacing:.5px;">ROBUSTE · v2.2</div>
   </div>
 </div>
 ​
@@ -179,7 +180,7 @@ var PRODUCTS = [
   {id:14,title:"ROBOT 26F",sell:14200,cat:"cuisine",stock:5,code:"R26",dad:10900},
   {id:15,title:"CENTRALE VAPEUR SMART 2400W",sell:12600,cat:"maison",stock:7,code:"",dad:null},
   {id:16,title:"ASPIRATEUR SOUFFLEUR A MAIN AM80",sell:5100,cat:"jardin",stock:14,code:"ASP-SOUF-MAIN",dad:3500},
-  {id:17,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22200,cat:"maison",stock:3,code:"A00000455",dad:19200},
+  {id:17,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22900,cat:"maison",stock:3,code:"A00000455",dad:19200},
   {id:19,title:"CAFETIERE ELECTRIQUE CBL15B",sell:15300,cat:"café",stock:9,code:"CFTRE",dad:11800},
   {id:20,title:"CAFETIERE ELECTRIQUE C850",sell:14300,cat:"café",stock:11,code:"CFE1.8",dad:11000},
   {id:21,title:"CAFETIERE ELECTRIQUE A BRAS MOKA 850 W",sell:14300,cat:"café",stock:6,code:"A00000362",dad:11000},
@@ -192,8 +193,8 @@ var PRODUCTS = [
   {id:27,title:"PLANCHE MODERNE",sell:2900,cat:"cuisine",stock:25,code:"",dad:null},
   {id:28,title:"PANINEUSE 2000W",sell:14500,cat:"cuisine",stock:6,code:"",dad:null},
   {id:100,title:"Defroisseur Vapeur",sell:6600,cat:"maison",stock:15,code:"A00000323",dad:5200},
-  {id:101,title:"ASPIRATEUR SOUFFLEUR A MAIN",sell:4900,cat:"maison",stock:8,code:"ASP-SOUF-MAIN",dad:3500},
-  {id:102,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22200,cat:"maison",stock:5,code:"A00000455",dad:19200},
+  {id:101,title:"ASPIRATEUR SOUFFLEUR A MAIN",sell:5100,cat:"maison",stock:8,code:"ASP-SOUF-MAIN",dad:3500},
+  {id:102,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22900,cat:"maison",stock:5,code:"A00000455",dad:19200},
   {id:103,title:"ROBUSTE PANINEUSE ET GRILL 1000W",sell:6900,cat:"cuisine",stock:10,code:"",dad:null},
   {id:104,title:"Autocuiseur & Marmite 2 en 1 – 6 litres",sell:12500,cat:"cuisine",stock:8,code:"A00000336",dad:10600},
   {id:105,title:"ROBO 26F",sell:15900,cat:"cuisine",stock:5,code:"R26",dad:10900}
@@ -268,7 +269,7 @@ function effectiveCost(d){if(d.wholesaleCost!=null&&isFinite(Number(d.wholesaleC
 function orderProfit(d){var c=effectiveCost(d);if(!c.complete)return null;return orderTotal(d)-deliveryOf(d)-c.cost;}
 function settlementDone(d){return d.settlementStatus==='settled';}
 /* ===== delivery cost (wilaya -> [home, office]) — same table as the storefront ===== */
-var DELIVERY_FEES={"أدرار":[1200,600],"الشلف":[700,400],"الأغواط":[800,500],"أم البواقي":[700,400],"باتنة":[700,400],"بجاية":[650,400],"بسكرة":[800,470],"بشار":[1200,650],"البليدة":[650,350],"البويرة":[650,400],"تمنراست":[1600,800],"تبسة":[750,400],"تلمسان":[750,400],"تيارت":[750,400],"تيزي وزو":[650,400],"الجزائر":[500,350],"الجلفة":[800,470],"جيجل":[700,400],"سطيف":[500,350],"سعيدة":[750,400],"سكيكدة":[700,400],"سيدي بلعباس":[700,400],"عنابة":[650,400],"قالمة":[700,400],"قسنطينة":[650,400],"المدية":[700,400],"مستغانم":[700,400],"المسيلة":[700,400],"معسكر":[700,400],"ورقلة":[800,500],"وهران":[650,400],"البيض":[950,600],"إليزي":[1600,800],"برج بوعريريج":[650,400],"بومرداس":[600,400],"الطارف":[700,400],"تيندوف":[1200,600],"تيسمسيلت":[700,400],"الوادي":[800,500],"خنشلة":[750,400],"سوق أهراس":[750,400],"تيبازة":[650,400],"ميلة":[650,400],"عين الدفلى":[650,400],"النعامة":[900,600],"عين تموشنت":[700,400],"غرداية":[900,500],"غليزان":[700,400],"تيميمون":[1300,650],"أولاد جلال":[900,550],"بني عباس":[1300,650],"عين صالح":[1300,700],"توقرت":[850,600],"المغير":[850,null],"المن��عة":[900,500]};
+var DELIVERY_FEES={"أدرار":[1200,600],"الشلف":[700,400],"الأغواط":[800,500],"أم البواقي":[700,400],"باتنة":[700,400],"بجاية":[650,400],"بسكرة":[800,470],"بشار":[1200,650],"البليدة":[650,350],"البويرة":[650,400],"تمنراست":[1600,800],"تبسة":[750,400],"تلمسان":[750,400],"تيارت":[750,400],"تيزي وزو":[650,400],"الجزائر":[500,350],"الجلفة":[800,470],"جيجل":[700,400],"سطيف":[500,350],"سعيدة":[750,400],"سكيكدة":[700,400],"سيدي بلعباس":[700,400],"عنابة":[650,400],"قالمة":[700,400],"قسنطينة":[650,400],"المدية":[700,400],"مستغانم":[700,400],"المسيلة":[700,400],"معسكر":[700,400],"ورقلة":[800,500],"وهران":[650,400],"البيض":[950,600],"إليزي":[1600,800],"برج بوعريريج":[650,400],"بومرداس":[600,400],"الطارف":[700,400],"تيندوف":[1200,600],"تيسمسيلت":[700,400],"الوادي":[800,500],"خنشلة":[750,400],"سوق أهراس":[750,400],"تيبازة":[650,400],"ميلة":[650,400],"عين الدفلى":[650,400],"النعامة":[900,600],"عين تموشنت":[700,400],"غرداية":[900,500],"غليزان":[700,400],"تيميمون":[1300,650],"أولاد جلال":[900,550],"بني عباس":[1300,650],"عين صالح":[1300,700],"توقرت":[850,600],"المغير":[850,null],"��لمن��عة":[900,500]};
 function normWil(s){var x=String(s||'').trim();x=x.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/^ال/,'').replace(/\s+/g,'');return x;}
 var _feeByNorm={};Object.keys(DELIVERY_FEES).forEach(function(k){_feeByNorm[normWil(k)]=DELIVERY_FEES[k];});
 function deliveryFeeFor(w,t){var f=DELIVERY_FEES[String(w||'').trim()]||_feeByNorm[normWil(w)];if(!f)return null;var home=f[0],office=f[1];if(t==='home')return home;return (office==null?home:office);}
@@ -491,7 +492,7 @@ window.__renderRegistry.fake=function(){
   var host=$("sec-fake");
   var q=fFilter.trim().toLowerCase();
   var rows=allOrders.filter(function(o){var d=o.data;if(q){var hay=(customerName(d)+' '+orderPhone(d)+' '+o.id).toLowerCase();return hay.indexOf(q)!==-1;}return inSet(EXCLUDE_STATUS,statusKey(d))||isArchived(d);});
-  var html='<div class="alert alert-warning py-2 mb-3" style="font-size:.84rem;"><i class="bi bi-shield-exclamation"></i> علّم الطلبات الوهمية أو التجريبية لاستبعادها من الأرباح والإحصائيات. الأرشفة تخفيها بأمان. الحذف نهائي — استعمله فقط لطلبات الاختبار.</div>';
+  var html='<div class="alert alert-warning py-2 mb-3" style="font-size:.84rem;"><i class="bi bi-shield-exclamation"></i> علّم الطلبات الوهمية أو التجريبية لاستبعادها من الأرباح والإحصائيات. الأرشفة تخفيها بأمان. الحذف نها��ي — استعمله فقط لطلبات الاختبار.</div>';
   html+='<div class="panel mb-3"><input id="fSearch" class="form-control" placeholder="ابحث في كل الطلبات لتعليمها وهمية/تجريبية..." value="'+esc(fFilter)+'"></div>';
   html+='<div class="table-wrap">';
   if(!rows.length)html+='<div class="empty"><i class="bi bi-shield-check"></i><div class="mt-2">لا توجد طلبات وهمية أو تجريبية أو مؤرشفة.'+(q?'':' ابحث بالأعلى لتعليم أي طلب.')+'</div></div>';
@@ -536,7 +537,7 @@ window.__renderRegistry.settings=function(){
     +'<div class="info-row"><span class="k">عدد الطلبات المحمّلة</span><span class="v">'+fmtNum(allOrders.length)+'</span></div>'
     +'</div></div>';
   html+='<div class="col-lg-6"><div class="panel"><h6><i class="bi bi-telegram"></i> إشعارات تيليجرام</h6><p style="font-size:.85rem;color:#6b7280;margin:0">تيليجرام يعمل كإشعارات فقط (طلب جديد / تقييم) من الـ Worker. هذه اللوحة هي مصدر الحقيقة للإدارة — لا تدر أعمالك من رسائل واتساب/تيليجرام. الردود التي تكتبها هناك لا تُحفظ؛ استعمل «ملاحظات» داخل صفحة الطلب بدلاً منها.</p></div>'
-    +'<div class="panel mt-3"><h6><i class="bi bi-shield-lock"></i> حماية الشحن</h6><p style="font-size:.85rem;color:#6b7280;margin:0">زر الإرسال إل�� Ecotrack يستعمل تسجيل دخولك (رمز Firebase). لقصر الشحن على بريدك فقط، أضف متغيّر <code>ADMIN_EMAIL</code> في إعدادات الـ Worker بقي��ة بريدك.</p></div></div>';
+    +'<div class="panel mt-3"><h6><i class="bi bi-shield-lock"></i> حماية الشحن</h6><p style="font-size:.85rem;color:#6b7280;margin:0">زر الإرسال إل�� Ecotrack يستعمل تسجيل دخولك (رمز Firebase). لقصر الشحن على بريدك فقط، أضف متغيّر <code>ADMIN_EMAIL</code> في إعدادات الـ Worker ب��ي��ة بريدك.</p></div></div>';
   html+='<div class="col-12"><div class="panel"><h6><i class="bi bi-file-earmark-code"></i> قواعد Firestore المقترحة</h6><p style="font-size:.82rem;color:#6b7280">لتعمل كل الميزات (قراءة/تعديل/حذف الطلبات + حفظ أسعار الجملة في السحابة)، انشر هذه القواعد:</p><pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:10px;font-size:.76rem;overflow:auto;" dir="ltr">'+esc(rules)+'</pre></div></div>';
   html+='</div>';host.innerHTML=html;
 };
@@ -608,10 +609,10 @@ function boot(){
     if(auth)auth.onAuthStateChanged(onAuth);
   }catch(e){var le=document.getElementById('loginError');if(le){le.style.display='block';le.textContent='\u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u062a\u0634\u063a\u064a\u0644: '+((e&&e.message)||e);}}
 }
+try{window.tryLogin=tryLogin;window.__boot=boot;}catch(_){}
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot);}else{boot();}
 ​
 })();
 </script>
 </body>
 </html>
-​
