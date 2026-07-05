@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Any authenticated admin (tighten to a specific email below when ready).
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // config/watchlist holds { phones: [...], ips: [...] } written by the admin
+    // panel. get()/exists() inside rules bypass the config read-lock, so we can
+    // hard-reject blocked phones at the database level.
+    function phoneBlocked(phone) {
+      return exists(/databases/$(database)/documents/config/watchlist)
+        && get(/databases/$(database)/documents/config/watchlist).data.get('phones', []).hasAny([phone]);
+    }
+
+    // A create must look like a genuine order coming from the storefront.
+    function validNewOrder() {
+      return request.resource.data.customer is string
+        && request.resource.data.customer.size() >= 3
+        && request.resource.data.customer.size() <= 80
+        && request.resource.data.phone is string
+        && request.resource.data.phone.matches('^0[5-7][0-9]{8}$')
+        && request.resource.data.wilaya is string
+        && request.resource.data.wilaya.size() >= 2
+        && request.resource.data.address is string
+        && request.resource.data.address.size() >= 5
+        && (!('status' in request.resource.data) || request.resource.data.status == 'جديد')
+        && !phoneBlocked(request.resource.data.phone);
+    }
+
+    match /orders/{orderId} {
+      // Public storefront may create, but only well-formed, non-blocked orders.
+      allow create: if validNewOrder();
+      // Only the admin can read customer data and change order status.
+      allow read, update: if isAdmin();
+      // Deletion is never allowed from the client.
+      allow delete: if false;
+    }
+
+    // Admin block/unblock list. Server (Admin SDK) always bypasses these rules.
+    match /config/watchlist {
+      allow read, write: if isAdmin();
+    }
+
+    // All other config docs stay server-only.
+    match /config/{doc} {
+      allow read, write: if false;
+    }
+
+    // Product reviews are public to read, server-only to write.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Default deny.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
