@@ -904,7 +904,7 @@ img{max-width:100%;}
 
 <!-- مودا���� الطلب -->
 <div class="modal fade" id="orderModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"><i class="bi bi-bag-check-fill"></i> تأكيد الطلب</h5>
@@ -925,7 +925,7 @@ img{max-width:100%;}
                     </div>
                     <div class="row">
                         <div class="col-md-6 order-field"><label><i class="bi bi-geo-alt"></i> الولاية *</label><select id="wilayaSelect" class="order-input" required onchange="updateOrderSummary();onWilayaCommune()"></select></div>
-                        <div class="col-md-6 order-field"><label><i class="bi bi-buildings"></i> البلدية *</label><select id="baladiyaInput" class="order-input" required onchange="updateOrderSummary()"><option value="" disabled selected>اختر الولاية أولاً</option></select></div>
+                        <div class="col-md-6 order-field"><label><i class="bi bi-buildings"></i> البلدية *</label><input type="text" id="baladiyaInput" class="order-input" required placeholder="اكتب اسم بلديتك"></div>
                     </div>
                     <div class="order-field"><label><i class="bi bi-house-door"></i> العنوان *</label><textarea id="address" class="order-input" rows="2" required placeholder="الحي، الشارع، رقم المنزل..."></textarea></div>
                     <div class="order-pay-option"><i class="bi bi-cash-coin"></i><input class="form-check-input m-0" type="radio" name="payMethod" value="الدفع عند الاستلام" checked id="payCod"> <label class="m-0" for="payCod">الدفع عند الاستلام</label></div>
@@ -1049,7 +1049,6 @@ function onWilayaCommune(){
     }).catch(function(){ communeFallbackToText(); });
 }
 window.onWilayaCommune = onWilayaCommune;
-try{ loadCommunes(); }catch(e){}
 
 // إدارة السلة
 let cart = [];
