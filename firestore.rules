@@ -2,9 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Any authenticated admin (tighten to a specific email below when ready).
+    // Only the store owner's account counts as admin.
     function isAdmin() {
-      return request.auth != null;
+      return request.auth != null
+        && request.auth.token.email == 'anescareer@gmail.com';
     }
 
     // config/watchlist holds { phones: [...], ips: [...] } written by the admin
