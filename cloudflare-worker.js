@@ -16,6 +16,33 @@
  */
 
 const PHONE_RE = /^0[5-7][0-9]{8}$/;
+const COOLDOWN_SECONDS = 120;
+
+// Rejects placeholder / troll names. Requires exactly two words, each with >=2 letters.
+function isRealName(name) {
+  const s = String(name || "").trim();
+  if (s.length < 4) return false;
+  const parts = s.split(/\s+/).filter(w => (w.match(/\p{L}/gu) || []).length >= 2);
+  return parts.length === 2;
+}
+
+// Rejects lazy / fake phone numbers (all-same digit, too few distinct digits, long sequential runs).
+function isLazyPhone(phone) {
+  const d = String(phone || "").replace(/\D/g, "");
+  if (d.length !== 10) return true;
+  const distinct = new Set(d.split("")).size;
+  if (distinct <= 2) return true;
+  let asc = 1, desc = 1, maxAsc = 1, maxDesc = 1;
+  for (let i = 1; i < d.length; i++) {
+    const delta = d.charCodeAt(i) - d.charCodeAt(i - 1);
+    asc = delta === 1 ? asc + 1 : 1;
+    desc = delta === -1 ? desc + 1 : 1;
+    maxAsc = Math.max(maxAsc, asc);
+    maxDesc = Math.max(maxDesc, desc);
+  }
+  if (maxAsc >= 6 || maxDesc >= 6) return true;
+  return false;
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -23,7 +50,7 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key"
+      "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, Authorization"
     };
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -460,14 +487,26 @@ async function handleIntake(request, env, ctx, cors) {
   const meta = payload.meta || {};
 
   // Minimal schema validation before persisting.
-  if (!order.phone || !PHONE_RE.test(String(order.phone))) return json({ error: "invalid_order_phone" }, 400, cors);
-  if (!order.customer || !order.wilaya) return json({ error: "missing_fields" }, 400, cors);
-  if (!Array.isArray(order.products) || order.products.length === 0) return json({ error: "empty_cart" }, 400, cors);
+  if (!order.phone || !PHONE_RE.test(String(order.phone))) return json({ error: "invalid_order_phone", message: "\u0631\u0642\u0645 \u0647\u0627\u062a\u0641 \u063a\u064a\u0631 \u0635\u062d\u064a\u062d" }, 400, cors);
+  if (isLazyPhone(order.phone)) return json({ error: "suspicious_phone", message: "\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0631\u0642\u0645 \u0647\u0627\u062a\u0641 \u062d\u0642\u064a\u0642\u064a" }, 400, cors);
+  if (!order.customer) return json({ error: "missing_fields", message: "\u064a\u0631\u062c\u0649 \u0645\u0644\u0621 \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0644 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629" }, 400, cors);
+  if (!isRealName(order.customer)) return json({ error: "invalid_name", message: "\u0627\u0644\u0631\u062c\u0627\u0621 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0627\u0633\u0645 \u0648\u0627\u0644\u0644\u0642\u0628 (\u0643\u0644\u0645\u062a\u0627\u0646 \u0641\u0642\u0637)" }, 400, cors);
+  if (!order.wilaya) return json({ error: "missing_wilaya", message: "\u064a\u0631\u062c\u0649 \u0627\u062e\u062a\u064a\u0627\u0631 \u0627\u0644\u0648\u0644\u0627\u064a\u0629" }, 400, cors);
+  if (!order.address || String(order.address).trim().length < 8) return json({ error: "missing_address", message: "\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0628\u0634\u0643\u0644 \u0648\u0627\u0636\u062d" }, 400, cors);
+  if (!Array.isArray(order.products) || order.products.length === 0) return json({ error: "empty_cart", message: "\u0627\u0644\u0633\u0644\u0629 \u0641\u0627\u0631\u063a\u0629" }, 400, cors);
 
   meta.ip = request.headers.get("CF-Connecting-IP") || "";
   const cf = request.cf || {};
   meta.country = cf.country || ""; meta.city = cf.city || ""; meta.region = cf.region || ""; meta.isp = cf.asOrganization || "";
   meta.serverTimestamp = new Date().toISOString();
+
+  // Cooldown: reject a second order from the same phone or IP within COOLDOWN_SECONDS.
+  try {
+    const sinceIso = new Date(Date.now() - COOLDOWN_SECONDS * 1000).toISOString();
+    const dupPhone = await recentCount(env, "phone", order.phone, sinceIso, 1);
+    const dupIp = meta.ip ? await recentCount(env, "meta.ip", meta.ip, sinceIso, 1) : 0;
+    if (dupPhone > 0 || dupIp > 0) return json({ error: "too_soon", message: "\u0644\u0642\u062f \u0623\u0631\u0633\u0644\u062a \u0637\u0644\u0628\u0627\u064b \u0644\u0644\u062a\u0648\u060c \u064a\u0631\u062c\u0649 \u0627\u0644\u0627\u0646\u062a\u0638\u0627\u0631 \u0642\u0644\u064a\u0644\u0627\u064b \u0642\u0628\u0644 \u0625\u0631\u0633\u0627\u0644 \u0637\u0644\u0628 \u0622\u062e\u0631" }, 429, cors);
+  } catch {}
 
   let watch = { phones: [], ips: [] };
   try { watch = await readWatchlist(env); } catch {}
@@ -651,6 +690,24 @@ async function countRecentByIp(env, ip) {
       { fieldFilter: { field: { fieldPath: "meta.ip" }, op: "EQUAL", value: { stringValue: ip } } },
       { fieldFilter: { field: { fieldPath: "createdAt" }, op: "GREATER_THAN", value: { stringValue: since } } }
     ] } }, limit: 50
+  } };
+  const res = await fetch(baseUrl(env) + ":runQuery", {
+    method: "POST", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }, body: JSON.stringify(q)
+  });
+  if (!res.ok) return 0;
+  const rows = await res.json();
+  return rows.filter(r => r.document).length;
+}
+// Generic: count recent orders where fieldPath == value and createdAt > sinceIso.
+async function recentCount(env, fieldPath, value, sinceIso, limit) {
+  if (!value) return 0;
+  const token = await accessToken(env);
+  const q = { structuredQuery: {
+    from: [{ collectionId: "orders" }],
+    where: { compositeFilter: { op: "AND", filters: [
+      { fieldFilter: { field: { fieldPath: fieldPath }, op: "EQUAL", value: { stringValue: String(value) } } },
+      { fieldFilter: { field: { fieldPath: "createdAt" }, op: "GREATER_THAN", value: { stringValue: sinceIso } } }
+    ] } }, limit: limit || 5
   } };
   const res = await fetch(baseUrl(env) + ":runQuery", {
     method: "POST", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }, body: JSON.stringify(q)

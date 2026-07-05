@@ -183,7 +183,7 @@ var PRODUCTS = [
   {id:17,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22900,cat:"maison",stock:3,code:"A00000455",dad:19200},
   {id:19,title:"CAFETIERE ELECTRIQUE CBL15B",sell:15300,cat:"café",stock:9,code:"CFTRE",dad:11800},
   {id:20,title:"CAFETIERE ELECTRIQUE C850",sell:14300,cat:"café",stock:11,code:"CFE1.8",dad:11000},
-  {id:21,title:"CAFETIERE ELECTRIQUE A BRAS MOKA 850 W",sell:13900,cat:"café",stock:6,code:"A00000362",dad:11000},
+  {id:21,title:"CAFETIERE ELECTRIQUE A BRAS MOKA 850 W",sell:13200,cat:"café",stock:6,code:"A00000362",dad:11000},
   {id:22,title:"CAFETIERE ELECTRIQUE A BRAS ROMA 1000 W",sell:16600,cat:"café",stock:4,code:"A00000363",dad:12800},
   {id:23,title:"FRITEUSE ELECTRIQUE SANS HUILE 3.2L",sell:13000,cat:"cuisine",stock:8,code:"",dad:null},
   {id:24,title:"FRITEUSE ELECTRIQUE SANS HUILE MAX 10L",sell:24000,cat:"cuisine",stock:3,code:"",dad:null},
@@ -577,6 +577,7 @@ function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=o
       +'<button class="btn btn-sm btn-outline-danger" id="mFake">وهمي</button>'
       +'<button class="btn btn-sm btn-outline-secondary" id="mTest">تجريبي</button>'
       +'<button class="btn btn-sm btn-outline-warning" id="mArch">'+(arch?'إلغاء الأرشفة':'أرشفة')+'</button>'
+      +'<button class="btn btn-sm btn-danger" id="mBlock">🚫 حظر الزبون</button>'
       +'</div></div>'
       +'</div>'
     +'</div></div>';
@@ -587,6 +588,7 @@ function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=o
   $("mFake").onclick=function(){patchOrder(id,{status:'وهمي'}).then(function(){orderModal.hide();renderAll();});};
   $("mTest").onclick=function(){patchOrder(id,{status:'تجريبي'}).then(function(){orderModal.hide();renderAll();});};
   $("mArch").onclick=function(){patchOrder(id,{archived:!arch}).then(function(){orderModal.hide();renderAll();});};
+  var blockBtn=$("mBlock");if(blockBtn)blockBtn.onclick=function(){if(!confirm('حظر هذا الزبون؟ سيتم وضع رقمه و IP في القائمة السوداء وتعليم الطلب كوهمي.'))return;blockBtn.disabled=true;var bip=(d.meta&&d.meta.ip)||'';blockCustomer(phone,bip).then(function(){return patchOrder(id,{status:'وهمي'});}).then(function(){orderModal.hide();renderAll();}).catch(function(){blockBtn.disabled=false;alert('تعذر الحظر');});};
   var addBtn=$("mNoteAdd");if(addBtn)addBtn.onclick=function(){var inp=$("mNoteInput");var t=(inp.value||'').trim();if(!t)return;var cur=Array.isArray(d.adminNotes)?d.adminNotes.slice():[];cur.push({text:t,at:new Date().toISOString(),by:(auth.currentUser&&auth.currentUser.email)||''});addBtn.disabled=true;patchOrder(id,{adminNotes:cur}).then(function(){openOrder(id);}).catch(function(){addBtn.disabled=false;alert('تعذر حفظ الملاحظة');});};
   var mdtSel=$("mShipDt");function updModalFee(){var el=$("mShipFee");if(el)el.textContent=('توصيل مدفوع: '+fmtMoney(deliveryOf(d)));}if(mdtSel){updModalFee();}
   var sb=$("mShip");if(sb)sb.onclick=function(){var msg=$("mShipMsg");var dt=mdtSel?mdtSel.value:'office';var commune=orderCommune(d);if(!commune){commune=(prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:')||'').trim();if(!commune)return;}var c=shipChecks(d,commune);if(!c.ok){if(msg)msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}sb.disabled=true;sb.innerHTML='<span class="spinner-border spinner-border-sm"></span>';var ov={stop_desk:stopDeskFor(dt)};if(commune&&!orderCommune(d))ov.commune=commune;autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}renderAll();openOrder(id);}).catch(function(err){sb.disabled=false;sb.innerHTML='<i class="bi bi-truck"></i> أرسل إلى Ecotrack';if(msg)msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message,err&&err.detail))+'</span>';});};
@@ -594,6 +596,8 @@ function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=o
 
 /* ============ shared write ============ */
 function patchOrder(id,patch){patch.updatedAt=new Date().toISOString();return db.collection('orders').doc(id).update(patch).then(function(){var r=getRec(id);if(r)Object.assign(r.data,patch);});}
+/* Add a phone + IP to config/watchlist so future orders from them are auto-flagged. */
+function blockCustomer(phone,ip){var u={};if(phone)u.phones=firebase.firestore.FieldValue.arrayUnion(phone);if(ip)u.ips=firebase.firestore.FieldValue.arrayUnion(ip);if(!u.phones&&!u.ips)return Promise.resolve();return db.collection('config').doc('watchlist').set(u,{merge:true});}
 
 /* ============ init ============ */
 function boot(){

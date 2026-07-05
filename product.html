@@ -924,10 +924,10 @@ img{max-width:100%;}
                         <div class="col-md-6 order-field"><label><i class="bi bi-telephone"></i> رقم الهاتف *</label><input type="tel" id="phone" class="order-input" inputmode="numeric" required></div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 order-field"><label><i class="bi bi-geo-alt"></i> الولاية *</label><select id="wilayaSelect" class="order-input" required onchange="updateOrderSummary()"></select></div>
-                        <div class="col-md-6 order-field"><label><i class="bi bi-buildings"></i> البلدية</label><input type="text" id="baladiyaInput" class="order-input" placeholder="اسم البلدية"></div>
+                        <div class="col-md-6 order-field"><label><i class="bi bi-geo-alt"></i> الولاية *</label><select id="wilayaSelect" class="order-input" required onchange="updateOrderSummary();onWilayaCommune()"></select></div>
+                        <div class="col-md-6 order-field"><label><i class="bi bi-buildings"></i> البلدية *</label><select id="baladiyaInput" class="order-input" required onchange="updateOrderSummary()"><option value="" disabled selected>اختر الولاية أولاً</option></select></div>
                     </div>
-                    <div class="order-field"><label><i class="bi bi-house-door"></i> العنوان</label><textarea id="address" class="order-input" rows="2" placeholder="الحي، الشارع، رقم المنزل..."></textarea></div>
+                    <div class="order-field"><label><i class="bi bi-house-door"></i> العنوان *</label><textarea id="address" class="order-input" rows="2" required placeholder="الحي، الشارع، رقم المنزل..."></textarea></div>
                     <div class="order-pay-option"><i class="bi bi-cash-coin"></i><input class="form-check-input m-0" type="radio" name="payMethod" value="الدفع عند الاستلام" checked id="payCod"> <label class="m-0" for="payCod">الدفع عند الاستلام</label></div>
                     <div class="order-field"><label><i class="bi bi-truck"></i> طريقة التوصيل *</label><div class="delivery-type-group"><label class="dt-opt"><input type="radio" name="deliveryType" value="home" onchange="updateOrderSummary()"> 🏠 للمن��ل</label><label class="dt-opt"><input type="radio" name="deliveryType" value="office" checked onchange="updateOrderSummary()"> 🏢 للمكتب</label></div></div>
                     <div class="order-summary-box"><div class="osb-row"><span>المجموع الفرعي</span><span id="sumSubtotal">0 د.ج</span></div><div class="osb-row"><span><i class="bi bi-truck"></i> سعر التوصيل</span><span id="sumDelivery">اختر الولاية</span></div><div class="osb-row osb-total"><span>المجموع الإجمالي</span><span id="sumTotal">0 د.ج</span></div></div>
@@ -1006,6 +1006,51 @@ function onCartWilayaChange(){ try{ var w=(document.getElementById('cartWilaya')
 function onCartDtChange(){ renderCartItems(); }
 window.updateOrderSummary=updateOrderSummary; window.updateExpressSummary=updateExpressSummary; window.onCartWilayaChange=onCartWilayaChange; window.onCartDtChange=onCartDtChange; window.deliveryFeeFor=deliveryFeeFor;
 
+/* ===== Commune (baladiya) dependent dropdown =====
+   Loads the official Algeria wilaya->commune list once from a CDN, caches it in
+   localStorage, then fills the commune <select> based on the chosen wilaya (matched
+   by wilaya code, so name spelling/spacing never matters). If the list cannot load,
+   the <select> degrades to a free-text input so ordering never breaks. */
+var ROBUSTE_COMMUNES_URL = 'https://cdn.jsdelivr.net/gh/othmanus/algeria-cities@master/json/ar/algeria_cities.json';
+var _robCommuneMap = null;
+function loadCommunes(){
+    if(_robCommuneMap) return Promise.resolve(_robCommuneMap);
+    try{ var cached = localStorage.getItem('robuste_communes_v1'); if(cached){ _robCommuneMap = JSON.parse(cached); return Promise.resolve(_robCommuneMap); } }catch(e){}
+    return fetch(ROBUSTE_COMMUNES_URL).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); }).then(function(arr){
+        var m = {};
+        (arr||[]).forEach(function(x){ var code = parseInt(x.wilaya_code,10); if(!code) return; var nm = String(x.commune_name||'').trim(); if(!nm) return; if(!m[code]) m[code]=[]; if(m[code].indexOf(nm)<0) m[code].push(nm); });
+        Object.keys(m).forEach(function(k){ m[k].sort(function(a,b){ return a.localeCompare(b,'ar'); }); });
+        _robCommuneMap = m; try{ localStorage.setItem('robuste_communes_v1', JSON.stringify(m)); }catch(e){}
+        return m;
+    });
+}
+function communeFallbackToText(){
+    try{
+        var sel = document.getElementById('baladiyaInput');
+        if(sel && sel.tagName === 'SELECT'){
+            var inp = document.createElement('input');
+            inp.type='text'; inp.id='baladiyaInput'; inp.className=sel.className; inp.placeholder='اسم البلدية'; inp.setAttribute('required','required');
+            sel.parentNode.replaceChild(inp, sel);
+        }
+    }catch(e){}
+}
+function onWilayaCommune(){
+    var sel = document.getElementById('baladiyaInput');
+    if(!sel || sel.tagName !== 'SELECT') return;
+    var ws = document.getElementById('wilayaSelect');
+    var wilaya = ws ? ws.value : '';
+    var code = wilayas.indexOf(wilaya) + 1;
+    loadCommunes().then(function(m){
+        var list = (code>0 && m[code]) ? m[code] : [];
+        var prev = sel.value;
+        sel.innerHTML='';
+        var ph = document.createElement('option'); ph.value=''; ph.disabled=true; ph.selected=true; ph.textContent = list.length ? 'اختر البلدية' : 'اختر الولاية أولاً'; sel.appendChild(ph);
+        list.forEach(function(nm){ var o=document.createElement('option'); o.value=nm; o.textContent=nm; if(nm===prev) o.selected=true; sel.appendChild(o); });
+    }).catch(function(){ communeFallbackToText(); });
+}
+window.onWilayaCommune = onWilayaCommune;
+try{ loadCommunes(); }catch(e){}
+
 // إدارة السلة
 let cart = [];
 function loadCart() { try { const c = localStorage.getItem('robuste_cart'); if(c) cart = JSON.parse(c); } catch(e){} updateCartUI(); }
@@ -1064,6 +1109,7 @@ function checkoutFromCart() {
     document.getElementById('modalProductImg').src = first.image;
     try{ var _cw=(document.getElementById('cartWilaya')||{}).value; if(_cw && document.getElementById('wilayaSelect')) document.getElementById('wilayaSelect').value=_cw; var _cdt=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value; if(_cdt){ var _mr=document.querySelector('input[name="deliveryType"][value="'+_cdt+'"]'); if(_mr)_mr.checked=true; } }catch(e){}
     try{ updateOrderSummary(); }catch(e){}
+    try{ onWilayaCommune(); }catch(e){}
     new bootstrap.Modal(document.getElementById('orderModal')).show();
 }
 function showOrderSuccess(orderId, phone, total) {
@@ -1124,7 +1170,10 @@ async function submitOrderFinal() {
     var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
     const totalPrice = subtotal + deliveryFee;
     if(!fullName || !phone || !wilaya) { showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
+    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length !== 2) { showToast("يرجى إدخال الاسم واللقب (كلمتان فقط)", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    if(!baladiya) { showToast("يرجى اختيار البلدية", "error"); return; }
+    if(!address || address.length < 8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
     var guard = antiSpamCheck(phone + '|' + totalPrice);
     if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingFinal = true;
