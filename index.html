@@ -630,8 +630,14 @@ gtag('config', 'G-GREM5BTR7T');
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="address" class="form-label">العنوان</label>
-                        <textarea class="form-control" id="address" rows="2"></textarea>
+                        <label for="baladiyaInput" class="form-label">البلدية<span class="text-danger">*</span></label>
+                        <select class="form-select" id="baladiyaInput" required aria-required="true">
+                            <option value="" disabled selected>اختر الولاية أولاً</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">العنوان<span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="address" rows="2" required aria-required="true" placeholder="أدخل عنوانك بالتفصيل (الحي، الشارع، رقم المنزل)"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
