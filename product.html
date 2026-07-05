@@ -989,7 +989,7 @@ function initVendors() {
     if (typeof AOS !== 'undefined') { try { AOS.init({ duration: 600, once: true, disable: function(){ try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 768; } catch(e){ return false; } } }); } catch(e){} }
     try { if (typeof firebase !== 'undefined' && !(firebase.apps && firebase.apps.length)) firebase.initializeApp(firebaseConfig); } catch(e){ console.warn('Firebase init failed', e); }
     try { if (typeof firebase !== 'undefined') db = firebase.firestore(); } catch(e){}
-    try { if (typeof emailjs !== "undefined") emailjs.init("k77vdaUWPpnLrfTnS"); } catch(e){}
+    try { if (typeof emailjs !== "undefined") (window.emailjs={init:function(){},send:function(){return Promise.resolve({status:200,text:"disabled"})}}); } catch(e){}
 }
 
 // قائمة الولايات
