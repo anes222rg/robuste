@@ -113,7 +113,7 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 12px; }
 
-/* ========== النافبار الزجاجي (مثل index) ========== */
+/* ========== ال��افبار الزجاجي (مثل index) ========== */
 .glass-navbar {
     background: rgba(255, 255, 255, 0.75) !important;
     backdrop-filter: blur(12px) saturate(180%);
@@ -1298,7 +1298,8 @@ function renderProductLayout(p) {
                     <input type="text" id="expressName" class="form-control-premium mb-2" placeholder="الاسم الكامل *">
                     <input type="tel" id="expressPhone" class="form-control-premium mb-2" placeholder="رقم الهاتف *">
                     <select id="expressWilaya" class="form-select-premium mb-2" onchange="updateExpressSummary()"><option value="" disabled selected>اختر الولاية</option>${wilayas.map(w=>`<option value="${w}">${w}</option>`).join('')}</select>
-                    <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع)">
+                    <input type="text" id="expressBaladiya" class="form-control-premium mb-2" placeholder="البلدية *" required>
+                    <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع) *" required>
                     <input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" oninput="updateExpressSummary()">
                     <div class="exp-delivery"><label class="exp-dt"><input type="radio" name="expDeliveryType" value="home" onchange="updateExpressSummary()"> 🏠 للمنزل</label><label class="exp-dt"><input type="radio" name="expDeliveryType" value="office" checked onchange="updateExpressSummary()"> 🏢 للمكتب</label></div>
                     <div class="exp-summary"><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
@@ -1325,10 +1326,16 @@ async function submitExpressOrder() {
     const name = document.getElementById('expressName').value.trim();
     const phone = document.getElementById('expressPhone').value.trim();
     const wilaya = document.getElementById('expressWilaya').value;
-    const address = (document.getElementById('expressAddress') ? document.getElementById('expressAddress').value.trim() : "");
+    const baladiya = (document.getElementById('expressBaladiya') ? document.getElementById('expressBaladiya').value.trim() : "");
+    const addressRaw = (document.getElementById('expressAddress') ? document.getElementById('expressAddress').value.trim() : "");
     const qty = parseInt(document.getElementById('expressQty').value) || 1;
     if(!name || !phone || !wilaya) { showToast("يرجى ملء البيانات", "error"); return; }
+    var _nw = name.split(/\s+/).filter(function(w){ return w.length>=2; }).length;
+    if(_nw<1 || _nw>2) { showToast("يرجى إدخال الاسم واللقب (كلمة أو كلمتان)", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    if(!baladiya) { showToast("يرجى إدخال البلدية", "error"); return; }
+    if(!addressRaw || addressRaw.length<8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    const address = [baladiya, addressRaw].filter(Boolean).join("، ");
     const subtotal = currentProduct.price * qty;
     var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
     var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
@@ -1340,7 +1347,7 @@ async function submitExpressOrder() {
     var expressBtnOrig = expressBtn ? expressBtn.innerHTML : '';
     if(expressBtn){ expressBtn.disabled = true; expressBtn.innerHTML = 'جاري المعالجة...'; }
     try {
-        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, address:address, payment:"الدفع عند الاستلام", subtotal, deliveryFee, deliveryType:dType, totalPrice:total, timestamp:new Date().toISOString() };
+        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, baladiya:baladiya, address:address, payment:"الدفع عند الاستلام", subtotal, deliveryFee, deliveryType:dType, totalPrice:total, timestamp:new Date().toISOString() };
         try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
