@@ -55,7 +55,7 @@ function buildSSR(p) {
   const disc = p.old_price ? Math.round(((p.old_price - p.price) / p.old_price) * 100) : 0;
   const feats = (p.features || ["جودة عالية", "ضمان سنتان", "توصيل سريع"])
     .map(f => `<li><i class="bi bi-check-circle-fill"></i> ${esc(f)}</li>`).join("");
-  const oldP = p.old_price ? `<span class="old-price text-decoration-line-through text-muted ms-2" dir="ltr">${p.old_price.toLocaleString()} DA</span>` : "";
+  const oldP = p.old_price ? `<del class="old-price text-muted ms-2" dir="ltr">${p.old_price.toLocaleString()} DA</del>` : "";
   const discBadge = disc ? `<span class="discount-badge ms-2">-${disc}%</span>` : "";
   const inStock = (p.stock == null || Number(p.stock) > 0);
   return `
@@ -101,7 +101,7 @@ function buildJsonLd(p) {
       seller: { "@type": "Organization", name: "ROBUSTE" }
     }
   };
-  return '<script type="application/ld+json">' + JSON.stringify(ld) + "<\/script>";
+  return '<script type="application/ld+json" id="product-jsonld">' + JSON.stringify(ld) + "<\/script>";
 }
 
 let generated = 0;
