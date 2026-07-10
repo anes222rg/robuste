@@ -603,3 +603,14 @@ footer.bg-dark a{transition:color .2s var(--lx-ease)}
   .hero-content .btn-outline-light{transition:none!important;animation:none!important}
   .product-card:hover,.offer-product:hover,.trust-item:hover,.review-card:hover{transform:none!important}
 }
+
+/* ---------- FIX: RTL bidi digit-reversal on space-separated prices ----------
+   "22 900 دج" was rendering as "900 22 دج" because the bidi algorithm
+   reorders adjacent digit groups in RTL context. Isolating the price text
+   in LTR direction preserves the true digit order. Visual-only, no layout
+   change (elements keep their position and alignment). */
+.offer-product-price,
+.offer-product-old-price {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
