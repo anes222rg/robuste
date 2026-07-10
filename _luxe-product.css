@@ -1,0 +1,233 @@
+
+/* ================================================================
+   ROBUSTE LUXE LAYER — premium visual upgrade (product pages)
+   Pure CSS appended after all existing robuste-ui.css rules.
+   Upgrades product.html + every generated product-<id>.html
+   without touching HTML or JS.
+   ================================================================ */
+
+:root {
+  --lxp-shadow-sm: 0 2px 6px rgba(20, 16, 12, 0.06), 0 1px 2px rgba(20, 16, 12, 0.05);
+  --lxp-shadow-md: 0 12px 32px rgba(20, 16, 12, 0.10), 0 2px 8px rgba(20, 16, 12, 0.06);
+  --lxp-shadow-lg: 0 24px 60px rgba(20, 16, 12, 0.14), 0 6px 18px rgba(20, 16, 12, 0.07);
+  --lxp-glow: 0 10px 28px rgba(255, 107, 53, 0.35);
+  --lxp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: rgba(255, 107, 53, 0.2); }
+
+/* ---------- Header ---------- */
+.glass-navbar {
+  backdrop-filter: saturate(1.7) blur(16px);
+  -webkit-backdrop-filter: saturate(1.7) blur(16px);
+  border-bottom: 1px solid rgba(20, 16, 12, 0.06);
+  box-shadow: 0 8px 30px rgba(20, 16, 12, 0.05);
+}
+.navbar .nav-link { font-weight: 600; }
+
+/* ---------- Product hero cards ---------- */
+.product-info-card,
+.quick-order-card {
+  border: 1px solid rgba(20, 16, 12, 0.07);
+  border-radius: 20px;
+  box-shadow: var(--lxp-shadow-md);
+}
+.quick-order-card { box-shadow: 0 18px 44px rgba(216, 68, 14, 0.10), 0 4px 12px rgba(20, 16, 12, 0.06); }
+.quick-order-title { font-weight: 800; }
+
+.product-title {
+  font-weight: 800;
+  line-height: 1.22;
+  color: var(--r-ink, #17171c);
+}
+
+/* ---------- Price block ---------- */
+.current-price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800 !important;
+  background: var(--r-grad, linear-gradient(135deg, #ff8347, #f2581f));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.old-price { opacity: 0.62; font-variant-numeric: tabular-nums; }
+.discount-badge {
+  background: linear-gradient(135deg, #e5484d, #d5303e);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 4px 12px;
+  box-shadow: 0 4px 12px rgba(213, 48, 62, 0.32);
+}
+
+/* ---------- Gallery ---------- */
+.main-image-wrapper {
+  border: 1px solid rgba(20, 16, 12, 0.07);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--lxp-shadow-sm);
+  background: #fff;
+}
+.main-image-wrapper img { transition: transform 0.5s var(--lxp-ease); }
+.main-image-wrapper:hover img { transform: scale(1.035); }
+.thumbnail {
+  border-radius: 14px;
+  border: 2px solid transparent;
+  box-shadow: var(--lxp-shadow-sm);
+  transition: transform 0.2s var(--lxp-ease), border-color 0.2s var(--lxp-ease), box-shadow 0.2s var(--lxp-ease);
+}
+.thumbnail:hover { transform: translateY(-2px); }
+.thumbnail.active,
+.thumbnail[aria-current="true"] {
+  border-color: var(--r-orange, #ff6b35);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.25);
+}
+
+/* ---------- CTAs ---------- */
+.btn-orange,
+.btn-submit-express,
+.btn-confirm-order {
+  background: var(--r-grad, linear-gradient(135deg, #ff8347 0%, #ff6b35 55%, #f2581f 100%));
+  border: none;
+  border-radius: 13px;
+  font-weight: 700;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 6px 18px rgba(255, 107, 53, 0.28);
+  transition: transform 0.2s var(--lxp-ease), box-shadow 0.2s var(--lxp-ease), filter 0.2s var(--lxp-ease);
+}
+.btn-orange:hover,
+.btn-submit-express:hover,
+.btn-confirm-order:hover {
+  filter: brightness(1.06) saturate(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, var(--lxp-glow);
+}
+.btn-orange:active,
+.btn-submit-express:active,
+.btn-confirm-order:active { transform: translateY(0) scale(0.985); }
+.btn-outline-modern { border-radius: 13px; font-weight: 700; }
+
+/* ---------- Feature list ---------- */
+.feature-list li,
+.product-features li { padding: 4px 0; }
+.feature-list li i,
+.product-features li i { color: var(--r-orange, #ff6b35); }
+
+/* ---------- Stock / availability ---------- */
+.stock-status { font-weight: 700; }
+
+/* ---------- Trust chips ---------- */
+.ph-trust .ph-item,
+.ph-item {
+  background: #fff;
+  border: 1px solid rgba(20, 16, 12, 0.07);
+  border-radius: 16px;
+  box-shadow: var(--lxp-shadow-sm);
+  transition: transform 0.25s var(--lxp-ease), box-shadow 0.25s var(--lxp-ease);
+}
+.ph-item:hover { transform: translateY(-4px); box-shadow: var(--lxp-shadow-md); }
+.ph-ic {
+  background: linear-gradient(135deg, rgba(255, 131, 71, 0.16), rgba(242, 88, 31, 0.12));
+  border: 1px solid rgba(255, 107, 53, 0.22);
+  border-radius: 14px;
+  color: var(--r-orange, #ff6b35);
+}
+
+/* ---------- Description ---------- */
+.description-section {
+  border: 1px solid rgba(20, 16, 12, 0.06);
+  border-radius: 18px;
+  box-shadow: var(--lxp-shadow-sm);
+}
+
+/* ---------- Related products ---------- */
+.related-card {
+  border: 1px solid rgba(20, 16, 12, 0.07);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--lxp-shadow-sm);
+  transition: transform 0.28s var(--lxp-ease), box-shadow 0.28s var(--lxp-ease), border-color 0.28s var(--lxp-ease);
+}
+.related-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 107, 53, 0.28);
+  box-shadow: 0 22px 48px rgba(20, 16, 12, 0.12), 0 6px 16px rgba(255, 107, 53, 0.10);
+}
+.related-card img { transition: transform 0.5s var(--lxp-ease); }
+.related-card:hover img { transform: scale(1.05); }
+.related-price { color: var(--r-orange-600, #f2581f); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* ---------- Reviews ---------- */
+.review-card {
+  border: 1px solid rgba(20, 16, 12, 0.06);
+  border-radius: 18px;
+  box-shadow: var(--lxp-shadow-sm);
+  position: relative;
+}
+.review-card:hover { box-shadow: var(--lxp-shadow-md); }
+.review-card::after {
+  content: "\201D";
+  position: absolute;
+  top: 6px;
+  inset-inline-start: 18px;
+  font-size: 64px;
+  line-height: 1;
+  font-weight: 800;
+  color: rgba(255, 107, 53, 0.14);
+  pointer-events: none;
+}
+
+/* ---------- Forms ---------- */
+.form-control-premium,
+.form-select-premium,
+.form-control {
+  border-radius: 12px;
+}
+.form-control-premium:focus,
+.form-select-premium:focus,
+.form-control:focus {
+  border-color: rgba(255, 107, 53, 0.55);
+  box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.14);
+}
+
+/* ---------- Order summary ---------- */
+.order-summary-box,
+.exp-summary {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 107, 53, 0.18);
+  background: linear-gradient(180deg, #fff8f2, #fff3ea);
+}
+.osb-row.osb-total,
+.exp-total { font-variant-numeric: tabular-nums; }
+
+/* ---------- Breadcrumb ---------- */
+.breadcrumb { font-size: 0.86rem; }
+.breadcrumb a { color: var(--r-muted, #7a7a86); text-decoration: none; }
+.breadcrumb a:hover { color: var(--r-orange, #ff6b35); }
+
+/* ---------- Section titles ---------- */
+.section-title,
+.related-title { font-weight: 800; }
+
+/* ---------- Modals ---------- */
+.modal-content { border: none; border-radius: 20px; box-shadow: var(--lxp-shadow-lg); }
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 107, 53, 0.55); border-radius: 999px; }
+
+/* ---------- Motion safety ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .related-card,
+  .related-card img,
+  .main-image-wrapper img,
+  .thumbnail,
+  .ph-item,
+  .btn-orange,
+  .btn-submit-express { animation: none !important; transition: none !important; }
+}
