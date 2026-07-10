@@ -298,3 +298,308 @@ footer.bg-dark .social-icon:hover { transform: translateY(-3px); color: var(--pr
   .trust-item,
   .btn-orange { animation: none !important; transition: none !important; }
 }
+
+
+/* ================================================================
+   ROBUSTE — LUXE Conversion Layer v3  (appended 2026-07)
+   CSS-only. Loads last in style.css → wins the cascade.
+   No markup or JS changes required. RTL-safe. Dark-theme aware.
+   ================================================================ */
+
+:root{
+  --lx-ink:#1B1B22;
+  --lx-body:#43434E;
+  --lx-muted:#84848F;
+  --lx-cream:#FDFBF8;
+  --lx-line:rgba(20,20,30,.08);
+  --lx-grad:linear-gradient(135deg,#FF8347 0%,#FF6B35 55%,#F0531B 100%);
+  --lx-grad-soft:linear-gradient(135deg,#FFF6EF,#FFEBDC);
+  --lx-shadow-xs:0 1px 3px rgba(20,20,30,.05);
+  --lx-shadow-sm:0 3px 12px rgba(20,20,30,.06);
+  --lx-shadow:0 16px 38px rgba(20,20,30,.11);
+  --lx-shadow-orange:0 10px 26px rgba(255,107,53,.32);
+  --lx-ease:cubic-bezier(.22,1,.36,1);
+}
+
+/* ---------- Base refinement ---------- */
+body{
+  background-color:var(--lx-cream);
+  color:var(--lx-body);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+[data-theme=dark] body{background-color:#121215;color:#D8D8DF}
+
+/* ---------- Navbar: quieter, crisper glass ---------- */
+.glass-navbar{
+  background:rgba(255,255,255,.86)!important;
+  backdrop-filter:blur(16px) saturate(160%);
+  -webkit-backdrop-filter:blur(16px) saturate(160%);
+  box-shadow:0 1px 0 rgba(20,20,30,.06);
+  border-bottom:1px solid rgba(20,20,30,.05);
+}
+[data-theme=dark] .glass-navbar{
+  background:rgba(18,18,21,.88)!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.navbar-brand{letter-spacing:-.3px}
+
+/* ---------- Hero: cinematic + confident CTAs ---------- */
+.image-overlay{
+  background:linear-gradient(180deg,rgba(12,10,16,.38) 0%,rgba(12,10,16,.42) 40%,rgba(12,10,16,.72) 100%);
+}
+.hero-title{
+  font-weight:900;
+  font-size:clamp(2rem,4.6vw,3.4rem)!important;
+  letter-spacing:-.5px;
+  line-height:1.18;
+  text-shadow:0 4px 26px rgba(0,0,0,.5);
+  margin-bottom:14px;
+}
+.hero-subtitle{
+  font-size:clamp(1rem,1.6vw,1.25rem)!important;
+  color:rgba(255,255,255,.92)!important;
+  max-width:680px;
+  margin-inline:auto;
+  margin-bottom:28px;
+  line-height:1.75;
+  text-shadow:0 2px 14px rgba(0,0,0,.45);
+}
+.hero-content .btn-orange{
+  background:var(--lx-grad);
+  border:none;
+  border-radius:999px;
+  padding:13px 34px;
+  font-weight:800;
+  letter-spacing:.2px;
+  box-shadow:var(--lx-shadow-orange);
+}
+.hero-content .btn-orange:hover{
+  transform:translateY(-3px);
+  box-shadow:0 16px 36px rgba(255,107,53,.46);
+}
+.hero-content .btn-outline-light{
+  border-radius:999px;
+  padding:13px 30px;
+  border-width:1.5px;
+  font-weight:700;
+  background:rgba(255,255,255,.10);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+.hero-content .btn-outline-light:hover{background:#fff;color:var(--lx-ink);border-color:#fff}
+
+/* ---------- Section titles: editorial weight ---------- */
+.section-title{
+  font-weight:900;
+  letter-spacing:-.4px;
+  font-size:clamp(1.6rem,3vw,2.25rem);
+  color:var(--lx-ink);
+}
+.section-title:after{
+  width:52px;height:5px;border-radius:999px;
+  background:var(--lx-grad);
+}
+[data-theme=dark] .section-title{color:#F2F2F5}
+
+/* ---------- Trust bar: jewelry-grade cards ---------- */
+.trust-item{
+  border-radius:18px;
+  border:1px solid var(--lx-line);
+  box-shadow:var(--lx-shadow-xs);
+}
+.trust-item:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--lx-shadow);
+  border-color:rgba(255,107,53,.30);
+}
+.trust-icon{
+  border-radius:15px;
+  background:var(--lx-grad-soft);
+  color:var(--primary);
+  box-shadow:inset 0 0 0 1px rgba(255,107,53,.12);
+}
+.trust-title{color:var(--lx-ink)}
+[data-theme=dark] .trust-icon{background:rgba(255,140,66,.14);box-shadow:inset 0 0 0 1px rgba(255,140,66,.22)}
+
+/* ---------- Offers: airy, expensive, less noisy ---------- */
+.offers-section{
+  background:linear-gradient(180deg,#FFFAF5 0%,#FFF0E4 100%);
+  padding:72px 0;
+}
+.offers-title{letter-spacing:-.6px}
+.offer-subtitle{color:var(--lx-muted)}
+.offer-timer{
+  background:rgba(255,255,255,.85);
+  border:1px solid rgba(255,107,53,.14);
+  border-radius:24px;
+  box-shadow:0 18px 44px rgba(255,107,53,.10);
+}
+.timer-item{
+  border-radius:16px;
+  border:1px solid rgba(20,20,30,.05);
+  box-shadow:var(--lx-shadow-xs);
+}
+.timer-value{
+  font-size:2.5rem;
+  background:var(--lx-grad);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;text-shadow:none;
+}
+.timer-label{font-size:.85rem;letter-spacing:1.5px;color:var(--lx-muted)}
+.offer-product{
+  border-radius:22px;
+  border:1px solid var(--lx-line);
+  box-shadow:var(--lx-shadow-sm);
+}
+.offer-product:hover{
+  transform:translateY(-8px) scale(1.01);
+  box-shadow:var(--lx-shadow),0 0 0 1px rgba(255,107,53,.25);
+}
+.offer-product-discount,.offer-product-badge{
+  padding:6px 14px;font-size:12.5px;letter-spacing:.4px;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+.offer-btn{
+  background:var(--lx-grad);
+  border-radius:999px;
+  padding:15px;
+  box-shadow:0 8px 20px rgba(255,107,53,.28);
+}
+.offer-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(255,107,53,.42)}
+[data-theme=dark] .offers-section{background:linear-gradient(180deg,#17171B 0%,#1E1B19 100%)}
+[data-theme=dark] .timer-value{background:linear-gradient(135deg,#FFA36B,#FF8C42);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---------- Product grid: premium retail cards ---------- */
+.product-card{
+  border-radius:18px!important;
+  border:1px solid var(--lx-line)!important;
+  box-shadow:var(--lx-shadow-xs)!important;
+  transition:transform .35s var(--lx-ease),box-shadow .35s var(--lx-ease),border-color .35s var(--lx-ease)!important;
+}
+.product-card:hover{
+  transform:translateY(-6px)!important;
+  border-color:rgba(255,107,53,.40)!important;
+  box-shadow:var(--lx-shadow)!important;
+}
+.product-card .carousel{background:#FAF8F6!important}
+.product-card .product-title{
+  font-weight:700!important;
+  color:var(--lx-ink)!important;
+  letter-spacing:0!important;
+}
+.product-card .current-price{
+  font-size:19px!important;
+  font-weight:800!important;
+  letter-spacing:-.3px!important;
+}
+.product-card .old-price{opacity:.75}
+.product-card .btn-orange{
+  background:var(--lx-grad)!important;
+  border-radius:999px!important;
+  letter-spacing:.2px!important;
+  box-shadow:0 5px 14px rgba(255,107,53,.22)!important;
+}
+.product-card .btn-orange:hover{
+  box-shadow:0 9px 22px rgba(255,107,53,.38)!important;
+}
+.product-card .discount-badge{
+  border-radius:999px!important;
+  padding:5px 12px!important;
+  background:#D91C4B!important;
+  box-shadow:0 3px 10px rgba(217,28,75,.30)!important;
+}
+.product-card .product-badge{
+  border-radius:999px!important;
+  padding:5px 12px!important;
+  box-shadow:0 3px 10px rgba(255,107,53,.30)!important;
+}
+[data-theme=dark] .product-card{border-color:rgba(255,255,255,.08)!important;background:#1C1C20!important}
+[data-theme=dark] .product-card .carousel{background:#232327!important}
+[data-theme=dark] .product-card .product-title{color:#EFEFF3!important}
+
+/* ---------- Category pills ---------- */
+.category-btn{
+  border-radius:999px;
+  border-width:1.5px;
+  background:#fff;
+  border-color:rgba(20,20,30,.12);
+  color:var(--lx-body);
+  font-weight:600;
+}
+.category-btn:hover,.category-btn.active{
+  background:var(--lx-grad);
+  border-color:transparent;
+  box-shadow:0 6px 16px rgba(255,107,53,.30);
+}
+
+/* ---------- Reviews: testimonial quality ---------- */
+#reviews.bg-light{background:linear-gradient(180deg,#FFFFFF,#FBF7F3)!important}
+.review-card{
+  border-radius:20px;
+  border:1px solid var(--lx-line);
+  box-shadow:var(--lx-shadow-xs);
+}
+.review-card:hover{
+  transform:translateY(-5px);
+  box-shadow:var(--lx-shadow);
+  border-color:rgba(255,107,53,.25);
+}
+[data-theme=dark] #reviews.bg-light{background:#161619!important}
+
+/* ---------- Contact cards ---------- */
+.contact-card{
+  border-radius:20px;
+  border:1px solid var(--lx-line);
+  box-shadow:var(--lx-shadow-xs);
+}
+.feature-icon{
+  background:var(--lx-grad);
+  box-shadow:0 8px 18px rgba(255,107,53,.28);
+  border-radius:18px;
+}
+
+/* ---------- Forms & modal: refined inputs ---------- */
+.form-control,.form-select{
+  border-radius:12px;
+  border:1.5px solid rgba(20,20,30,.12);
+  padding:.62rem .9rem;
+  transition:border-color .2s var(--lx-ease),box-shadow .2s var(--lx-ease);
+}
+.form-control:focus,.form-select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(255,107,53,.14);
+}
+.modal-content{border-radius:20px;border:none;box-shadow:var(--lx-shadow)}
+.modal-header{background:var(--lx-grad)!important;color:#fff}
+.modal-header .modal-title{color:#fff}
+.order-summary{border-radius:14px;border:1px solid var(--lx-line)}
+
+/* ---------- Global buttons ---------- */
+.btn-orange{
+  background:var(--lx-grad);
+  border-radius:12px;
+  letter-spacing:.2px;
+}
+.btn-orange:hover{box-shadow:0 8px 20px rgba(255,107,53,.35)}
+
+/* ---------- Footer: deep premium ---------- */
+footer.bg-dark{
+  background:#15151A!important;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+footer.bg-dark a{transition:color .2s var(--lx-ease)}
+
+/* ---------- Floating actions ---------- */
+.whatsapp-btn{box-shadow:0 10px 26px rgba(37,211,102,.40)}
+.cart-btn-drag{background:var(--lx-grad);box-shadow:0 10px 26px rgba(255,107,53,.36)}
+
+/* ---------- Accessibility & motion safety ---------- */
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  .product-card,.offer-product,.trust-item,.review-card,.contact-card,
+  .btn-orange,.offer-btn,.category-btn,.timer-item,.hero-content .btn-orange,
+  .hero-content .btn-outline-light{transition:none!important;animation:none!important}
+  .product-card:hover,.offer-product:hover,.trust-item:hover,.review-card:hover{transform:none!important}
+}

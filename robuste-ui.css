@@ -500,3 +500,195 @@ body {
   .btn-orange,
   .btn-submit-express { animation: none !important; transition: none !important; }
 }
+
+
+/* ================================================================
+   ROBUSTE — LUXE Conversion Layer v3 for product pages (appended)
+   CSS-only. robuste-ui.css loads last on every product page,
+   so these rules win the cascade. No markup or JS changes.
+   RTL-safe. Light + Dark aware.
+   ================================================================ */
+
+/* ---------- Announcement bar: brand gradient ---------- */
+.top-cod-bar{
+  background:var(--r-grad)!important;
+  letter-spacing:.2px;
+  font-weight:700;
+  box-shadow:0 2px 12px rgba(255,107,53,.25);
+}
+
+/* ---------- Main gallery: gallery-grade frame ---------- */
+.main-image-wrapper{
+  border-radius:20px!important;
+  border:1px solid var(--r-line);
+  box-shadow:var(--r-shadow-sm);
+  background:#FAF8F6;
+  overflow:hidden;
+}
+[data-theme=dark] .main-image-wrapper{background:#232327}
+.thumbnail{
+  border-radius:12px!important;
+  border-width:2px;
+  box-shadow:var(--r-shadow-xs);
+}
+.thumbnail.active{
+  border-color:var(--r-orange)!important;
+  box-shadow:0 4px 14px rgba(255,107,53,.28);
+}
+
+/* ---------- Product info card: hero of the page ---------- */
+.product-info-card{
+  border-radius:22px!important;
+  border:1px solid var(--r-line)!important;
+  box-shadow:var(--r-shadow)!important;
+}
+.product-title{
+  font-weight:800;
+  letter-spacing:-.3px;
+  color:var(--r-ink);
+}
+.price-block{
+  background:var(--r-grad-soft)!important;
+  border:1px solid rgba(255,107,53,.16)!important;
+  border-radius:16px!important;
+}
+.current-price{
+  font-weight:900!important;
+  letter-spacing:-.5px;
+}
+.discount-badge{
+  border-radius:999px!important;
+  box-shadow:0 4px 12px rgba(217,28,75,.28);
+  letter-spacing:.3px;
+}
+[data-theme=dark] .price-block{background:rgba(255,140,66,.10)!important;border-color:rgba(255,140,66,.22)!important}
+
+/* ---------- Feature list ---------- */
+.feature-list li{color:var(--r-body)}
+.feature-list li i{color:var(--r-orange)}
+
+/* ---------- CTAs: single confident hierarchy ---------- */
+.btn-orange,.btn-confirm-order,.btn-submit-express{
+  background:var(--r-grad)!important;
+  border:none!important;
+  border-radius:14px!important;
+  font-weight:800!important;
+  letter-spacing:.2px;
+  box-shadow:var(--r-shadow-orange)!important;
+  transition:transform .25s var(--r-ease),box-shadow .25s var(--r-ease)!important;
+}
+.btn-orange:hover,.btn-confirm-order:hover,.btn-submit-express:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 34px rgba(255,107,53,.42)!important;
+}
+.btn-outline-modern{
+  border-radius:14px!important;
+  border-width:1.5px!important;
+  font-weight:700!important;
+}
+
+/* ---------- Quick order card: trustworthy checkout ---------- */
+.quick-order-card{
+  border-radius:22px!important;
+  border:1px solid var(--r-line)!important;
+  box-shadow:var(--r-shadow)!important;
+  background:var(--r-surface)!important;
+}
+.quick-order-title{
+  font-weight:900;
+  letter-spacing:-.3px;
+}
+.order-input,.form-control-premium,.form-select-premium{
+  border-radius:12px!important;
+  border:1.5px solid rgba(20,20,30,.12)!important;
+  transition:border-color .2s var(--r-ease),box-shadow .2s var(--r-ease)!important;
+}
+.order-input:focus,.form-control-premium:focus,.form-select-premium:focus{
+  border-color:var(--r-orange)!important;
+  box-shadow:0 0 0 4px rgba(255,107,53,.14)!important;
+}
+[data-theme=dark] .order-input,[data-theme=dark] .form-control-premium,[data-theme=dark] .form-select-premium{border-color:rgba(255,255,255,.14)!important}
+.order-summary-box,.order-summary-card{
+  border-radius:14px!important;
+  border:1px solid rgba(255,107,53,.14)!important;
+  background:var(--r-grad-soft)!important;
+}
+[data-theme=dark] .order-summary-box,[data-theme=dark] .order-summary-card{background:rgba(255,140,66,.08)!important;border-color:rgba(255,140,66,.18)!important}
+.osb-row.osb-total{letter-spacing:-.3px}
+.order-trust,.secure-pay{color:var(--r-muted)}
+.order-trust i,.secure-pay i{color:#2E9E5B}
+
+/* ---------- Assurance chips ---------- */
+.order-assurance .oa-item{
+  border-radius:12px;
+  background:var(--r-soft);
+  border:1px solid var(--r-line);
+}
+.order-assurance .oa-item i{color:var(--r-orange)}
+
+/* ---------- Trust strip (ph-trust) ---------- */
+.ph-trust .ph-item{
+  border-radius:16px!important;
+  border:1px solid var(--r-line)!important;
+  box-shadow:var(--r-shadow-xs)!important;
+  background:var(--r-surface)!important;
+}
+.ph-trust .ph-item:hover{
+  transform:translateY(-4px)!important;
+  box-shadow:var(--r-shadow-sm)!important;
+  border-color:rgba(255,107,53,.30)!important;
+}
+.ph-trust .ph-ic{
+  background:var(--r-grad-soft)!important;
+  color:var(--r-orange)!important;
+  border-radius:14px!important;
+  box-shadow:inset 0 0 0 1px rgba(255,107,53,.12);
+}
+.ph-trust .ph-t{color:var(--r-ink)!important;font-weight:700}
+.ph-trust .ph-s{color:var(--r-muted)!important}
+[data-theme=dark] .ph-trust .ph-ic{background:rgba(255,140,66,.14)!important}
+
+/* ---------- Description & sections ---------- */
+.section-title{font-weight:900;letter-spacing:-.4px}
+.section-title::after{border-radius:999px;background:var(--r-grad)}
+
+/* ---------- Related products ---------- */
+.related-card{
+  border-radius:18px!important;
+  border:1px solid var(--r-line)!important;
+  box-shadow:var(--r-shadow-xs)!important;
+  transition:transform .3s var(--r-ease),box-shadow .3s var(--r-ease),border-color .3s var(--r-ease)!important;
+}
+.related-card:hover{
+  transform:translateY(-6px)!important;
+  box-shadow:var(--r-shadow)!important;
+  border-color:rgba(255,107,53,.35)!important;
+}
+.related-price{font-weight:800;letter-spacing:-.3px}
+
+/* ---------- Reviews ---------- */
+.review-card{
+  border-radius:20px!important;
+  border:1px solid var(--r-line)!important;
+  box-shadow:var(--r-shadow-xs)!important;
+}
+.review-card:hover{
+  transform:translateY(-4px)!important;
+  box-shadow:var(--r-shadow-sm)!important;
+  border-color:rgba(255,107,53,.22)!important;
+}
+
+/* ---------- Modal ---------- */
+.modal-content{border-radius:20px!important;border:none!important;box-shadow:var(--r-shadow-lg)!important}
+
+/* ---------- Floating actions ---------- */
+.whatsapp-float{box-shadow:0 10px 26px rgba(37,211,102,.40)!important}
+.cart-btn-drag{background:var(--r-grad)!important;box-shadow:0 10px 26px rgba(255,107,53,.36)!important}
+
+/* ---------- Accessibility & motion safety ---------- */
+:focus-visible{outline:2px solid var(--r-orange);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  .related-card,.review-card,.ph-trust .ph-item,.btn-orange,.btn-confirm-order,
+  .btn-submit-express,.thumbnail{transition:none!important;animation:none!important}
+  .related-card:hover,.review-card:hover,.ph-trust .ph-item:hover{transform:none!important}
+}
