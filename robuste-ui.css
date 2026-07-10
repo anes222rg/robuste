@@ -692,3 +692,44 @@ body {
   .btn-submit-express,.thumbnail{transition:none!important;animation:none!important}
   .related-card:hover,.review-card:hover,.ph-trust .ph-item:hover{transform:none!important}
 }
+
+/* ================================================================
+   ✦ FABLE 5 — PHONE EXPERIENCE (product pages) ✦
+   ================================================================ */
+@media (max-width: 768px) {
+  /* iOS: 16px inputs = no zoom-on-focus */
+  .form-control-premium,
+  input.form-control,
+  select.form-select,
+  select.form-control,
+  textarea.form-control {
+    font-size: 16px !important;
+    min-height: 48px;
+  }
+  /* Thumb-first buy CTAs */
+  .btn-submit-express,
+  .btn-confirm-order {
+    min-height: 54px;
+    font-size: 1.1rem !important;
+    border-radius: 999px !important;
+  }
+  /* Gallery thumbnails: bigger tap targets */
+  .thumbnail { min-width: 64px; min-height: 64px; }
+  /* Trust chips: snap rail instead of wrap */
+  .ph-trust {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+  }
+  .ph-trust::-webkit-scrollbar { display: none; }
+  .ph-trust .ph-item { flex: 0 0 auto; scroll-snap-align: center; }
+  /* Touch feedback */
+  .btn-submit-express:active,
+  .btn-confirm-order:active,
+  .thumbnail:active { transform: scale(0.96); transition: transform 0.08s ease; }
+  /* Related products: comfy corners */
+  .related-card { border-radius: 16px; }
+}
