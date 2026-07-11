@@ -1276,3 +1276,38 @@ footer.bg-dark .container { position: relative; z-index: 1; }
   transition: transform 0.2s ease;
 }
 .call-float-btn:hover, .call-float-btn:active { transform: scale(1.06); color: #fff; }
+
+/* ================================================================
+   ✦ FABLE 5.2 — FINAL FLOATS + HERO TYPE (user feedback) ✦
+   Only two floats: basket + WhatsApp. Pinned, never mid-page.
+   ================================================================ */
+.call-float-btn { display: none !important; }
+.floating-cart,
+#floatingCart {
+  position: fixed !important;
+  top: auto !important;
+  left: 14px !important;
+  right: auto !important;
+  bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+}
+.whatsapp-btn {
+  position: fixed !important;
+  top: auto !important;
+  left: 14px !important;
+  right: auto !important;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#cartCountFloat {
+  background: #e5484d !important;
+  border: 2px solid #fff !important;
+}
+@media (max-width: 768px) {
+  .hero-container .hero-content .hero-title,
+  .hero-content .hero-title,
+  .hero-title {
+    font-size: 1.4rem !important;
+    line-height: 1.35 !important;
+  }
+  .hero-title::after { width: 48px !important; height: 3px !important; }
+  .hero-subtitle { font-size: 0.9rem !important; }
+}

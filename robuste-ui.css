@@ -873,3 +873,22 @@ body {
   .btn-submit-express::after,
   .btn-confirm-order::after { animation: none !important; }
 }
+
+/* ================================================================
+   ✦ FABLE 5.2 — FINAL FLOATS (product pages) ✦
+   ================================================================ */
+.call-float-btn { display: none !important; }
+.whatsapp-float {
+  position: fixed !important;
+  top: auto !important;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+}
+.floating-cart {
+  position: fixed !important;
+  top: auto !important;
+  bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#cartCountFloat {
+  background: #e5484d !important;
+  border: 2px solid #fff !important;
+}
