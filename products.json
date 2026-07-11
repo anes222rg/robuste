@@ -63,48 +63,48 @@
   {
     "id": 203,
     "title": "PACK BEAUTÉ — ÉPILATEUR SES 3 + BROSSE VISAGE BNV 4",
-    "price": 6000,
-    "old_price": 6300,
+    "price": 7000,
+    "old_price": null,
     "images": [
       "images/EPILATOIR.png",
       "images/BROSSE NETOYANTE VISAGE.png"
     ],
-    "description_short": "آلة نزع الشعر SES 3 + فرشاة تنظيف الوجه بـ 6٬000 دج. | Épilateur SES 3 + brosse visage à 6 000 DA.",
-    "description_long": "باك العناية الشخصية: آلة نزع الشعر EPILATEUR SES 3 مع فرشاة تنظيف الوجه BNV 4 بسعر واحد مخفّض. — Le pack soin personnel : épilateur SES 3 et brosse nettoyante visage BNV 4 à prix réduit.",
+    "description_short": "Épilateur SES 3 + brosse nettoyante visage BNV 4 dans un seul pack à 7 000 DA. | آلة نزع الشعر SES 3 + فرشاة تنظيف الوجه BNV 4 في باك واحد بـ 7,000 دج.",
+    "description_long": "Pack beauté composé de l’épilateur SES 3 et de la brosse nettoyante visage BNV 4. Deux appareils complémentaires réunis dans un seul achat. — باك عناية شخصية يضم آلة نزع الشعر SES 3 وفرشاة تنظيف الوجه BNV 4، جهازان متكاملان في شراء واحد.",
     "features": [
       "EPILATEUR SES 3",
       "BROSSE NETTOYANTE VISAGE BNV 4",
-      "وفّري 300 دج",
+      "Pack beauté : 7 000 DA",
       "الدفع عند الاستلام"
     ],
     "stock": 7,
     "category": "packs",
-    "badge": "PACK وفر"
+    "badge": "PACK BEAUTÉ"
   },
   {
     "id": 204,
     "title": "MEGA PACK — COIFFURE + BEAUTÉ (4 APPAREILS)",
-    "price": 13900,
-    "old_price": 14600,
+    "price": 14900,
+    "old_price": null,
     "images": [
       "images/SECHE CHEVEUX magenta.jpg",
       "images/LISSEUR CHEVEUX.jpg",
       "images/EPILATOIR.png",
       "images/BROSSE NETOYANTE VISAGE.png"
     ],
-    "description_short": "4 أجهزة: مجفف + مملّس + آلة نزع الشعر + فرشاة الوجه بـ 13٬900 دج. | Méga pack 4 appareils à 13 900 DA.",
-    "description_long": "الباك الأكبر: مجفف PRO2000، مملّس SW 207، آلة نزع الشعر SES 3 وفرشاة تنظيف الوجه BNV 4 — طقم كامل للعناية بسعر واحد. هدية مثالية. — Le plus grand pack : sèche-cheveux PRO2000, lisseur SW 207, épilateur SES 3 et brosse visage BNV 4. Le coffret complet, parfait comme cadeau.",
+    "description_short": "4 appareils : sèche-cheveux, lisseur, épilateur et brosse visage à 14 900 DA. | 4 أجهزة: مجفف، مملّس، آلة نزع الشعر وفرشاة الوجه بـ 14,900 دج.",
+    "description_long": "Le méga pack coiffure et beauté réunit le sèche-cheveux PRO2000, le lisseur SW 207, l’épilateur SES 3 et la brosse nettoyante visage BNV 4. Une sélection complète dans un seul pack. — باك متكامل للعناية بالشعر والجمال: مجفف PRO2000، مملّس SW 207، آلة نزع الشعر SES 3 وفرشاة تنظيف الوجه BNV 4، كلها في باك واحد.",
     "features": [
       "SECHE CHEVEUX PRO2000",
       "LISSEUR CHEVEUX SW 207",
       "EPILATEUR SES 3",
       "BROSSE NETTOYANTE VISAGE BNV 4",
-      "وفّري 700 دج",
+      "Mega pack : 14 900 DA",
       "الدفع عند الاستلام"
     ],
     "stock": 7,
     "category": "packs",
-    "badge": "PACK وفر"
+    "badge": "MEGA PACK"
   },
   {
     "id": 1,
