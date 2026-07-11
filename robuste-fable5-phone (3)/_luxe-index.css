@@ -1,0 +1,262 @@
+
+/* ================================================================
+   ROBUSTE LUXE LAYER — premium visual upgrade (index)
+   Pure CSS. Appended after all existing rules: no selector removed,
+   no layout/JS hooks touched. Uses existing theme variables so the
+   dark-mode toggle keeps working.
+   ================================================================ */
+
+:root {
+  --lx-ink: #1b1b20;
+  --lx-radius: 16px;
+  --lx-shadow-xs: 0 1px 2px rgba(20, 16, 12, 0.05);
+  --lx-shadow-sm: 0 2px 6px rgba(20, 16, 12, 0.06), 0 1px 2px rgba(20, 16, 12, 0.05);
+  --lx-shadow-md: 0 12px 32px rgba(20, 16, 12, 0.10), 0 2px 8px rgba(20, 16, 12, 0.06);
+  --lx-shadow-lg: 0 24px 60px rgba(20, 16, 12, 0.14), 0 6px 18px rgba(20, 16, 12, 0.07);
+  --lx-glow: 0 10px 28px rgba(255, 107, 53, 0.35);
+  --lx-grad: linear-gradient(135deg, #ff8347 0%, #ff6b35 55%, #f2581f 100%);
+  --lx-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: rgba(255, 107, 53, 0.2); }
+
+/* ---------- Header: glass + hairline ---------- */
+.glass-navbar {
+  backdrop-filter: saturate(1.7) blur(16px);
+  -webkit-backdrop-filter: saturate(1.7) blur(16px);
+  border-bottom: 1px solid rgba(20, 16, 12, 0.06);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 8px 30px rgba(20, 16, 12, 0.06);
+}
+[data-theme="dark"] .glass-navbar {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+.navbar .nav-link { font-weight: 600; transition: color 0.2s var(--lx-ease); }
+.navbar-brand { font-weight: 800; }
+
+/* ---------- Hero: cinematic overlay + typographic scale ---------- */
+.image-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(18, 14, 12, 0.72) 0%,
+    rgba(18, 14, 12, 0.38) 45%,
+    rgba(18, 14, 12, 0.22) 100%
+  ) !important;
+}
+.hero-title {
+  font-size: clamp(2rem, 4.6vw, 3.6rem) !important;
+  font-weight: 800;
+  line-height: 1.18;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.hero-subtitle {
+  font-size: clamp(1rem, 1.6vw, 1.3rem) !important;
+  font-weight: 500;
+  opacity: 0.94;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.45);
+}
+.hero-content .btn {
+  padding: 13px 34px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.hero-content .btn-orange { box-shadow: var(--lx-glow); }
+.hero-content .btn-outline-light {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.08);
+  border-width: 2px;
+}
+@keyframes lx-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-content > * { animation: lx-rise 0.7s var(--lx-ease) backwards; }
+.hero-content > *:nth-child(2) { animation-delay: 0.12s; }
+.hero-content > *:nth-child(3) { animation-delay: 0.24s; }
+
+/* ---------- Primary buttons: gradient + glow ---------- */
+.btn-orange {
+  background: var(--lx-grad);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 6px 18px rgba(255, 107, 53, 0.28);
+  transition: transform 0.2s var(--lx-ease), box-shadow 0.2s var(--lx-ease), filter 0.2s var(--lx-ease);
+}
+.btn-orange:hover {
+  background: var(--lx-grad);
+  filter: brightness(1.06) saturate(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, var(--lx-glow);
+}
+.btn-orange:active { transform: translateY(0) scale(0.985); }
+
+/* ---------- Trust bar: tactile cards ---------- */
+.trust-item {
+  background: var(--light, #fff);
+  border: 1px solid rgba(20, 16, 12, 0.07);
+  border-radius: var(--lx-radius);
+  box-shadow: var(--lx-shadow-sm);
+  transition: transform 0.25s var(--lx-ease), box-shadow 0.25s var(--lx-ease);
+}
+.trust-item:hover { transform: translateY(-4px); box-shadow: var(--lx-shadow-md); }
+.trust-icon {
+  background: linear-gradient(135deg, rgba(255, 131, 71, 0.16), rgba(242, 88, 31, 0.12));
+  border: 1px solid rgba(255, 107, 53, 0.22);
+  border-radius: 14px;
+  color: var(--primary);
+}
+[data-theme="dark"] .trust-item { border-color: rgba(255, 255, 255, 0.08); }
+
+/* ---------- Section titles: refined accent ---------- */
+.section-title { font-size: clamp(1.6rem, 2.6vw, 2.2rem); }
+.section-title:after {
+  width: 56px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--lx-grad);
+  box-shadow: 0 2px 10px rgba(255, 107, 53, 0.45);
+}
+
+/* ---------- Offers: countdown + deal cards ---------- */
+.timer-item {
+  background: var(--light, #fff);
+  border: 1px solid rgba(255, 107, 53, 0.16);
+  border-radius: 14px;
+  box-shadow: var(--lx-shadow-sm);
+}
+.timer-value {
+  font-variant-numeric: tabular-nums;
+  background: var(--lx-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+.offer-product {
+  border: 1px solid rgba(20, 16, 12, 0.06);
+  box-shadow: 0 18px 44px rgba(216, 68, 14, 0.10), 0 4px 12px rgba(20, 16, 12, 0.06);
+}
+.offer-product:hover {
+  box-shadow: 0 26px 60px rgba(216, 68, 14, 0.16), 0 8px 20px rgba(20, 16, 12, 0.08) !important;
+}
+.offer-product-badge {
+  background: linear-gradient(135deg, #e5484d, #d5303e);
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(213, 48, 62, 0.35);
+}
+.offer-product-price { font-variant-numeric: tabular-nums; font-weight: 800; }
+.offer-btn { border-radius: 13px; }
+
+/* ---------- Product grid cards ---------- */
+.product-card {
+  border: 1px solid rgba(20, 16, 12, 0.07);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--lx-shadow-sm);
+  transition: transform 0.28s var(--lx-ease), box-shadow 0.28s var(--lx-ease), border-color 0.28s var(--lx-ease);
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 107, 53, 0.28);
+  box-shadow: 0 22px 48px rgba(20, 16, 12, 0.12), 0 6px 16px rgba(255, 107, 53, 0.10);
+}
+.product-card .card-title { font-weight: 700; }
+.product-card .current-price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--primary);
+}
+.product-card .old-price { opacity: 0.6; }
+.product-card img { transition: transform 0.5s var(--lx-ease); }
+.product-card:hover img { transform: scale(1.045); }
+.discount-badge {
+  background: linear-gradient(135deg, #e5484d, #d5303e);
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(213, 48, 62, 0.3);
+}
+[data-theme="dark"] .product-card { border-color: rgba(255, 255, 255, 0.08); }
+[data-theme="dark"] .product-card:hover { border-color: rgba(255, 140, 66, 0.35); }
+
+/* ---------- Category filter pills ---------- */
+.category-btn { border-radius: 999px; font-weight: 600; }
+.category-btn:hover,
+.category-btn.active { box-shadow: 0 6px 16px rgba(255, 107, 53, 0.30); }
+
+/* ---------- Reviews ---------- */
+.review-card {
+  border: 1px solid rgba(20, 16, 12, 0.06);
+  border-radius: 18px;
+  box-shadow: var(--lx-shadow-sm);
+  position: relative;
+}
+.review-card:hover { box-shadow: var(--lx-shadow-md); }
+.review-card::after {
+  content: "\201D";
+  position: absolute;
+  top: 6px;
+  inset-inline-start: 18px;
+  font-size: 64px;
+  line-height: 1;
+  font-weight: 800;
+  color: rgba(255, 107, 53, 0.16);
+  pointer-events: none;
+}
+
+/* ---------- Contact + forms ---------- */
+.contact-card {
+  border: 1px solid rgba(20, 16, 12, 0.06);
+  border-radius: 18px;
+  box-shadow: var(--lx-shadow-sm);
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(255, 107, 53, 0.55);
+  box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.14);
+}
+.form-control,
+.form-select { border-radius: 10px; }
+
+/* ---------- Footer ---------- */
+footer.bg-dark {
+  background: linear-gradient(180deg, #1d1b22 0%, #141317 100%) !important;
+  border-top: 3px solid transparent;
+  border-image: var(--lx-grad) 1;
+}
+footer.bg-dark .social-icon { transition: transform 0.2s var(--lx-ease), color 0.2s var(--lx-ease); }
+footer.bg-dark .social-icon:hover { transform: translateY(-3px); color: var(--primary); }
+
+/* ---------- Floating actions ---------- */
+.floating-cart .cart-icon-container,
+.whatsapp-btn {
+  box-shadow: 0 10px 26px rgba(20, 16, 12, 0.22);
+  transition: transform 0.2s var(--lx-ease), box-shadow 0.2s var(--lx-ease);
+}
+.floating-cart .cart-icon-container:hover,
+.whatsapp-btn:hover { transform: translateY(-3px) scale(1.04); }
+
+/* ---------- Modals & offcanvas ---------- */
+.modal-content { border: none; border-radius: 20px; box-shadow: var(--lx-shadow-lg); }
+.offcanvas { box-shadow: var(--lx-shadow-lg); }
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 107, 53, 0.55); border-radius: 999px; }
+
+/* ---------- Motion safety ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hero-content > *,
+  .product-card,
+  .product-card img,
+  .trust-item,
+  .btn-orange { animation: none !important; transition: none !important; }
+}
