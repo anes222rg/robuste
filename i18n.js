@@ -298,6 +298,7 @@
       for (var j = 0; j < els.length; j++) { if (!inSwitcher(els[j])) translateEl(els[j], lang); }
     } catch (e) { /* never break the page */ }
     updateSwitcherLabel(lang);
+    window.dispatchEvent(new CustomEvent("robuste:languagechange", { detail: { lang: lang } }));
     if (observer) connectObserver();
   }
 

@@ -1,5 +1,26 @@
 [
   {
+    "id": 205,
+    "title": "PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1",
+    "price": 26000,
+    "old_price": 27000,
+    "images": [
+      "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png",
+      "images/NETTOYEUR DE TACHES 4 EN 1.jpg"
+    ],
+    "description_short": "Aspirateur souffleur à main + nettoyeur de taches 4 en 1 : les deux appareils pour 26 000 DA au lieu de 27 000 DA. | مكنسة نافخة يدوية + منظف البقع 4 في 1 بسعر 26,000 دج بدل 27,000 دج.",
+    "description_long": "Le pack maison associe l’aspirateur souffleur à main et le nettoyeur de taches 4 en 1. Une solution pratique pour l’entretien quotidien de la maison, avec 1 000 DA de réduction par rapport à l’achat séparé. — يجمع باك المنزل بين المكنسة النافخة اليدوية ومنظف البقع 4 في 1. حل عملي للعناية اليومية بالمنزل، مع تخفيض 1,000 دج مقارنة بشراء الجهازين منفصلين.",
+    "features": [
+      "ASPIRATEUR SOUFFLEUR À MAIN",
+      "NETTOYEUR DE TACHES 4 EN 1",
+      "وفّر 1,000 دج مقارنة بالشراء المنفصل",
+      "الدفع عند الاستلام"
+    ],
+    "stock": 5,
+    "category": "packs",
+    "badge": "PACK MAISON"
+  },
+  {
     "id": 200,
     "title": "PACK DUO — 2× FRITEUSE DF 900W",
     "price": 12000,
@@ -20,14 +41,14 @@
   },
   {
     "id": 201,
-    "title": "PACK CUISINE — GRILL 1000W + FRITEUSE DF 900W",
+    "title": "SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W",
     "price": 13000,
     "old_price": 13400,
     "images": [
       "images/PANINEUSE ET GRILL 1000W.png",
       "images/FRITEUSE DF 900 W.png"
     ],
-    "description_short": "بانينوز وغريل 1000W + مقلاة DF 900W بـ 13٬000 دج. | Grill 1000W + friteuse DF 900W à 13 000 DA.",
+    "description_short": "Summer Pack : grill 1000W + friteuse DF 900W à 13 000 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,000 دج.",
     "description_long": "باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.",
     "features": [
       "PANINEUSE ET GRILL 1000W",
@@ -37,7 +58,7 @@
     ],
     "stock": 10,
     "category": "packs",
-    "badge": "PACK وفر"
+    "badge": "SUMMER PACK"
   },
   {
     "id": 202,
@@ -62,14 +83,14 @@
   },
   {
     "id": 203,
-    "title": "PACK BEAUTÉ — ÉPILATEUR SES 3 + BROSSE VISAGE BNV 4",
+    "title": "GIRLY PACK — ÉPILATEUR SES 3 + BROSSE VISAGE BNV 4",
     "price": 7000,
     "old_price": null,
     "images": [
       "images/EPILATOIR.png",
       "images/BROSSE NETOYANTE VISAGE.png"
     ],
-    "description_short": "Épilateur SES 3 + brosse nettoyante visage BNV 4 dans un seul pack à 7 000 DA. | آلة نزع الشعر SES 3 + فرشاة تنظيف الوجه BNV 4 في باك واحد بـ 7,000 دج.",
+    "description_short": "Girly Pack : épilateur SES 3 + brosse nettoyante visage BNV 4 à 7 000 DA. | باك البنات: آلة نزع الشعر SES 3 + فرشاة تنظيف الوجه BNV 4 بـ 7,000 دج.",
     "description_long": "Pack beauté composé de l’épilateur SES 3 et de la brosse nettoyante visage BNV 4. Deux appareils complémentaires réunis dans un seul achat. — باك عناية شخصية يضم آلة نزع الشعر SES 3 وفرشاة تنظيف الوجه BNV 4، جهازان متكاملان في شراء واحد.",
     "features": [
       "EPILATEUR SES 3",
@@ -79,7 +100,7 @@
     ],
     "stock": 7,
     "category": "packs",
-    "badge": "PACK BEAUTÉ"
+    "badge": "GIRLY PACK"
   },
   {
     "id": 204,
