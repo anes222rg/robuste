@@ -1,0 +1,170 @@
+
+/* ================================================================
+   ✦ FABLE 5 — PHONE EXPERIENCE ✦
+   Dedicated mobile UX layer: thumb ergonomics, snap-scroll rows,
+   iOS-safe forms, compact luxury. CSS-only.
+   ================================================================ */
+
+@media (max-width: 768px) {
+
+  /* ---------- Hero: thumb-first CTAs ---------- */
+  .hero-content .btn-orange,
+  .hero-content .btn-outline-light {
+    display: block;
+    width: min(320px, 82vw);
+    margin: 0 auto 12px !important;
+    min-height: 52px;
+    padding: 14px 20px !important;
+    font-size: 1.08rem !important;
+  }
+  .hero-subtitle { max-width: 88vw; margin-inline: auto; }
+
+  /* ---------- Trust bar: 2×2 compact grid ---------- */
+  .trust-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .trust-item {
+    flex-direction: column !important;
+    text-align: center;
+    gap: 8px !important;
+    padding: 14px 10px !important;
+    margin: 0 !important;
+  }
+  .trust-icon {
+    margin: 0 auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.25rem !important;
+  }
+  .trust-title { font-size: 0.92rem !important; display: block; }
+  .trust-sub { font-size: 0.78rem !important; display: block; }
+
+  /* ---------- Category pills: snap-scroll rail ---------- */
+  .categories-filter > div {
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding: 6px 4px 10px;
+    -webkit-mask-image: linear-gradient(to left, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to left, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  }
+  .categories-filter > div::-webkit-scrollbar { display: none; }
+  .category-btn {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    min-height: 44px;
+    padding: 9px 20px !important;
+    white-space: nowrap;
+  }
+
+  /* ---------- Offers rail: card peek + snap ---------- */
+  .offer-products {
+    gap: 14px !important;
+    padding: 16px 6px 30px !important;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 12vw;
+  }
+  .offer-products > * {
+    scroll-snap-align: center;
+  }
+  .offer-products .col-md-4 {
+    flex: 0 0 78vw !important;
+    max-width: 78vw !important;
+  }
+
+  /* ---------- Product grid: compact 2-up gallery ---------- */
+  #productsContainer .col-6 { padding-inline: 6px; }
+  #productsContainer { margin-inline: -6px; }
+  .product-card .product-info { padding: 10px 10px 4px !important; }
+  .product-card .product-title {
+    font-size: 0.88rem !important;
+    line-height: 1.35 !important;
+    min-height: 2.4em;
+  }
+  .product-card .current-price { font-size: 1.12rem !important; }
+  .product-card .old-price { font-size: 0.8rem !important; }
+  .product-card .add-to-cart-btn {
+    min-height: 44px;
+    font-size: 0.95rem !important;
+    padding: 9px 12px !important;
+  }
+  .product-card .card-footer { padding: 8px 10px 12px !important; }
+
+  /* ---------- Countdown: tighter observatory ---------- */
+  .offer-timer { padding: 18px 12px !important; }
+  .timer-item { min-width: 62px !important; padding: 10px 6px !important; }
+  .timer-value { font-size: 1.7rem !important; }
+
+  /* ---------- Touch feedback (no hover on phones) ---------- */
+  .btn-orange:active,
+  .offer-btn:active,
+  .add-to-cart-btn:active,
+  .category-btn:active {
+    transform: scale(0.96) !important;
+    transition: transform 0.08s ease !important;
+  }
+  .product-card:active { transform: scale(0.985); }
+
+  /* ---------- Navbar: glass menu card ---------- */
+  .glass-navbar .navbar-collapse {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 18px 44px rgba(23, 18, 25, 0.14);
+    border: 1px solid rgba(255, 107, 53, 0.14);
+  }
+  [data-theme="dark"] .glass-navbar .navbar-collapse {
+    background: rgba(24, 22, 28, 0.94);
+    border-color: rgba(255, 107, 53, 0.2);
+  }
+  .glass-navbar .navbar-collapse .nav-link {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 10px 16px !important;
+    border-radius: 12px;
+  }
+  .glass-navbar .navbar-collapse .nav-link:active {
+    background: rgba(255, 107, 53, 0.10);
+  }
+
+  /* ---------- iOS: no zoom-on-focus (16px inputs) ---------- */
+  input.form-control,
+  select.form-select,
+  select.form-control,
+  textarea.form-control,
+  .quantity-input {
+    font-size: 16px !important;
+    min-height: 46px;
+  }
+
+  /* ---------- Cart drawer: fat-finger friendly ---------- */
+  .quantity-btn {
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+  .remove-item-btn {
+    min-width: 42px;
+    min-height: 42px;
+  }
+
+  /* ---------- Footer: compact monument ---------- */
+  footer.bg-dark { text-align: center; }
+  footer.bg-dark h5::after { inset-inline-start: 50%; transform: translateX(50%); }
+  footer.bg-dark .social-icon { width: 46px; height: 46px; }
+}
+
+/* Ultra-small phones */
+@media (max-width: 380px) {
+  .offer-products .col-md-4 { flex: 0 0 86vw !important; max-width: 86vw !important; }
+  .trust-title { font-size: 0.85rem !important; }
+  .timer-item { min-width: 56px !important; }
+}
