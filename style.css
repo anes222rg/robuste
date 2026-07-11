@@ -1311,3 +1311,49 @@ footer.bg-dark .container { position: relative; z-index: 1; }
   .hero-title::after { width: 48px !important; height: 3px !important; }
   .hero-subtitle { font-size: 0.9rem !important; }
 }
+
+/* ================================================================
+   ✦ FABLE 5.3 — PERFECT PHONE (opus) ✦
+   Compact hero buttons + rock-solid floats (basket + WhatsApp).
+   ================================================================ */
+@media (max-width: 768px) {
+  /* Hero CTAs: compact, side-by-side, not giant slabs */
+  .hero-content > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .hero-content .btn-orange,
+  .hero-content .btn-outline-light,
+  .hero-content .btn.btn-lg {
+    display: inline-flex !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 44px !important;
+    padding: 8px 20px !important;
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
+  }
+  .hero-title { font-size: 1.35rem !important; line-height: 1.35 !important; }
+  .hero-subtitle { font-size: 0.88rem !important; }
+}
+
+/* Floats: two only (basket + WhatsApp), always pinned to viewport.
+   !important beats the drag script's inline styles so it can't drift. */
+.floating-cart,
+#floatingCart {
+  position: fixed !important;
+  top: auto !important;
+  right: auto !important;
+  left: 14px !important;
+  bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 1100 !important;
+  transform: none !important;
+}
+.whatsapp-btn {
+  position: fixed !important;
+  top: auto !important;
+  right: auto !important;
+  left: 14px !important;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 1099 !important;
+}
+.call-float-btn { display: none !important; }

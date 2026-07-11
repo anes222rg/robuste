@@ -892,3 +892,22 @@ body {
   background: #e5484d !important;
   border: 2px solid #fff !important;
 }
+
+/* ================================================================
+   ✦ FABLE 5.3 — PERFECT PHONE floats (product pages) ✦
+   ================================================================ */
+.floating-cart,
+#floatingCart {
+  position: fixed !important;
+  top: auto !important;
+  bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 1100 !important;
+  transform: none !important;
+}
+.whatsapp-float {
+  position: fixed !important;
+  top: auto !important;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 1099 !important;
+}
+.call-float-btn { display: none !important; }
