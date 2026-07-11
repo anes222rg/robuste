@@ -11,12 +11,10 @@
     en: { pack: 'PACK', appliances: 'appliances', offer: 'Bundle offer', price: 'The pack', add: 'Add to cart', view: 'View' },
     fr: { pack: 'PACK', appliances: 'appareils', offer: 'Offre groupée', price: 'Le pack', add: 'Ajouter', view: 'Voir' }
   };
-  var PACK_NAMES = {
-    201: { ar: 'باك الصيف — شواية ومقلاة', en: 'Summer Pack — Grill + Fryer', fr: 'Pack Été — Grill + Friteuse' },
-    203: { ar: 'باك البنات — آلة نزع الشعر وفرشاة الوجه', en: 'Girly Pack — Epilator + Facial Cleansing Brush', fr: 'Pack Girly — Épilateur + Brosse Visage' }
-  };
+  // Campaign names stay identical in Arabic, English, and French.
+  // The language switch translates only surrounding interface text.
   function language() { try { return localStorage.getItem('site_lang') || 'ar'; } catch (e) { return 'ar'; } }
-  function displayName(pack, lang) { return (PACK_NAMES[pack.id] && PACK_NAMES[pack.id][lang]) || pack.title.replace(/^PACK\s+|^MEGA PACK\s+—\s*/i, ''); }
+  function displayName(pack) { return pack.title.replace(/^PACK\s+|^MEGA PACK\s+—\s*/i, ''); }
   function titleParts(pack) {
     var names = (pack.features || []).filter(function (x) {
       return !/\d[\d\s,]*\s*DA|الدفع|Pack|Mega/i.test(x);
@@ -33,7 +31,7 @@
         var lang = language();
         var copy = UI[lang] || UI.ar;
         root.innerHTML = packs.map(function (p, index) {
-          var name = displayName(p, lang);
+          var name = displayName(p);
           var images = (p.images || []).slice(0, 4);
           var members = titleParts(p);
           var count = members.length || images.length;
