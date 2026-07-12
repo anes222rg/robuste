@@ -1,133 +1,5 @@
 [
   {
-    "id": 205,
-    "title": "PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1",
-    "price": 26000,
-    "old_price": 27000,
-    "images": [
-      "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png",
-      "images/NETTOYEUR DE TACHES 4 EN 1.jpg"
-    ],
-    "description_short": "Aspirateur souffleur à main + nettoyeur de taches 4 en 1 : les deux appareils pour 26 000 DA au lieu de 27 000 DA. | مكنسة نافخة يدوية + منظف البقع 4 في 1 بسعر 26,000 دج بدل 27,000 دج.",
-    "description_long": "Le pack maison associe l’aspirateur souffleur à main et le nettoyeur de taches 4 en 1. Une solution pratique pour l’entretien quotidien de la maison, avec 1 000 DA de réduction par rapport à l’achat séparé. — يجمع باك المنزل بين المكنسة النافخة اليدوية ومنظف البقع 4 في 1. حل عملي للعناية اليومية بالمنزل، مع تخفيض 1,000 دج مقارنة بشراء الجهازين منفصلين.",
-    "features": [
-      "ASPIRATEUR SOUFFLEUR À MAIN",
-      "NETTOYEUR DE TACHES 4 EN 1",
-      "وفّر 1,000 دج مقارنة بالشراء المنفصل",
-      "الدفع عند الاستلام"
-    ],
-    "stock": 5,
-    "category": "packs",
-    "badge": "PACK MAISON"
-  },
-  {
-    "id": 200,
-    "title": "PACK DUO — 2× FRITEUSE DF 900W",
-    "price": 12000,
-    "old_price": 13000,
-    "images": [
-      "images/FRITEUSE DF 900 W.png"
-    ],
-    "description_short": "مقلاتان DF 900W بـ 12٬000 دج بدل 13٬000 دج. | 2 friteuses DF 900W à 12 000 DA au lieu de 13 000 DA.",
-    "description_long": "اقتنِ مقلاتين FRITEUSE DF 900W معًا بسعر 6٬000 دج للواحدة بدل 6٬500 دج — مثالية للعائلات أو كهدية. — Achetez 2 friteuses DF 900W ensemble à 6 000 DA l'unité au lieu de 6 500 DA. Idéal pour la famille ou comme cadeau.",
-    "features": [
-      "2× FRITEUSE DF 900W",
-      "وفّر 1٬000 دج مقارنة بالشراء المنفصل",
-      "الدفع عند الاستلام"
-    ],
-    "stock": 5,
-    "category": "packs",
-    "badge": "PACK وفر"
-  },
-  {
-    "id": 201,
-    "title": "SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W",
-    "price": 13000,
-    "old_price": 13400,
-    "images": [
-      "images/PANINEUSE ET GRILL 1000W.png",
-      "images/FRITEUSE DF 900 W.png"
-    ],
-    "description_short": "Summer Pack : grill 1000W + friteuse DF 900W à 13 000 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,000 دج.",
-    "description_long": "باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.",
-    "features": [
-      "PANINEUSE ET GRILL 1000W",
-      "FRITEUSE DF 900W",
-      "وفّر 400 دج",
-      "الدفع عند الاستلام"
-    ],
-    "stock": 10,
-    "category": "packs",
-    "badge": "SUMMER PACK"
-  },
-  {
-    "id": 202,
-    "title": "PACK COIFFURE — SÈCHE-CHEVEUX PRO2000 + LISSEUR SW 207",
-    "price": 8000,
-    "old_price": 8300,
-    "images": [
-      "images/SECHE CHEVEUX magenta.jpg",
-      "images/LISSEUR CHEVEUX.jpg"
-    ],
-    "description_short": "مجفف PRO2000 + مملّس SW 207 بـ 8٬000 دج. | Sèche-cheveux PRO2000 + lisseur SW 207 à 8 000 DA.",
-    "description_long": "كل ما تحتاجينه لتصفيف مثالي: مجفف الشعر SECHE CHEVEUX PRO2000 مع مملّس LISSEUR SW 207 في باك واحد بسعر مخفّض. — Tout pour un coiffage parfait : sèche-cheveux PRO2000 et lisseur SW 207 réunis à prix réduit.",
-    "features": [
-      "SECHE CHEVEUX PRO2000",
-      "LISSEUR CHEVEUX SW 207",
-      "وفّري 300 دج",
-      "الدفع عند الاستلام"
-    ],
-    "stock": 12,
-    "category": "packs",
-    "badge": "PACK وفر"
-  },
-  {
-    "id": 203,
-    "title": "GIRLY PACK — ÉPILATEUR SES 3 + BROSSE VISAGE BNV 4",
-    "price": 7000,
-    "old_price": null,
-    "images": [
-      "images/EPILATOIR.png",
-      "images/BROSSE NETOYANTE VISAGE.png"
-    ],
-    "description_short": "Girly Pack : épilateur SES 3 + brosse nettoyante visage BNV 4 à 7 000 DA. | باك البنات: آلة نزع الشعر SES 3 + فرشاة تنظيف الوجه BNV 4 بـ 7,000 دج.",
-    "description_long": "Pack beauté composé de l’épilateur SES 3 et de la brosse nettoyante visage BNV 4. Deux appareils complémentaires réunis dans un seul achat. — باك عناية شخصية يضم آلة نزع الشعر SES 3 وفرشاة تنظيف الوجه BNV 4، جهازان متكاملان في شراء واحد.",
-    "features": [
-      "EPILATEUR SES 3",
-      "BROSSE NETTOYANTE VISAGE BNV 4",
-      "Pack beauté : 7 000 DA",
-      "الدفع عند الاستلام"
-    ],
-    "stock": 7,
-    "category": "packs",
-    "badge": "GIRLY PACK"
-  },
-  {
-    "id": 204,
-    "title": "MEGA PACK — COIFFURE + BEAUTÉ (4 APPAREILS)",
-    "price": 14900,
-    "old_price": null,
-    "images": [
-      "images/SECHE CHEVEUX magenta.jpg",
-      "images/LISSEUR CHEVEUX.jpg",
-      "images/EPILATOIR.png",
-      "images/BROSSE NETOYANTE VISAGE.png"
-    ],
-    "description_short": "4 appareils : sèche-cheveux, lisseur, épilateur et brosse visage à 14 900 DA. | 4 أجهزة: مجفف، مملّس، آلة نزع الشعر وفرشاة الوجه بـ 14,900 دج.",
-    "description_long": "Le méga pack coiffure et beauté réunit le sèche-cheveux PRO2000, le lisseur SW 207, l’épilateur SES 3 et la brosse nettoyante visage BNV 4. Une sélection complète dans un seul pack. — باك متكامل للعناية بالشعر والجمال: مجفف PRO2000، مملّس SW 207، آلة نزع الشعر SES 3 وفرشاة تنظيف الوجه BNV 4، كلها في باك واحد.",
-    "features": [
-      "SECHE CHEVEUX PRO2000",
-      "LISSEUR CHEVEUX SW 207",
-      "EPILATEUR SES 3",
-      "BROSSE NETTOYANTE VISAGE BNV 4",
-      "Mega pack : 14 900 DA",
-      "الدفع عند الاستلام"
-    ],
-    "stock": 7,
-    "category": "packs",
-    "badge": "MEGA PACK"
-  },
-  {
     "id": 1,
     "title": "SECHE CHEVEUX PRO2000",
     "price": 4200,
@@ -194,7 +66,7 @@
   {
     "id": 4,
     "title": "FRITEUSE DF 900 W",
-    "price": 6500,
+    "price": 6200,
     "old_price": 7800,
     "images": [
       "images/FRITEUSE DF 900 W.png",
@@ -866,8 +738,8 @@
       "images/EXTRACTEUR DE JUS 2.webp",
       "images/EXTRACTEUR DE JUS 3.webp"
     ],
-    "description_short": "عصير طبيعي نقي في منزلك مع عصّارة ROBUSTE الاحترافية: فصل ذكي، محرك قوي، وتنظيف سهل. | Extracteur de jus ROBUSTE : jus 100% naturel, séparation intelligente, nettoyage facile.",
-    "description_long": "عصّارة ROBUSTE الاحترافية تمنحك عصيرًا طبيعيًا نقيًا في منزلك. يعمل نظام الفصل الذكي على عزل العصير عن القشور والألياف للحصول على قوام صافٍ، بينما يتيح المحرك القوي مع خاصية عكس الاتجاه (Reverse) عصر أصعب الفواكه والخضروات بسهولة. سهلة التفكيك والتنظيف، وبتصميم أنيق يليق بمطبخك. — L'extracteur de jus professionnel ROBUSTE vous permet de préparer des jus 100% naturels à la maison. Son système de séparation intelligent isole le jus des peaux et des fibres pour une texture pure, tandis que son moteur puissant doté de la fonction Reverse vient à bout des fruits et légumes les plus fermes. Facile à démonter et à nettoyer, avec un design élégant qui s'intègre parfaitement à votre cuisine.",
+    "description_short": "榨汁機 汁液分离 榨汁机",
+    "description_long": "هَلْكُونَا بِالْمَوَادِّ الْمُسَرْطَنَة وَالْمُلَوِّنَاتْ! و مَا بْقَاش غِيرْ عَصِيرْ طَبِيعِي يْدِيرْلَكْ الْاِنْتِعَاشْ وِيْشَارْجِيكْ بِالطَّاقَة! مِنْ خُضْرَة وْفَوَاكِه كَامْلَة وْطَازْجَة.. لْأَجْوَدْ عَصِيرْ معَمَّرْ فِيتَامِينَاتْ وْصِحَّة! مَعَ عَصَّارَة رُوبُوسْتْ الْاِحْتِرَافِيَّة بْقُوَّةْ سون وَاطْ، وِ تَصْمِيمْهَا الذَّكِي.. تْفَكَاكْهَا وْغْسِيلْهَا رْجَعْ سَاهِلْ وْمَا يْدِيشْ كَامِلْ الْوَقْتْ! أَنْسَى التَّعَبْ وَالتَّقْشَارْ! حُطْ اللِّيمُونْ وَالنَّعْنَاعْ بْقْشُورْهُمْ مُبَاشَرَةً، وْخَلِّي التِّكْنُولُوجْيَا تْخْدَمْ خِدْمِتْهَا. تِقْنِيَّة الْفَصْلِ الذَّكِي تَعْطِيكْ اِسْتِخْلَاصْ صَافِي مِيَّة بِالْمِيَّة.. الْعَصِيرْ النَّقِي يُخْرُجْ مِنْ جِيهَة، وَالْقْشُورْ النَّاشْفَة تَمَاماً تُخْرُجْ مِن الْجِيهَة الْأُخْرَى وْبِأَعْلَى كَفَاءَة! وْمَاشِي غِيرْ الْفَوَاكِه بَرْكْ! بْمُحَرِّكْهَا الْقَوِي وْخَاصِّيَّة الرِّيفِرْسْ اللِّي تَقْلِبْ الْاِتِّجَاه، الْمَاشِينَة تَعْصَرْ لَكْ أَصْعَبْ الْخُضْرَوَاتْ كِيمَا الزُّرُودِيَّة بْكُلِّ سَلَاسَة وْبْلَا مَا تْبْلُوكِي. فْرِيشْكِي رُوحَكْ بْأَبَنْ كُوكْتِيلْ طَبِيعِي وْصِحِّي مِيَّة بِالْمِيَّة مَخْدُومْ فِي دَارَكْ.. عَصَّارَة رُوبُوسْتْ بْيُو دْرِينْكْ.. جُرْعِتَكْ الْيَوْمِيَّة تَّاعْ الْحَيَوِيَّة!",
     "features": [
       "فاصلك ذكي يعزل العصير عن القشور",
       "محرك قوي مع خاصية الريفرس",
