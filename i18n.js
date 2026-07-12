@@ -269,7 +269,9 @@
 
   function inSwitcher(node) {
     var el = node.nodeType === 1 ? node : node.parentNode;
-    return !!(el && el.closest && el.closest("#i18nSwitcher"));
+    // Dynamic Packs cards translate themselves after the language event.
+    // Everything else keeps the normal i18n.js behavior.
+    return !!(el && el.closest && el.closest("#i18nSwitcher,[data-i18n-skip]"));
   }
 
   function applyLang(lang) {

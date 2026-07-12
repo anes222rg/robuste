@@ -11,10 +11,24 @@
     en: { pack: 'PACK', appliances: 'appliances', offer: 'Bundle offer', price: 'The pack', add: 'Add to cart', view: 'View' },
     fr: { pack: 'PACK', appliances: 'appareils', offer: 'Offre groupée', price: 'Le pack', add: 'Ajouter', view: 'Voir' }
   };
-  // Campaign names stay identical in Arabic, English, and French.
-  // The language switch translates only surrounding interface text.
   function language() { try { return localStorage.getItem('site_lang') || 'ar'; } catch (e) { return 'ar'; } }
+  // Campaign names remain fixed in every language; only surrounding Pack UI changes.
   function displayName(pack) { return pack.title.replace(/^PACK\s+|^MEGA PACK\s+—\s*/i, ''); }
+  function updateIntro(lang) {
+    var root = document.getElementById('packs'); if (!root) return;
+    var copy = {
+      ar: { eye:'باكات ROBUSTE', title:'باكات مختارة، في عرض واحد', text:'اجمعي الأجهزة التي تحتاجينها في باك واحد. اختاري الباك وأضيفيه مباشرة إلى السلة.', hint:'اسحبي لاكتشاف الباكات' },
+      en: { eye:'ROBUSTE PACKS', title:'Curated packs, one offer', text:'Get the appliances you need in one pack and add it directly to your cart.', hint:'Swipe to explore the packs' },
+      fr: { eye:'PACKS ROBUSTE', title:'Des packs choisis, une seule offre', text:'Réunissez les appareils dont vous avez besoin dans un seul pack et ajoutez-le directement au panier.', hint:'Faites glisser pour découvrir les packs' }
+    }[lang] || {};
+    root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    var cards = document.getElementById('packsShowcase'); if (cards) cards.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    var eye=root.querySelector('.packs-eyebrow'), title=root.querySelector('h2'), text=root.querySelector('p'), hint=root.querySelector('.packs-scroll-hint');
+    if (eye) eye.innerHTML='<i class="bi bi-stars"></i> '+copy.eye;
+    if (title) title.textContent=copy.title;
+    if (text) text.textContent=copy.text;
+    if (hint) hint.innerHTML='<i class="bi bi-arrow-left"></i> '+copy.hint;
+  }
   function titleParts(pack) {
     var names = (pack.features || []).filter(function (x) {
       return !/\d[\d\s,]*\s*DA|الدفع|Pack|Mega/i.test(x);
@@ -30,6 +44,7 @@
         if (!packs.length) { root.hidden = true; return; }
         var lang = language();
         var copy = UI[lang] || UI.ar;
+        updateIntro(lang);
         root.innerHTML = packs.map(function (p, index) {
           var name = displayName(p);
           var images = (p.images || []).slice(0, 4);
