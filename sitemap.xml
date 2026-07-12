@@ -7,6 +7,42 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://www.robustedz.store/product-205.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.robustedz.store/product-200.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.robustedz.store/product-201.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.robustedz.store/product-202.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.robustedz.store/product-203.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.robustedz.store/product-204.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.robustedz.store/product-1.html</loc>
     <lastmod>2026-07-12</lastmod>
     <changefreq>weekly</changefreq>
@@ -145,6 +181,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.robustedz.store/product-29.html</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.robustedz.store/product-25.html</loc>
     <lastmod>2026-07-12</lastmod>
     <changefreq>weekly</changefreq>
@@ -164,12 +206,6 @@
   </url>
   <url>
     <loc>https://www.robustedz.store/product-28.html</loc>
-    <lastmod>2026-07-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/product-29.html</loc>
     <lastmod>2026-07-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -217,39 +253,9 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.robustedz.store/product-200.html</loc>
+    <loc>https://www.robustedz.store/privacy.html</loc>
     <lastmod>2026-07-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/product-201.html</loc>
-    <lastmod>2026-07-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/product-202.html</loc>
-    <lastmod>2026-07-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/product-203.html</loc>
-    <lastmod>2026-07-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/product-204.html</loc>
-    <lastmod>2026-07-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/product-205.html</loc>
-    <lastmod>2026-07-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
