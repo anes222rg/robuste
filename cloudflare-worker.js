@@ -71,6 +71,9 @@ export default {
     if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/confirm-ship")) {
       return handleAdminConfirmShip(request, env, cors);
     }
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/confirm-purchase")) {
+      return handleAdminConfirmPurchase(request, env, cors);
+    }
 
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
     return handleIntake(request, env, ctx, cors);
@@ -161,7 +164,14 @@ async function handleAdminSetTracking(request, env, cors) {
   if (!Object.keys(fields).length) return json({ error: "nothing_to_update" }, 400, cors);
   try { await updateOrderFields(env, id, fields); }
   catch (e) { return json({ error: "update_failed", detail: String(e) }, 500, cors); }
-  return json({ ok: true, id, updated: fields }, 200, cors);
+  // ANY positive status (تم التأكيد, قيد التحضير, تم الشحن, تم التسليم, ...)
+  // or a tracking number being attached = a REAL order -> send the Meta Purchase.
+  // Works for ALL orders, with or without EcoTrack.
+  let capi = null;
+  if ((fields.status && isPositiveStatus(fields.status)) || fields.ecotrackTracking) {
+    try { capi = await fireConfirmedPurchase(env, id, request); } catch (e) { capi = { ok: false, error: String(e) }; }
+  }
+  return json({ ok: true, id, updated: fields, capi }, 200, cors);
 }
 
 /* POST /admin/confirm-ship  { id, commune?, code_wilaya?, adresse?, type?, stop_desk?, status?, remarque? }
@@ -195,7 +205,50 @@ async function handleAdminConfirmShip(request, env, cors) {
   try { await updateOrderFields(env, id, fields); }
   catch (e) { return json({ error: "saved_parcel_but_db_update_failed", tracking, detail: String(e) }, 500, cors); }
 
-  return json({ ok: true, id, tracking, status: fields.status }, 200, cors);
+  // Shipping a parcel = definitely a REAL order -> make sure the Meta Purchase went out.
+  let capi = null;
+  try { capi = await fireConfirmedPurchase(env, id, request); } catch (e) { capi = { ok: false, error: String(e) }; }
+
+  return json({ ok: true, id, tracking, status: fields.status, capi }, 200, cors);
+}
+
+/* Is this status "positive" (= the order is real)?
+ * Matches: تم التأكيد / مؤكد / confirmed, قيد التحضير / جاهز / preparing,
+ * تم الشحن / في الطريق / shipped / in transit, خرج للتوصيل / out for delivery,
+ * تم التسليم / وصل / delivered (Arabic, French and English wording).
+ * NEVER matches: ملغى / إلغاء / cancelled, مرتجع / إرجاع / returned, جديد / new. */
+function isPositiveStatus(st) {
+  const s = String(st || "").toLowerCase();
+  // Negative statuses always lose, even if the text also contains a positive word.
+  if (/\u0625\u0644\u063a|\u0644\u063a\u0649|\u0644\u063a\u064a|cancel|annul|refus|\u0631\u0641\u0636|\u0631\u0627\u062c\u0639|\u0625\u0631\u062c\u0627\u0639|\u0645\u0631\u062a\u062c\u0639|retour|return|fake|\u0648\u0647\u0645\u064a|spam/.test(s)) return false;
+  return /\u0623\u0643\u062f|\u0624\u0643\u062f|\u062a\u0623\u0643\u064a\u062f|confirm|\u062a\u062d\u0636\u064a\u0631|\u062c\u0627\u0647\u0632|prepar|ready|\u0634\u062d\u0646|\u0627\u0644\u0637\u0631\u064a\u0642|\u062a\u0648\u0635\u064a\u0644|exp\u00e9di|expedi|ship|transit|livr|\u062a\u0633\u0644\u064a\u0645|\u0648\u0635\u0644|deliver/.test(s);
+}
+
+/* Send the Meta CAPI Purchase for a CONFIRMED order, exactly once.
+ * Idempotent via the metaPurchaseSentAt field stored on the order document. */
+async function fireConfirmedPurchase(env, id, request) {
+  const order = await getOrderById(env, id);
+  if (!order) return { ok: false, error: "order_not_found" };
+  if (order.metaPurchaseSentAt) return { ok: true, already: true, sentAt: order.metaPurchaseSentAt };
+  await sendMetaCapi(env, order, id, order.fb || {}, request);
+  try { await updateOrderFields(env, id, { metaPurchaseSentAt: new Date().toISOString() }); } catch (e) {}
+  return { ok: true, already: false };
+}
+
+/* POST /admin/confirm-purchase  { id }
+ * Call this the moment you confirm an order by phone (even before shipping).
+ * Sends the Meta Purchase using the fbc/fbp saved at order time. Safe to
+ * call more than once — the event is only ever sent a single time. */
+async function handleAdminConfirmPurchase(request, env, cors) {
+  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  const id = String(body.id || "").trim();
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
+  let result;
+  try { result = await fireConfirmedPurchase(env, id, request); }
+  catch (e) { return json({ error: "capi_failed", detail: String(e) }, 500, cors); }
+  return json(result, result.ok ? 200 : 404, cors);
 }
 
 async function getOrderById(env, id) {
@@ -524,6 +577,7 @@ async function handleIntake(request, env, ctx, cors) {
   const risk = { flags, level, score };
 
   order.meta = meta; order.risk = risk;
+  order.fb = payload.fb || {}; // saved so the Purchase can be sent LATER, after you confirm the order
   if (!order.status) order.status = "\u062c\u062f\u064a\u062f";
   if (!order.timestamp) order.timestamp = new Date().toISOString();
   order.createdAt = new Date().toISOString();
@@ -533,7 +587,11 @@ async function handleIntake(request, env, ctx, cors) {
   try { id = await writeOrder(env, order); }
   catch (e) { return json({ error: "Firestore write failed", detail: String(e) }, 500, cors); }
 
-  const notify = Promise.allSettled([ notifyTelegram(env, order, id, risk), notifyEmail(env, order, id), sendMetaCapi(env, order, id, payload.fb || {}, request) ]);
+  // NOTE: the Meta Purchase is NOT sent here anymore. It is sent ONLY after
+  // YOU confirm the order (/admin/confirm-ship, /admin/confirm-purchase, or
+  // /admin/set-tracking with a "confirmed" status), so fake / cancelled
+  // orders never pollute the Purchase signal Meta optimizes on.
+  const notify = Promise.allSettled([ notifyTelegram(env, order, id, risk), notifyEmail(env, order, id) ]);
   if (ctx && ctx.waitUntil) ctx.waitUntil(notify); else await notify;
 
   return json({ id, ref: shortRef(id), risk }, 200, cors);
@@ -571,6 +629,13 @@ async function sendMetaCapi(env, order, id, fb, request) {
     if (!PIXEL || !TOKEN) return; // not configured yet -> safe no-op
     fb = fb || {};
     const meta = order.meta || {};
+    // Fallback: if the browser didn't send fbc, rebuild it from the landing page's fbclid.
+    if (!fb.fbc) {
+      try {
+        const m = String(meta.landingPage || "").match(/[?&]fbclid=([^&#]+)/);
+        if (m) fb.fbc = "fb.1." + Date.now() + "." + decodeURIComponent(m[1]);
+      } catch (e) {}
+    }
     const parts = String(order.customer || "").trim().split(/\s+/).filter(Boolean);
     const first = parts.shift() || "";
     const last = parts.join(" ");
@@ -584,8 +649,8 @@ async function sendMetaCapi(env, order, id, fb, request) {
     const ct = await hashField(meta.city); if (ct) user_data.ct = [ct];
     const st = await hashField(order.wilaya || meta.region); if (st) user_data.st = [st];
     const co = await hashField(meta.country || "dz"); if (co) user_data.country = [co];
-    const ip = meta.ip || request.headers.get("CF-Connecting-IP") || ""; if (ip) user_data.client_ip_address = ip;
-    const ua = meta.userAgent || request.headers.get("User-Agent") || ""; if (ua) user_data.client_user_agent = ua;
+    const ip = meta.ip || (request && request.headers.get("CF-Connecting-IP")) || ""; if (ip) user_data.client_ip_address = ip;
+    const ua = meta.userAgent || (request && request.headers.get("User-Agent")) || ""; if (ua) user_data.client_user_agent = ua;
     if (fb.fbp) user_data.fbp = fb.fbp;
     if (fb.fbc) user_data.fbc = fb.fbc;
 
@@ -595,8 +660,18 @@ async function sendMetaCapi(env, order, id, fb, request) {
 
     const event = {
       event_name: "Purchase",
-      event_time: Math.floor(Date.now() / 1000),
-      event_id: "ord_" + id,                 // dedup key: must match the browser Pixel
+      // Use the ORDER time (when the customer actually bought), not the
+      // confirmation time — Meta accepts events up to 7 days old and this
+      // keeps ad attribution exact.
+      event_time: (function () {
+        const now = Math.floor(Date.now() / 1000);
+        try {
+          const t = Math.floor(Date.parse(order.createdAt || order.timestamp || "") / 1000);
+          if (t && t <= now && t > now - 6 * 86400) return t;
+        } catch (e) {}
+        return now;
+      })(),
+      event_id: "ord_" + id,                 // stable dedup key per order
       action_source: "website",
       event_source_url: fb.event_source_url || ("https://" + (env.SITE_HOST || "www.robustedz.store") + "/product.html"),
       user_data,

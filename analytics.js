@@ -17,6 +17,12 @@
   function fbqTrack(name, params, opts) {
     try { if (typeof window.fbq === "function") window.fbq("track", name, params || {}, opts || {}); } catch (e) {}
   }
+  // CUSTOM Pixel event (not a standard one). Order submissions now fire
+  // "PlaceOrder" in the browser; the REAL "Purchase" is sent server-side
+  // ONLY after you confirm the order, so fake orders never count.
+  function fbqTrackCustom(name, params, opts) {
+    try { if (typeof window.fbq === "function") window.fbq("trackCustom", name, params || {}, opts || {}); } catch (e) {}
+  }
   function ready(fn) {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
     else fn();
@@ -66,7 +72,7 @@
       track("purchase", params);
       try {
         var mContents = (items || []).map(function (i) { return { id: i.item_id, quantity: i.quantity || 1, item_price: i.price }; });
-        fbqTrack("Purchase", {
+        fbqTrackCustom("PlaceOrder", {
           currency: "DZD",
           value: params.value,
           content_type: "product",
