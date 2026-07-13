@@ -539,7 +539,7 @@ window.__renderRegistry.settings=function(){
     +'<div class="info-row"><span class="k">تخزين أسعار الجملة</span><span class="v">'+(costSource==='cloud'?'السحابة (مشترك)':'محلي (هذا المتصفح)')+'</span></div>'
     +'<div class="info-row"><span class="k">عدد الطلبات المحمّلة</span><span class="v">'+fmtNum(allOrders.length)+'</span></div>'
     +'</div></div>';
-  html+='<div class="col-lg-6"><div class="panel"><h6><i class="bi bi-telegram"></i> إشعارات تيليجرام</h6><p style="font-size:.85rem;color:#6b7280;margin:0">تيليجرام يعمل كإشعارات فقط (طلب جديد / تقييم) من الـ Worker. هذه اللوحة هي مصدر الحقيقة للإدارة — لا تدر أعمالك من رسائل واتساب/تيليجرام. الردود التي تكتبها هناك لا تُحفظ؛ استعمل «ملاحظات» داخل صفحة الطلب بدلاً منها.</p></div>'
+  html+='<div class="col-lg-6"><div class="panel"><h6><i class="bi bi-telegram"></i> إشعارات تيليجرام</h6><p style="font-size:.85rem;color:#6b7280;margin:0">تيليجرام يعمل كإشعارات فقط (طلب جديد / تقييم) من الـ Worker. هذه اللوحة هي مصدر الحقيقة للإ��ارة — لا تدر أعمالك من رسائل واتساب/تيليجرام. الردود التي تكتبها هناك لا تُحفظ؛ استعمل «ملاحظات» داخل صفحة الطلب بدلاً منها.</p></div>'
     +'<div class="panel mt-3"><h6><i class="bi bi-shield-lock"></i> حماية الشحن</h6><p style="font-size:.85rem;color:#6b7280;margin:0">زر الإرسال إل�� Ecotrack يستعمل تسجيل دخولك (رمز Firebase). لقصر الشحن على بريدك فقط، أضف متغيّر <code>ADMIN_EMAIL</code> في إعدادات الـ Worker ب��ي��ة بريدك.</p></div></div>';
   html+='<div class="col-12"><div class="panel"><h6><i class="bi bi-file-earmark-code"></i> قواعد Firestore المقترحة</h6><p style="font-size:.82rem;color:#6b7280">لتعمل كل الميزات (قراءة/تعديل/حذف الطلبات + حفظ أسعار الجملة في السحابة)، انشر هذه القواعد:</p><pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:10px;font-size:.76rem;overflow:auto;" dir="ltr">'+esc(rules)+'</pre></div></div>';
   html+='</div>';host.innerHTML=html;
@@ -598,7 +598,10 @@ function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=o
 }
 
 /* ============ shared write ============ */
-function patchOrder(id,patch){patch.updatedAt=new Date().toISOString();return db.collection('orders').doc(id).update(patch).then(function(){var r=getRec(id);if(r)Object.assign(r.data,patch);});}
+function robusteAdminKey(){var k="";try{k=localStorage.getItem("ROBUSTE_ADMIN_KEY")||"";}catch(e){}if(!k){try{k=(prompt("أدخل مفتاح الإدارة (ADMIN_KEY) لتفعيل إرسال حدث الشراء إلى ميتا — مرة واحدة فقط:")||"").trim();}catch(e){k="";}if(k){try{localStorage.setItem("ROBUSTE_ADMIN_KEY",k);}catch(e){}}}return k;}
+function isPositiveStatusAdmin(st){var s=String(st||"").toLowerCase();if(/إلغ|لغى|لغي|cancel|annul|refus|رفض|راجع|إرجاع|مرتجع|retour|return|fake|وهمي|spam|تجريبي/.test(s))return false;return /أكد|ؤكد|تأكيد|confirm|تحضير|جاهز|prepar|ready|شحن|الطريق|توصيل|expedi|ship|transit|livr|تسليم|وصل|deliver/.test(s);}
+function fireWorkerPurchase(id){try{if(!id||typeof WORKER_URL==="undefined"||!WORKER_URL)return;var k=robusteAdminKey();if(!k)return;fetch(WORKER_URL+"/admin/confirm-purchase",{method:"POST",headers:{"Content-Type":"application/json","X-Admin-Key":k},body:JSON.stringify({id:id})}).catch(function(){});}catch(e){}}
+function patchOrder(id,patch){patch.updatedAt=new Date().toISOString();return db.collection('orders').doc(id).update(patch).then(function(){var r=getRec(id);if(r)Object.assign(r.data,patch);try{if(patch&&patch.status&&isPositiveStatusAdmin(patch.status))fireWorkerPurchase(id);}catch(e){}});}
 /* Add a phone + IP to config/watchlist so future orders from them are auto-flagged. */
 function blockCustomer(phone,ip){var u={};if(phone)u.phones=firebase.firestore.FieldValue.arrayUnion(phone);if(ip)u.ips=firebase.firestore.FieldValue.arrayUnion(ip);if(!u.phones&&!u.ips)return Promise.resolve();return db.collection('config').doc('watchlist').set(u,{merge:true});}
 
