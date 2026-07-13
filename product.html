@@ -818,7 +818,7 @@ img{max-width:100%;}
     <div class="ph-trust" data-aos="fade-up">
       <div class="ph-grid">
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-truck"></i></div><div class="ph-t">توصيل حتى باب البيت</div><div class="ph-s">إلى 58 ولاية</div></div>
-        <div class="ph-item"><div class="ph-ic"><i class="bi bi-shield-check"></i></div><div class="ph-t">ضمان عام</div><div class="ph-s">منتجات أصلية</div></div>
+        <div class="ph-item"><div class="ph-ic"><i class="bi bi-shield-check"></i></div><div class="ph-t">ضمان عام</div><div class="ph-s">منت��ات أصلية</div></div>
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-headset"></i></div><div class="ph-t">خدمة ما بعد الشراء</div><div class="ph-s">دعم متواصل</div></div>
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-cash-coin"></i></div><div class="ph-t">دفع يد بيد</div><div class="ph-s">عند الاستلام</div></div>
       </div>
@@ -1187,7 +1187,7 @@ async function submitOrderFinal() {
     try {
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;
@@ -1353,7 +1353,7 @@ async function submitExpressOrder() {
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;

@@ -110,6 +110,36 @@
     };
   }
 
+  // Meta fbc/fbp for the Conversions API. Never returns empty strings —
+  // missing keys are omitted entirely so the server never sends fbc: "".
+  function getFbData() {
+    return safe(function () {
+      function cookie(name) {
+        var m = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+        return m ? decodeURIComponent(m[2]) : "";
+      }
+      var fbc = cookie("_fbc");
+      if (fbc) {
+        try { localStorage.setItem("robuste_fbc", fbc); } catch (e) {}
+      } else {
+        var fbclid = getParam("fbclid");
+        if (fbclid) {
+          // Build _fbc from fbclid per Meta's format: fb.1.<timestamp_ms>.<fbclid>
+          fbc = "fb.1." + Date.now() + "." + fbclid;
+          try { localStorage.setItem("robuste_fbc", fbc); } catch (e) {}
+        } else {
+          // Multi-page visit: reuse the value captured on the landing page.
+          try { fbc = localStorage.getItem("robuste_fbc") || ""; } catch (e) {}
+        }
+      }
+      var fbp = cookie("_fbp");
+      var fb = { event_source_url: location.href };
+      if (fbp) fb.fbp = fbp;
+      if (fbc) fb.fbc = fbc;
+      return fb;
+    }, { });
+  }
+
   // Client-side risk flags (display/triage only — never blocks).
   function computeClientRisk(meta, order) {
     var flags = [];
@@ -126,10 +156,11 @@
   }
 
   captureFirstTouch();
+  getFbData(); // persist fbc from the ad click as early as possible
   bumpPageView();
   watchFormOpen();
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wrapAddToCart);
   else wrapAddToCart();
 
-  window.RobusteTracking = { getOrderMeta: getOrderMeta, computeClientRisk: computeClientRisk };
+  window.RobusteTracking = { getOrderMeta: getOrderMeta, computeClientRisk: computeClientRisk, getFbData: getFbData };
 })();

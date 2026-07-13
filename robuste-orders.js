@@ -132,7 +132,10 @@
     status("\u062c\u0627\u0631\u064a \u0645\u0639\u0627\u0644\u062c\u0629 \u0637\u0644\u0628\u0643...", "loading");
     lockBtn(true);
 
-    var p = CONFIG.workerUrl ? submitViaWorker({ order: order, meta: meta, risk: risk }) : submitViaFirebase(order);
+    var fb = {};
+    try { if (window.RobusteTracking && window.RobusteTracking.getFbData) fb = window.RobusteTracking.getFbData(); } catch (e) {}
+
+    var p = CONFIG.workerUrl ? submitViaWorker({ order: order, meta: meta, risk: risk, fb: fb }) : submitViaFirebase(order);
     p.then(function (id) { onSuccess(order, id); })
      .catch(function (err) { console.error("Order submit error:", err); status("\u062a\u0639\u0630\u0631 \u0625\u0631\u0633\u0627\u0644 \u0627\u0644\u0637\u0644\u0628. \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.", "error"); })
      .then(function () { lockBtn(false); });
