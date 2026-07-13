@@ -1166,7 +1166,7 @@ function antiSpamCheck(sig){
         var now = Date.now();
         var last = parseInt(localStorage.getItem('robuste_last_order_ts') || '0', 10);
         var lastSig = localStorage.getItem('robuste_last_order_sig') || '';
-        if(sig && sig === lastSig && last && (now - last) < 60000) { return { ok:false, msg:"لقد استلمنا هذا الطلب بالفعل، سنتواصل معك قريباً" }; }
+        if(sig && sig === lastSig && last && (now - last) < 60000) { return { ok:false, msg:"لقد اس��لمنا هذا الطلب بالفعل، سنتواصل معك قريباً" }; }
     } catch(e){}
     return { ok:true };
 }
@@ -1203,7 +1203,7 @@ async function submitOrderFinal() {
     try {
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;
@@ -1369,7 +1369,7 @@ async function submitExpressOrder() {
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;

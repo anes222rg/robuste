@@ -805,7 +805,7 @@ img{max-width:100%;}
         <div class="price-section my-3">
           <span class="current-price fw-bold fs-3" dir="ltr">4,100 DA</span><del class="old-price text-muted ms-2" dir="ltr">5,800 DA</del><span class="discount-badge ms-2">-29%</span>
         </div>
-        <p class="product-availability">متوفر في المخزون</p>
+        <p class="product-availability">متو��ر في المخزون</p>
         <p class="product-description">Le lisseur SW 207 avec plaques en céramique assure un lissage parfait sans abîmer les cheveux. Contrôle précis de la température de 120°C à 230°C pour s'adapter à tous types de cheveux.</p>
         <ul class="product-features list-unstyled"><li><i class="bi bi-check-circle-fill"></i> Plaques en céramique</li><li><i class="bi bi-check-circle-fill"></i> Température réglable 120-230°C</li><li><i class="bi bi-check-circle-fill"></i> Chauffage rapide 30 secondes</li><li><i class="bi bi-check-circle-fill"></i> Verrouillage de sécurité</li></ul>
         <p class="text-muted">الدفع عند الاستلام • التوصيل لكل الولايات</p>
@@ -1203,7 +1203,7 @@ async function submitOrderFinal() {
     try {
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;
@@ -1369,7 +1369,7 @@ async function submitExpressOrder() {
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;

@@ -596,7 +596,10 @@ function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=o
 }
 
 /* ============ shared write ============ */
-function patchOrder(id,patch){patch.updatedAt=new Date().toISOString();return db.collection('orders').doc(id).update(patch).then(function(){var r=getRec(id);if(r)Object.assign(r.data,patch);});}
+function robusteAdminKey(){var k="";try{k=localStorage.getItem("ROBUSTE_ADMIN_KEY")||"";}catch(e){}if(!k){try{k=(prompt("أدخل مفتاح الإدارة (ADMIN_KEY) لتفعيل إرسال حدث الشراء إلى ميتا — مرة واحدة فقط:")||"").trim();}catch(e){k="";}if(k){try{localStorage.setItem("ROBUSTE_ADMIN_KEY",k);}catch(e){}}}return k;}
+function isPositiveStatusAdmin(st){var s=String(st||"").toLowerCase();if(/إلغ|لغى|لغي|cancel|annul|refus|رفض|راجع|إرجاع|مرتجع|retour|return|fake|وهمي|spam|تجريبي/.test(s))return false;return /أكد|ؤكد|تأكيد|confirm|تحضير|جاهز|prepar|ready|شحن|الطريق|توصيل|expedi|ship|transit|livr|تسليم|وصل|deliver/.test(s);}
+function fireWorkerPurchase(id){try{if(!id||typeof WORKER_URL==="undefined"||!WORKER_URL)return;var k=robusteAdminKey();if(!k)return;fetch(WORKER_URL+"/admin/confirm-purchase",{method:"POST",headers:{"Content-Type":"application/json","X-Admin-Key":k},body:JSON.stringify({id:id})}).catch(function(){});}catch(e){}}
+function patchOrder(id,patch){patch.updatedAt=new Date().toISOString();return db.collection('orders').doc(id).update(patch).then(function(){var r=getRec(id);if(r)Object.assign(r.data,patch);try{if(patch&&patch.status&&isPositiveStatusAdmin(patch.status))fireWorkerPurchase(id);}catch(e){}});}
 /* Add a phone + IP to config/watchlist so future orders from them are auto-flagged. */
 function blockCustomer(phone,ip){var u={};if(phone)u.phones=firebase.firestore.FieldValue.arrayUnion(phone);if(ip)u.ips=firebase.firestore.FieldValue.arrayUnion(ip);if(!u.phones&&!u.ips)return Promise.resolve();return db.collection('config').doc('watchlist').set(u,{merge:true});}
 
