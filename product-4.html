@@ -174,6 +174,15 @@ body {
     transform: rotate(15deg) scale(1.1);
 }
 
+/* ========== زر اطلب الآن الثابت ========== */
+.sticky-order-btn{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:1200;display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border:none;border-radius:999px;cursor:pointer;font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:.3px;background:linear-gradient(135deg,#ff7a18,#e8590c);box-shadow:0 10px 28px rgba(232,89,12,.45);transition:transform .25s ease,box-shadow .25s ease,opacity .3s ease,visibility .3s ease;animation:stickyPulse 2.4s ease-in-out infinite;}
+.sticky-order-btn:hover{transform:translateX(-50%) translateY(-3px);box-shadow:0 14px 34px rgba(232,89,12,.55);}
+.sticky-order-btn i{font-size:1.2rem;}
+.sticky-order-btn.is-hidden{opacity:0;visibility:hidden;transform:translateX(-50%) translateY(24px);pointer-events:none;}
+@keyframes stickyPulse{0%,100%{box-shadow:0 10px 28px rgba(232,89,12,.45);}50%{box-shadow:0 12px 36px rgba(232,89,12,.72);}}
+.quick-order-card.qo-flash{animation:qoFlash 1.6s ease;}
+@keyframes qoFlash{0%,100%{box-shadow:none;}30%,60%{box-shadow:0 0 0 4px rgba(255,122,24,.55);}}
+@media (max-width:576px){.sticky-order-btn{width:calc(100% - 28px);justify-content:center;bottom:14px;padding:15px 20px;font-size:1.12rem;}}
 /* ========== زر السلة العائمة (مطابق لـ index) ========== */
 .floating-cart {
     position: fixed;
@@ -323,6 +332,19 @@ body {
 .ph-trust .ph-s{ font-size:12px; color:#8a8a8a; margin-top:2px; }
 @media (max-width:768px){ .ph-trust .ph-grid{ grid-template-columns:repeat(2,1fr); } }
 @media (max-width:400px){ .ph-trust .ph-grid{ grid-template-columns:1fr; } }
+/* real customer review screenshots */
+.real-reviews{margin-top:8px;}
+.rr-head{text-align:center;margin-bottom:18px;}
+.rr-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:800;padding:8px 18px;border-radius:999px;font-size:1rem;box-shadow:0 6px 18px rgba(22,163,74,.3);}
+.rr-sub{color:#6b7280;margin-top:10px;font-size:.95rem;}
+.rr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.rr-item{margin:0;position:relative;border-radius:14px;overflow:hidden;cursor:zoom-in;box-shadow:0 6px 20px rgba(0,0,0,.12);border:1px solid rgba(0,0,0,.06);background:#0b0b0b;transition:transform .25s ease,box-shadow .25s ease;}
+.rr-item:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.2);}
+.rr-item img{width:100%;height:340px;object-fit:cover;object-position:top center;display:block;}
+.rr-item figcaption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);color:#fff;font-size:.82rem;padding:18px 10px 8px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;}
+@media(max-width:992px){.rr-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:576px){.rr-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.rr-item img{height:270px;}}
+
 /* lightbox */
 .ph-lightbox{ position:fixed; inset:0; z-index:30000; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
 .ph-lightbox.open{ display:flex; }
@@ -790,6 +812,9 @@ img{max-width:100%;}
     </div>
 </div>
 
+<!-- زر اطلب الآن الثابت -->
+<button class="sticky-order-btn" id="stickyOrderBtn" type="button" onclick="goToOrder()"><i class="bi bi-bag-check-fill"></i> اطلب الآن</button>
+
 <!-- Toast للمنبهات -->
 <div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
 
@@ -848,6 +873,18 @@ img{max-width:100%;}
 <section class="reviews-section py-5" data-aos="fade-up">
   <div class="container">
     <h2 class="section-title">آراء العملاء</h2>
+    <div class="real-reviews mb-5">
+      <div class="rr-head">
+        <span class="rr-badge"><i class="bi bi-patch-check-fill"></i> آراء حقيقية 100%</span>
+        <p class="rr-sub">صور حقيقية من محادثات زبائننا بعد استلامهم وتجربتهم للفريتوز</p>
+      </div>
+      <div class="rr-grid">
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-1.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-1.jpg" alt="زبونة جرّبت الفريتوز: ولله أحسن ماركة والنتيجة روعة"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-2.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-2.jpg" alt="تأكيد توصيل الطلب مع شكر الزبونة"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-3.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-3.jpg" alt="زبونة راضية وطلبت فريتوز إضافية للعائلة"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-4.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-4.jpg" alt="زبونة استلمت طلبها وشكرت المتجر"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+      </div>
+    </div>
     <div class="row" id="reviewsRow">
       <div class="col-md-4 mb-4">
         <div class="review-card">
@@ -1186,10 +1223,10 @@ async function submitOrderFinal() {
     var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
     const totalPrice = subtotal + deliveryFee;
     if(!fullName || !phone || !wilaya) { showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
-    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length !== 2) { showToast("يرجى إدخال الاسم واللقب (كلمتان فقط)", "error"); return; }
+    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length > 2) { showToast("يرجى إدخال الاسم (كلمة أو كلمتان)", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
     if(!baladiya) { showToast("يرجى اختيار البلدية", "error"); return; }
-    if(!address || address.length < 8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!address) { showToast("يرجى إدخال العنوان", "error"); return; }
     var guard = antiSpamCheck(phone + '|' + totalPrice);
     if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingFinal = true;
@@ -1296,7 +1333,7 @@ function renderProductLayout(p) {
                 <div class="stock-status"><i class="bi bi-check-circle-fill text-success"></i> متوفر · توصيل سريع</div>
                 <div class="action-buttons d-flex gap-3 mt-3">
                     <button class="btn btn-orange flex-grow-1" onclick="addToCart('${p.title.replace(/'/g, "\\'")}', ${p.price}, '${p.images[0]}', ${p.id})"><i class="bi bi-cart-plus"></i> أضف للسلة</button>
-                    <button class="btn btn-outline-modern flex-grow-1" onclick="directBuy('${p.title.replace(/'/g, "\\'")}', ${p.price}, '${p.images[0]}', ${p.id})"><i class="bi bi-bag-check"></i> شراء فوري</button>
+                    <button class="btn btn-outline-modern flex-grow-1" onclick="goToOrder()"><i class="bi bi-bag-check"></i> اطلب الآن</button>
                 </div>
                 <div class="order-assurance">
                     <div class="oa-item"><i class="bi bi-shield-lock"></i> دفع آمن عند الاستلام</div>
@@ -1351,7 +1388,7 @@ async function submitExpressOrder() {
     if(_nw<1 || _nw>2) { showToast("يرجى إدخال الاسم واللقب (كلمة أو كلمتان)", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
     if(!baladiya) { showToast("يرجى إدخال البلدية", "error"); return; }
-    if(!addressRaw || addressRaw.length<8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!addressRaw) { showToast("يرجى إدخال العنوان", "error"); return; }
     const address = [baladiya, addressRaw].filter(Boolean).join("، ");
     const subtotal = currentProduct.price * qty;
     var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
@@ -1534,6 +1571,19 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 window.openReviewModal = openReviewModal; window.submitReview = submitReview;
 window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; window.goToProduct = goToProduct;
+function goToOrder(){
+  var el=document.getElementById('expressForm')||document.querySelector('.quick-order-card')||document.getElementById('productDetailRow');
+  if(el){
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    var card=document.querySelector('.quick-order-card');
+    if(card){card.classList.add('qo-flash');setTimeout(function(){card.classList.remove('qo-flash');},1600);}
+    var n=document.getElementById('expressName');
+    if(n){setTimeout(function(){try{n.focus({preventScroll:true});}catch(e){}},650);}
+  }
+}
+window.goToOrder=goToOrder;
+(function(){function toggleSticky(){var btn=document.getElementById('stickyOrderBtn');if(!btn)return;var form=document.getElementById('expressForm');if(!form){btn.classList.remove('is-hidden');return;}var r=form.getBoundingClientRect();var vis=r.top<(window.innerHeight*0.85)&&r.bottom>60;if(vis)btn.classList.add('is-hidden');else btn.classList.remove('is-hidden');}window.addEventListener('scroll',toggleSticky,{passive:true});window.addEventListener('resize',toggleSticky);setTimeout(toggleSticky,1200);})();
+
 </script>
 <div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
 <script src="i18n.js"></script>
