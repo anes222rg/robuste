@@ -184,13 +184,48 @@ gtag('config', 'G-GREM5BTR7T');
 </div>
 
 <!-- Hero (restructured — no JS hooks inside) -->
+<style>
+/* ROBUSTE hero stage — self-contained (works even if robuste.css is cached/old) */
+.rb-hero-stage{position:relative;min-block-size:clamp(240px,46vw,320px)}
+.rb-stage-glow{position:absolute;inset:8% 0 2%;background:radial-gradient(46% 42% at 50% 38%,rgba(255,79,0,.13),transparent 70%),radial-gradient(40% 36% at 16% 78%,rgba(16,24,40,.07),transparent 70%)}
+[data-theme="dark"] .rb-stage-glow{background:radial-gradient(46% 42% at 50% 38%,rgba(255,92,20,.18),transparent 70%),radial-gradient(40% 36% at 16% 78%,rgba(255,255,255,.05),transparent 70%)}
+.rb-stage-ring{position:absolute;border:1px dashed var(--rb-line-strong,#CBD2DC);border-radius:50%;opacity:.7}
+.rb-ring-1{inline-size:42%;aspect-ratio:1;top:0;inset-inline-start:29%}
+.rb-ring-2{inline-size:22%;aspect-ratio:1;bottom:2%;inset-inline-end:1%;border-style:solid;opacity:.45}
+.rb-stage-spark{position:absolute;inline-size:8px;aspect-ratio:1;border-radius:50%;background:var(--rb-accent,#FF4F00);opacity:.5;animation:rb-bob 5s ease-in-out infinite}
+.rb-spark-1{top:8%;inset-inline-end:12%}
+.rb-spark-2{top:38%;inset-inline-start:2%;inline-size:6px;background:var(--rb-muted,#7B8497)}
+.rb-spark-3{top:2%;inset-inline-start:46%;inline-size:5px}
+.rb-float{position:absolute;margin:0}
+.rb-float img{inline-size:100%;block-size:auto;display:block;position:relative;z-index:1;filter:drop-shadow(0 14px 16px rgba(16,24,40,.15));animation:rb-bob var(--bob-d,6s) ease-in-out infinite;animation-delay:var(--bob-delay,0s)}
+.rb-float-shadow{position:absolute;inset-inline:15%;block-size:7%;inset-block-end:-5%;background:radial-gradient(50% 50% at 50% 50%,rgba(16,24,40,.34),transparent 72%);filter:blur(5px);animation:rb-shadow var(--bob-d,6s) ease-in-out infinite;animation-delay:var(--bob-delay,0s)}
+/* One line: café | ProClean (middle, raised) | friteuse */
+.rb-float-cafe{inline-size:32%;inset-inline-start:0;inset-block-end:4%;z-index:2;--bob-d:6s;--drift:-48px}
+.rb-float-proclean{inline-size:36%;inset-inline-start:32.5%;inset-block-end:22%;z-index:3;--bob-d:6.8s;--bob-delay:-1.8s;--drift:-70px}
+.rb-float-friteuse{inline-size:30%;inset-inline-end:0;inset-block-end:4%;z-index:2;--bob-d:7.2s;--bob-delay:-2.6s;--drift:-90px}
+.rb-float-badge{position:absolute;z-index:4;display:inline-flex;align-items:center;gap:6px;background:var(--rb-surface,#fff);border:1px solid var(--rb-line,#E3E6EB);border-radius:999px;padding:7px 14px;font-size:.875rem;font-weight:700;color:var(--rb-ink,#0E1116);box-shadow:0 10px 24px rgba(16,24,40,.10);animation:rb-bob 5.4s ease-in-out infinite}
+.rb-float-badge .bi{color:var(--rb-accent,#FF4F00)}
+.rb-badge-1{top:24%;inset-inline-start:1%;animation-delay:-1.4s;--drift:-120px}
+.rb-badge-2{top:32%;inset-inline-end:0;animation-delay:-3.8s;--drift:-140px}
+.rb-badge-3{inset-block-end:2%;inset-inline-start:41%;animation-delay:-2.4s;--drift:-100px}
+@keyframes rb-bob{0%,100%{translate:0 0}50%{translate:0 -12px}}
+@keyframes rb-shadow{0%,100%{scale:1 1;opacity:.85}50%{scale:.78 1;opacity:.45}}
+@keyframes rb-hero-vanish{to{opacity:0;transform:translateY(var(--drift,-60px))}}
+@supports (animation-timeline: scroll()){
+  .rb-float,.rb-stage-ring,.rb-stage-glow{animation:rb-hero-vanish linear both;animation-timeline:scroll();animation-range:0 520px}
+  .rb-stage-glow{--drift:-30px}.rb-ring-1{--drift:-35px}.rb-ring-2{--drift:-55px}
+  .rb-stage-spark{animation:rb-bob 5s ease-in-out infinite,rb-hero-vanish linear both;animation-timeline:auto,scroll();animation-range:normal,0 520px;--drift:-110px}
+  .rb-float-badge{animation:rb-bob 5.4s ease-in-out infinite,rb-hero-vanish linear both;animation-timeline:auto,scroll();animation-range:normal,0 520px}
+}
+@media (prefers-reduced-motion: reduce){.rb-float,.rb-float img,.rb-float-shadow,.rb-float-badge,.rb-stage-spark,.rb-stage-ring,.rb-stage-glow{animation:none!important}}
+</style>
 <header class="rb-hero">
   <div class="container">
     <div class="rb-hero-grid">
       <div class="rb-hero-copy">
         <span class="rb-hero-eyebrow"><i class="bi bi-lightning-charge-fill"></i> ROBUSTE — EL EULMA</span>
         <h1 class="rb-hero-title">أجهزة منزلية تجعل حياتك أسهل</h1>
-        <p class="rb-hero-sub">جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة وضمان سنة واحدة</p>
+        <p class="rb-hero-sub">جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة و��مان سنة واحدة</p>
         <div class="rb-hero-cta">
           <a href="#products" class="btn btn-orange btn-lg"><i class="bi bi-cart"></i> تسوق الآن</a>
           <a href="#contact" class="btn rb-btn-ghost btn-lg"><i class="bi bi-headset"></i> اتصل بنا</a>
@@ -212,12 +247,17 @@ gtag('config', 'G-GREM5BTR7T');
           <img src="images/hero-cafe.webp" width="695" height="721" alt="آلة قهوة إسبريسو ROBUSTE Moka" fetchpriority="high" decoding="async">
           <span class="rb-float-shadow" aria-hidden="true"></span>
         </figure>
+        <figure class="rb-float rb-float-proclean" data-drift="-70">
+          <img src="images/hero-proclean.webp" width="716" height="704" alt="منظف البقع ROBUSTE ProClean" fetchpriority="high" decoding="async">
+          <span class="rb-float-shadow" aria-hidden="true"></span>
+        </figure>
         <figure class="rb-float rb-float-friteuse" data-drift="-90">
           <img src="images/hero-friteuse.webp" width="708" height="618" alt="مقلاة ROBUSTE 900 واط" decoding="async">
           <span class="rb-float-shadow" aria-hidden="true"></span>
         </figure>
         <span class="rb-float-badge rb-badge-1" data-drift="-120"><i class="bi bi-cup-hot-fill"></i> إسبريسو موكا</span>
         <span class="rb-float-badge rb-badge-2" data-drift="-140"><i class="bi bi-lightning-charge-fill"></i> 900 واط</span>
+        <span class="rb-float-badge rb-badge-3" data-drift="-100"><i class="bi bi-droplet-fill"></i> ProClean</span>
       </div>
     </div>
   </div>
