@@ -91,7 +91,7 @@ gtag('config', 'G-GREM5BTR7T');
 <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <!-- ROBUSTE Signal Graphite — ONE consolidated stylesheet (replaces style/premium/robuste-ui/_fable5/_luxe) -->
-<link rel="stylesheet" href="robuste.css?v=1">
+<link rel="stylesheet" href="robuste.css?v=3">
 <!-- Auto-WebP with safe fallback (added) -->
 <script>
 (function(){
@@ -202,15 +202,22 @@ gtag('config', 'G-GREM5BTR7T');
         </div>
       </div>
       <div class="rb-hero-media" data-i18n-skip>
-        <!-- Hero product stage (old baked banner retired — no baked text/logo/domain) -->
-        <a href="product-4.html" class="rb-hero-stage" aria-label="FRITEUSE DF 900 W">
-          <img width="760" height="760" src="images/FRITEUSE DF 900 W.png" alt="FRITEUSE DF 900 W" class="rb-hero-img" fetchpriority="high" decoding="async">
-          <span class="rb-hero-flag">-18%</span>
-          <span class="rb-hero-tag">
-            <span class="rb-hero-tag-name">FRITEUSE DF 900 W</span>
-            <span class="rb-hero-tag-price">6,400 دج <s>7,800 دج</s></span>
-          </span>
-        </a>
+        <!-- Floating product trio — pure CSS animation, zero JS, zero video -->
+        <div class="rb-hero-float">
+          <span class="rb-float-glow" aria-hidden="true"></span>
+          <a href="product-4.html" class="rb-float rb-float--1" aria-label="FRITEUSE DF 900 W">
+            <img src="images/FRITEUSE DF 900 W.png" alt="FRITEUSE DF 900 W" width="440" height="440" fetchpriority="high" decoding="async">
+            <span class="rb-float-tag">6,400 دج</span>
+          </a>
+          <a href="product-103.html" class="rb-float rb-float--2" aria-label="PANINEUSE ET GRILL 1000W">
+            <img src="images/PANINEUSE ET GRILL 1000W.png" alt="PANINEUSE ET GRILL 1000W" width="340" height="340" loading="lazy" decoding="async">
+            <span class="rb-float-tag">6,900 دج</span>
+          </a>
+          <a href="product-101.html" class="rb-float rb-float--3" aria-label="ASPIRATEUR SOUFFLEUR A MAIN">
+            <img src="images/ASPIRATEUR SOUFFLEUR A MAIN 3.png" alt="ASPIRATEUR SOUFFLEUR A MAIN" width="300" height="300" loading="lazy" decoding="async">
+            <span class="rb-float-tag">4,400 دج</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>

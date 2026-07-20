@@ -1787,3 +1787,59 @@ img {max-width:100%;}
   .rb-slide-media { flex-basis: 108px; }
   .rb-slide-title { font-size: .95rem; }
 }
+
+/* ==== Hero: floating product trio (CSS-only — no JS, no video) ==== */
+.rb-hero-media { background: transparent; border: 0; border-radius: 0; overflow: visible; }
+.rb-hero-float { position: relative; min-block-size: clamp(280px, 40vw, 440px); }
+.rb-float-glow {
+  position: absolute; inset-block-start: 50%; inset-inline-start: 50%; translate: -50% -50%;
+  inline-size: clamp(230px, 30vw, 380px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,79,0,.20), transparent 65%);
+}
+[dir=rtl] .rb-float-glow { translate: 50% -50%; }
+.rb-float { position: absolute; display: block; text-decoration: none; }
+.rb-float img {
+  inline-size: 100%; block-size: auto; object-fit: contain;
+  filter: drop-shadow(0 26px 30px rgba(16, 24, 40, .25));
+}
+.rb-float--1 { inline-size: clamp(170px, 23vw, 290px); inset-inline-start: 3%; inset-block-start: 2%; animation: rbFloatY 6s ease-in-out infinite; }
+.rb-float--2 { inline-size: clamp(115px, 15vw, 190px); inset-inline-end: 3%; inset-block-start: 16%; animation: rbFloatY 7.5s ease-in-out -2.4s infinite; }
+.rb-float--3 { inline-size: clamp(100px, 13vw, 165px); inset-inline-start: 30%; inset-block-end: 2%; animation: rbFloatY 8.5s ease-in-out -4.8s infinite; }
+@keyframes rbFloatY {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(1.5deg); }
+}
+.rb-float:hover img { filter: drop-shadow(0 30px 34px rgba(255, 79, 0, .30)); }
+.rb-float-tag {
+  position: absolute; inset-block-end: -8px; inset-inline-start: 50%; translate: -50%;
+  background: var(--rb-surface); border: 1px solid var(--rb-line);
+  color: var(--rb-accent-strong); font-family: var(--rb-font-display);
+  font-weight: 800; font-size: .8rem; padding: 4px 12px;
+  border-radius: var(--rb-r-pill); box-shadow: var(--rb-shadow-1); white-space: nowrap;
+}
+[dir=rtl] .rb-float-tag { translate: 50%; }
+
+/* Scroll-driven effects (modern Chromium; graceful no-op elsewhere) */
+@supports (animation-timeline: scroll(root)) {
+  .rb-float--1 { animation: rbFloatY 6s ease-in-out infinite, rbDriftA linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 70vh; }
+  .rb-float--2 { animation: rbFloatY 7.5s ease-in-out -2.4s infinite, rbDriftB linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 70vh; }
+  .rb-float--3 { animation: rbFloatY 8.5s ease-in-out -4.8s infinite, rbDriftC linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 70vh; }
+  @keyframes rbDriftA { to { translate: 0 -70px; } }
+  @keyframes rbDriftB { to { translate: 0 -130px; } }
+  @keyframes rbDriftC { to { translate: 0 -40px; } }
+}
+@supports (animation-timeline: view()) {
+  .trust-item, .offer-product, .pack-card, #productsContainer .product-card {
+    animation: rbRise both; animation-timeline: view(); animation-range: entry 0% entry 55%;
+  }
+  @keyframes rbRise { from { opacity: .2; translate: 0 26px; } to { opacity: 1; translate: 0 0; } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rb-float--1, .rb-float--2, .rb-float--3, .trust-item, .offer-product, .pack-card, #productsContainer .product-card { animation: none !important; }
+}
+@media (max-width: 991px) {
+  .rb-hero-float { min-block-size: clamp(240px, 60vw, 340px); }
+  .rb-float--1 { inline-size: clamp(150px, 38vw, 220px); }
+  .rb-float--2 { inline-size: clamp(105px, 26vw, 150px); }
+  .rb-float--3 { inline-size: clamp(95px, 23vw, 135px); }
+}
