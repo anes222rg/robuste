@@ -31,7 +31,7 @@ gtag('config', 'G-GREM5BTR7T');
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 
-<meta name="theme-color" content="#FF4F00">
+<meta name="theme-color" content="#ff6600">
 <title>ROBUSTE eulma - المتجر الرسمي</title>
 <!-- Canonical + SEO (added) -->
 <link rel="canonical" href="https://www.robustedz.store/">
@@ -71,15 +71,16 @@ gtag('config', 'G-GREM5BTR7T');
 }
 </script>
 
-<!-- Google Fonts: Rubik (body) + Readex Pro (display) — Arabic + Latin -->
+<!-- Google Fonts (Tajawal) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://api.dicebear.com">
 <link rel="dns-prefetch" href="https://i.postimg.cc">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&display=swap"></noscript>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&display=swap"></noscript>
 
 <!-- Bootstrap -->
 <link href="bootstrap.min.css" rel="stylesheet">
@@ -90,8 +91,7 @@ gtag('config', 'G-GREM5BTR7T');
 <!-- EmailJS -->
 <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-<!-- ROBUSTE Signal Graphite — ONE consolidated stylesheet (replaces style/premium/robuste-ui/_fable5/_luxe) -->
-<link rel="stylesheet" href="robuste.css?v=1">
+<link rel="stylesheet" href="robuste.css?v=1.0">
 <!-- Auto-WebP with safe fallback (added) -->
 <script>
 (function(){
@@ -141,19 +141,22 @@ gtag('config', 'G-GREM5BTR7T');
 </script>
 </head>
 <body>
-<!-- Top COD reassurance strip (static, new) -->
-<div class="rb-topstrip"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام — توصيل <b>58 ولاية</b> خلال 24–72 ساعة</div>
-<!-- [JS HOOK] .glass-navbar (main.js adds .scrolled) · #navbarNav (collapse) · #themeToggle -->
+<!-- JS HOOK: #topCodBar — preserve ID exactly -->
+<div class="top-cod-bar" id="topCodBar" role="status">
+  <span><!-- JS HOOK: #topBarText — preserve ID exactly --><span id="topBarText"><i class="bi bi-shield-check"></i>الدفع عند الاستلام · توصيل إلى جميع ولايات الجزائر</span></span>
+</div>
+
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
     <div class="container">
         <a class="navbar-brand" href="index.html">
             <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" 
                  alt="شعار ROBUSTE" width="180" height="50" style="max-height:50px;">
-            <span class="d-none d-lg-inline brand-name ms-2">ROBUSTE <b>eulma</b></span>
+            <span class="d-none d-lg-inline fw-bold fs-4 ms-2" style="color: #FF6B35;">ROBUSTE eulma</span>
         </a>
        
         <div class="d-flex align-items-center ms-3">
-            <button class="theme-toggle" id="themeToggle" title="الوضع المظلم" aria-label="الوضع المظلم">
+            <!-- JS HOOK: #themeToggle — theme switch; preserve ID exactly -->
+<button class="theme-toggle" id="themeToggle" title="الوضع المظلم" aria-label="الوضع المظلم">
                 <i class="bi bi-moon"></i>
             </button>
         </div>
@@ -162,7 +165,8 @@ gtag('config', 'G-GREM5BTR7T');
             <span class="navbar-toggler-icon"></span>
         </button>
         
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <!-- JS HOOK: #navbarNav — Bootstrap navigation collapse; preserve ID exactly -->
+<div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item mx-2"><a class="nav-link active" href="index.html">الرئيسية</a></li>
                 <li class="nav-item"><a class="nav-link" href="#products">المنتجات</a></li>
@@ -175,38 +179,36 @@ gtag('config', 'G-GREM5BTR7T');
     </div>
 </nav>
 
-<!-- [JS HOOK] #statusIndicator / #statusMessage (main.js notifications) -->
+<!-- JS HOOK: #statusIndicator — global status surface; preserve ID exactly -->
 <div class="status-indicator" id="statusIndicator" style="display: none;">
     <div class="alert alert-dismissible fade show" role="alert" aria-live="polite">
-        <span id="statusMessage"></span> 
+        <!-- JS HOOK: #statusMessage — global status content; preserve ID exactly -->
+<span id="statusMessage"></span> 
         <button type="button" class="btn-close" onclick="hideStatus()" aria-label="إغلاق"></button>
     </div>
 </div>
 
-<!-- Hero (restructured — no JS hooks inside) -->
-<header class="rb-hero">
-  <div class="container">
-    <div class="rb-hero-grid">
-      <div class="rb-hero-copy">
-        <span class="rb-hero-eyebrow"><i class="bi bi-lightning-charge-fill"></i> ROBUSTE — EL EULMA</span>
-        <h1 class="rb-hero-title">أجهزة منزلية تجعل حياتك أسهل</h1>
-        <p class="rb-hero-sub">جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة وضمان سنة واحدة</p>
-        <div class="rb-hero-cta">
-          <a href="#products" class="btn btn-orange btn-lg"><i class="bi bi-cart"></i> تسوق الآن</a>
-          <a href="#contact" class="btn rb-btn-ghost btn-lg"><i class="bi bi-headset"></i> اتصل بنا</a>
-        </div>
-        <div class="rb-hero-chips">
-          <span class="rb-chip"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام</span>
-          <span class="rb-chip"><i class="bi bi-truck"></i> توصيل 58 ولاية</span>
-          <span class="rb-chip"><i class="bi bi-shield-check"></i> ضمان سنة</span>
-        </div>
-      </div>
-      <div class="rb-hero-media">
-        <img width="3780" height="1890" src="images/banner.webp" alt="أجهزة منزلية" class="rb-hero-img" fetchpriority="high" decoding="async">
-      </div>
+<!-- القسم الرئيسي Hero -->
+<section class="hero-container position-relative">
+    <div class="hero-image-container">
+        <img width="3780" height="1890" src="images/banner.webp" alt="أجهزة منزلية" class="hero-image" fetchpriority="high" decoding="async">
+        <div class="image-overlay"></div>
     </div>
-  </div>
-</header>
+    <div class="hero-content container text-center position-absolute top-50 start-50 translate-middle">
+        <span class="hero-eyebrow"><i class="bi bi-patch-check-fill"></i> ROBUSTE · المتجر الرسمي</span>
+        <h1 class="hero-title">أجهزة منزلية تجعل حياتك أسهل</h1>
+        <p class="hero-subtitle">أداء موثوق، أسعار واضحة، وتوصيل سريع لكل منزل جزائري مع ضمان سنة كاملة.</p>
+        <div class="hero-actions">
+            <a href="#products" class="btn btn-orange btn-lg"><i class="bi bi-bag"></i> تسوق المنتجات</a>
+            <a href="tracking.html" class="btn btn-outline-light btn-lg"><i class="bi bi-truck"></i> تتبع طلبي</a>
+        </div>
+        <div class="hero-assurance" aria-label="مزايا الطلب">
+          <span><i class="bi bi-cash-coin"></i> الدفع عند الاستلام</span>
+          <span><i class="bi bi-shield-check"></i> ضمان سنة</span>
+          <span><i class="bi bi-headset"></i> خدمة ما بعد البيع</span>
+        </div>
+    </div>
+</section>
 
 <!-- عرض الشرائح (Slideshow) -->
 <div class="slideshow-container1">
@@ -282,24 +284,28 @@ gtag('config', 'G-GREM5BTR7T');
       <p class="offer-subtitle">استفد من عروضنا الاستثنائية مع تخفيضات تصل إلى 30% على أفضل الأجهزة المنزلية. العرض محدود زمنياً!</p>
     </div>
 
-    <!-- [JS HOOK] countdown: #days #hours #minutes #seconds (main.js) -->
+    <!-- العد التنازلي -->
     <div class="offer-timer">
       <div class="timer-title">⏳ ينتهي العرض خلال :</div>
       <div class="timer-content">
         <div class="timer-item">
-          <div class="timer-value" id="days">03</div>
+          <!-- JS HOOK: #days — offer countdown days; preserve ID exactly -->
+<div class="timer-value" id="days">03</div>
           <div class="timer-label">أيام</div>
         </div>
         <div class="timer-item">
-          <div class="timer-value" id="hours">12</div>
+          <!-- JS HOOK: #hours — offer countdown hours; preserve ID exactly -->
+<div class="timer-value" id="hours">12</div>
           <div class="timer-label">ساعات</div>
         </div>
         <div class="timer-item">
-          <div class="timer-value" id="minutes">45</div>
+          <!-- JS HOOK: #minutes — offer countdown minutes; preserve ID exactly -->
+<div class="timer-value" id="minutes">45</div>
           <div class="timer-label">دقائق</div>
         </div>
         <div class="timer-item">
-          <div class="timer-value" id="seconds">30</div>
+          <!-- JS HOOK: #seconds — offer countdown seconds; preserve ID exactly -->
+<div class="timer-value" id="seconds">30</div>
           <div class="timer-label">ثواني</div>
         </div>
       </div>
@@ -314,18 +320,19 @@ gtag('config', 'G-GREM5BTR7T');
       </div>
       <span class="packs-scroll-hint"><i class="bi bi-arrow-left"></i> اسحبي لاكتشاف الباكات</span>
     </div>
-    <!-- [JS HOOK] #packs / #packsShowcase (packs-showcase.js renders here with its own CSS) -->
-    <div class="packs-showcase" id="packsShowcase" data-i18n-skip aria-live="polite"></div>
+    <!-- JS HOOK: #packsShowcase — packs renderer; preserve ID exactly -->
+<div class="packs-showcase" id="packsShowcase" data-i18n-skip aria-live="polite"></div>
 
     <!-- المنتجات المعروضة (أسماء المنتجات الأصلية بالفرنسية) -->
-    <!-- [JS HOOK] #offerProducts / .offer-product / .offer-btn / #carousel-offer-1..5 (click routing + carousels in main.js) -->
-    <div class="offer-products" id="offerProducts">
+    <!-- JS HOOK: #offerProducts — offer collection; preserve ID exactly -->
+<div class="offer-products" id="offerProducts">
       <!-- منتج 1 -->
       <div class="offer-product">
         <div class="offer-product-discount">-15%</div>
         <div class="offer-product-badge">الأكثر مبيعاً</div>
 
-        <div id="carousel-offer-1" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+        <!-- JS HOOK: #carousel-offer-1 — offer carousel 1; preserve ID exactly -->
+<div id="carousel-offer-1" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
           <div class="carousel-indicators">
             <button type="button" data-bs-target="#carousel-offer-1" data-bs-slide-to="0" class="active" aria-label="صورة 1"></button>
             <button type="button" data-bs-target="#carousel-offer-1" data-bs-slide-to="1" aria-label="صورة 2"></button>
@@ -369,7 +376,8 @@ gtag('config', 'G-GREM5BTR7T');
         <div class="offer-product-discount">-20%</div>
         <div class="offer-product-badge">جديد</div>
 
-        <div id="carousel-offer-2" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
+        <!-- JS HOOK: #carousel-offer-2 — offer carousel 2; preserve ID exactly -->
+<div id="carousel-offer-2" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
           <div class="carousel-indicators">
             <button type="button" data-bs-target="#carousel-offer-2" data-bs-slide-to="0" class="active" aria-label="صورة 1"></button>
             <button type="button" data-bs-target="#carousel-offer-2" data-bs-slide-to="1" aria-label="صورة 2"></button>
@@ -413,7 +421,8 @@ gtag('config', 'G-GREM5BTR7T');
         <div class="offer-product-discount">-25%</div>
         <div class="offer-product-badge">الأعلى مبيعاً</div>
 
-        <div id="carousel-offer-3" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+        <!-- JS HOOK: #carousel-offer-3 — offer carousel 3; preserve ID exactly -->
+<div id="carousel-offer-3" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
           <div class="carousel-indicators">
             <button type="button" data-bs-target="#carousel-offer-3" data-bs-slide-to="0" class="active" aria-label="صورة 1"></button>
             <button type="button" data-bs-target="#carousel-offer-3" data-bs-slide-to="1" aria-label="صورة 2"></button>
@@ -453,7 +462,8 @@ gtag('config', 'G-GREM5BTR7T');
         <div class="offer-product-discount">-14%</div>
         <div class="offer-product-badge">عرض خاص</div>
 
-        <div id="carousel-offer-4" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
+        <!-- JS HOOK: #carousel-offer-4 — offer carousel 4; preserve ID exactly -->
+<div id="carousel-offer-4" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
           <div class="carousel-indicators">
             <button type="button" data-bs-target="#carousel-offer-4" data-bs-slide-to="0" class="active" aria-label="صورة 1"></button>
             <button type="button" data-bs-target="#carousel-offer-4" data-bs-slide-to="1" aria-label="صورة 2"></button>
@@ -497,7 +507,8 @@ gtag('config', 'G-GREM5BTR7T');
         <div class="offer-product-discount">-21%</div>
         <div class="offer-product-badge">عرض خاص</div>
 
-        <div id="carousel-offer-5" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
+        <!-- JS HOOK: #carousel-offer-5 — offer carousel 5; preserve ID exactly -->
+<div id="carousel-offer-5" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
           <div class="carousel-indicators">
             <button type="button" data-bs-target="#carousel-offer-5" data-bs-slide-to="0" class="active" aria-label="صورة 1"></button>
             <button type="button" data-bs-target="#carousel-offer-5" data-bs-slide-to="1" aria-label="صورة 2"></button>
@@ -557,8 +568,8 @@ gtag('config', 'G-GREM5BTR7T');
             </div>
         </div>
         
-        <!-- [JS HOOK] #productsContainer — main.js replaces the skeletons below with product cards -->
-        <div class="row" id="productsContainer"><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div></div>
+        <!-- JS HOOK: #productsContainer — products.json renderer; preserve ID exactly -->
+<div class="row" id="productsContainer"></div>
     </div>
 </section>
     
@@ -614,7 +625,7 @@ gtag('config', 'G-GREM5BTR7T');
 </section>
 
 <!-- نافذة الطلب (Order Modal) -->
-<!-- [JS HOOK] #orderModal + #orderForm and ALL inner field IDs (fullName, phone, email, wilaya, baladiyaInput, address, cashOnDelivery, onlinePayment, sumSubtotal, sumDelivery, sumTotal, submitOrderBtn, productName, productPriceValue, productImageUrl, productImage, productNameDisplay, productPrice) -->
+<!-- JS HOOK: #orderModal — Bootstrap order modal; preserve ID exactly -->
 <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -633,18 +644,23 @@ gtag('config', 'G-GREM5BTR7T');
                         </div>
                     </div>
                 </div>
-                <form id="orderForm">
+                <!-- JS HOOK: #orderForm — COD order form; preserve ID exactly -->
+<form id="orderForm">
+                    <!-- JS HOOK: #orderHp — anti-spam honeypot; preserve ID exactly -->
+                    <input type="text" id="orderHp" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
                     <input type="hidden" id="productName">
                     <input type="hidden" id="productPriceValue">
                     <input type="hidden" id="productImageUrl">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="fullName" class="form-label">الاسم واللقب<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="fullName" required aria-required="true">
+                            <!-- JS HOOK: #fullName — customer name; preserve ID exactly -->
+<input type="text" class="form-control" id="fullName" required aria-required="true">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">رقم الهاتف<span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="phone" pattern="[0]{1}[5-7]{1}[0-9]{8}" required aria-required="true">
+                            <!-- JS HOOK: #phone — customer phone; preserve ID exactly -->
+<input type="tel" class="form-control" id="phone" pattern="[0]{1}[5-7]{1}[0-9]{8}" required aria-required="true">
                             <small class="text-muted">مثال: 0551234566</small>
                         </div>
                     </div>
@@ -655,28 +671,33 @@ gtag('config', 'G-GREM5BTR7T');
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="wilaya" class="form-label">الولاية<span class="text-danger">*</span></label>
-                            <select class="form-select" id="wilaya" required aria-required="true">
+                            <!-- JS HOOK: #wilaya — order wilaya; preserve ID exactly -->
+<select class="form-select" id="wilaya" required aria-required="true">
                                 <option value="">اختر ولايتك</option>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="baladiyaInput" class="form-label">البلدية<span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="baladiyaInput" required aria-required="true" placeholder="اكتب اسم بلديتك">
+                        <!-- JS HOOK: #baladiyaInput — order commune; preserve ID exactly -->
+<input type="text" class="form-control" id="baladiyaInput" required aria-required="true" placeholder="اكتب اسم بلديتك">
                     </div>
                     <div class="mb-3">
                         <label for="address" class="form-label">العنوان<span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="address" rows="2" required aria-required="true" placeholder="أدخل عنوانك بالتفصيل (الحي، الشارع، رقم المنزل)"></textarea>
+                        <!-- JS HOOK: #address — delivery address; preserve ID exactly -->
+<textarea class="form-control" id="address" rows="2" required aria-required="true" placeholder="أدخل عنوانك بالتفصيل (الحي، الشارع، رقم المنزل)"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">طريقة الدفع</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery" value="الدفع عند الاستلام" checked>
+                                <!-- JS HOOK: #cashOnDelivery — COD payment; preserve ID exactly -->
+<input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery" value="الدفع عند الاستلام" checked>
                                 <label class="form-check-label" for="cashOnDelivery">الدفع عند الاستلام</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="onlinePayment" value="الدفع عبر الإنترنت">
+                                <!-- JS HOOK: #onlinePayment — online payment; preserve ID exactly -->
+<input class="form-check-input" type="radio" name="paymentMethod" id="onlinePayment" value="الدفع عبر الإنترنت">
                                 <label class="form-check-label" for="onlinePayment">الدفع عبر الإنترنت</label>
                             </div>
                         </div>
@@ -689,15 +710,19 @@ gtag('config', 'G-GREM5BTR7T');
                         </div>
                     </div>
                     <div class="order-summary-box">
-                        <div class="osb-row"><span>المجموع الفرعي</span><span id="sumSubtotal">0 د.ج</span></div>
-                        <div class="osb-row"><span><i class="bi bi-truck"></i> سعر التوصيل</span><span id="sumDelivery">اختر الولاية</span></div>
-                        <div class="osb-row osb-total"><span>المجموع الإجمالي</span><span id="sumTotal">0 د.ج</span></div>
+                        <div class="osb-row"><span>المجموع الفرعي</span><!-- JS HOOK: #sumSubtotal — order subtotal; preserve ID exactly -->
+<span id="sumSubtotal">0 د.ج</span></div>
+                        <div class="osb-row"><span><i class="bi bi-truck"></i> سعر التوصيل</span><!-- JS HOOK: #sumDelivery — order delivery; preserve ID exactly -->
+<span id="sumDelivery">اختر الولاية</span></div>
+                        <div class="osb-row osb-total"><span>المجموع الإجمالي</span><!-- JS HOOK: #sumTotal — order total; preserve ID exactly -->
+<span id="sumTotal">0 د.ج</span></div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <button type="button" class="btn btn-orange" id="submitOrderBtn" onclick="submitOrder()">تأكيد الطلب</button>
+                <!-- JS HOOK: #submitOrderBtn — order submission; preserve ID exactly -->
+<button type="button" class="btn btn-orange" id="submitOrderBtn" onclick="submitOrder()">تأكيد الطلب</button>
             </div>
         </div>
     </div>
@@ -760,27 +785,33 @@ gtag('config', 'G-GREM5BTR7T');
             <div class="col-md-6 mb-4">
                 <div class="contact-card h-100">
                     <h4 class="mb-4">أرسل لنا رسالة</h4>
-                    <!-- [JS HOOK] #contactForm #contactName #contactEmail #contactPhone #contactMessage #contactSpinner #contactSubmitText -->
-                    <form id="contactForm">
+                    <!-- JS HOOK: #contactForm — contact submission; preserve ID exactly -->
+<form id="contactForm">
                         <div class="mb-3">
                             <label for="contactName" class="form-label">اسمك<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="contactName" required aria-required="true">
+                            <!-- JS HOOK: #contactName — contact name; preserve ID exactly -->
+<input type="text" class="form-control" id="contactName" required aria-required="true">
                         </div>
                         <div class="mb-3">
                             <label for="contactEmail" class="form-label">بريدك الإلكتروني<span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" id="contactEmail" required aria-required="true">
+                            <!-- JS HOOK: #contactEmail — contact email; preserve ID exactly -->
+<input type="email" class="form-control" id="contactEmail" required aria-required="true">
                         </div>
                         <div class="mb-3">
                             <label for="contactPhone" class="form-label">رقم الهاتف</label>
-                            <input type="tel" class="form-control" id="contactPhone">
+                            <!-- JS HOOK: #contactPhone — contact phone; preserve ID exactly -->
+<input type="tel" class="form-control" id="contactPhone">
                         </div>
                         <div class="mb-3">
                             <label for="contactMessage" class="form-label">رسالتك<span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="contactMessage" rows="4" required aria-required="true"></textarea>
+                            <!-- JS HOOK: #contactMessage — contact message; preserve ID exactly -->
+<textarea class="form-control" id="contactMessage" rows="4" required aria-required="true"></textarea>
                         </div>
                         <button type="submit" class="btn btn-orange w-100">
-                            <span id="contactSubmitText">إرسال الرسالة</span>
-                            <span id="contactSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            <!-- JS HOOK: #contactSubmitText — contact button label; preserve ID exactly -->
+<span id="contactSubmitText">إرسال الرسالة</span>
+                            <!-- JS HOOK: #contactSpinner — contact loading state; preserve ID exactly -->
+<span id="contactSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                         </button>
                     </form>
                 </div>
@@ -872,34 +903,40 @@ gtag('config', 'G-GREM5BTR7T');
 </a>
 
 <!-- سلة عائمة قابلة للسحب -->
-<!-- [JS HOOK] #floatingCart #dragCartBtn #cartCountFloat (drag + open cart in main.js) -->
+<!-- JS HOOK: #floatingCart — draggable cart; preserve ID exactly -->
 <div class="floating-cart" id="floatingCart">
     <div class="cart-icon-container">
-        <button class="cart-btn-drag" id="dragCartBtn">
+        <!-- JS HOOK: #dragCartBtn — cart drag and open control; preserve ID exactly -->
+<button class="cart-btn-drag" id="dragCartBtn">
             <i class="bi bi-cart3"></i>
-            <span id="cartCountFloat">0</span>
+            <!-- JS HOOK: #cartCountFloat — cart quantity; preserve ID exactly -->
+<span id="cartCountFloat">0</span>
         </button>
         <span class="cart-label-float">السلة</span>
     </div>
 </div>
 
 <!-- Toast للمنبهات -->
-<div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
+<!-- JS HOOK: #statusToast — toast mount; preserve ID exactly -->
+<div id="statusToast"></div>
 
 <!-- السلة الجانبية -->
-<!-- [JS HOOK] #cartOffcanvas #cartItems #emptyCartMessage #emptyCartBtn #cartWilaya #cartSubtotal #cartDelivery #cartTotal #checkoutBtn -->
+<!-- JS HOOK: #cartOffcanvas — Bootstrap cart offcanvas; preserve ID exactly -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="cartOffcanvasLabel">سلة التسوق</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="إغلاق"></button>
     </div>
     <div class="offcanvas-body">
-        <div id="cartItems" class="mb-3">
-            <div class="text-center py-5" id="emptyCartMessage">
+        <!-- JS HOOK: #cartItems — cart item renderer; preserve ID exactly -->
+<div id="cartItems" class="mb-3">
+            <!-- JS HOOK: #emptyCartMessage — empty cart state; preserve ID exactly -->
+<div class="text-center py-5" id="emptyCartMessage">
                 <i class="bi bi-cart-x display-4 d-block mb-4" style="font-size: 4rem; opacity: 0.3;"></i>
                 <h4 class="mb-3">سلة التسوق فارغة</h4>
                 <p class="text-muted mb-4">لم تقم بإضافة أي منتجات إلى السلة بعد</p>
-                <a href="#products" class="btn btn-orange btn-lg px-5 py-2" id="emptyCartBtn">
+                <!-- JS HOOK: #emptyCartBtn — empty cart action; preserve ID exactly -->
+<a href="#products" class="btn btn-orange btn-lg px-5 py-2" id="emptyCartBtn">
                     <i class="bi bi-cart-plus me-2"></i> استكشف المنتجات
                 </a>
             </div>
@@ -908,7 +945,8 @@ gtag('config', 'G-GREM5BTR7T');
         <div class="cart-summary border-top pt-3">
             <div class="cart-deliv-field mb-2">
                 <label class="form-label"><i class="bi bi-geo-alt"></i> الولاية</label>
-                <select id="cartWilaya" class="form-select form-select-sm"></select>
+                <!-- JS HOOK: #cartWilaya — cart wilaya; preserve ID exactly -->
+<select id="cartWilaya" class="form-select form-select-sm"></select>
             </div>
             <div class="delivery-type-group cart-dt-group">
                 <label class="dt-opt"><input type="radio" name="cartDeliveryType" value="home"> 🏠 للمنزل</label>
@@ -916,17 +954,21 @@ gtag('config', 'G-GREM5BTR7T');
             </div>
             <div class="d-flex justify-content-between mb-1">
                 <span>المجموع الفرعي:</span>
-                <span id="cartSubtotal">0 د.ج</span>
+                <!-- JS HOOK: #cartSubtotal — cart subtotal; preserve ID exactly -->
+<span id="cartSubtotal">0 د.ج</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
                 <span><i class="bi bi-truck"></i> التوصيل:</span>
-                <span id="cartDelivery">اختر الولاية</span>
+                <!-- JS HOOK: #cartDelivery — cart delivery; preserve ID exactly -->
+<span id="cartDelivery">اختر الولاية</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
                 <span class="fw-bold">المجموع:</span>
-                <span id="cartTotal" class="fw-bold text-primary">0 دج</span>
+                <!-- JS HOOK: #cartTotal — cart total; preserve ID exactly -->
+<span id="cartTotal" class="fw-bold text-primary">0 دج</span>
             </div>
-            <button class="btn btn-orange w-100" onclick="checkout()" id="checkoutBtn" disabled aria-label="إنهاء الطلب">
+            <!-- JS HOOK: #checkoutBtn — cart checkout; preserve ID exactly -->
+<button class="btn btn-orange w-100" onclick="checkout()" id="checkoutBtn" disabled aria-label="إنهاء الطلب">
                 <i class="bi bi-bag-check"></i> إنهاء الطلب
             </button>
         </div>
