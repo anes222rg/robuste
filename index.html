@@ -144,24 +144,14 @@ gtag('config', 'G-GREM5BTR7T');
 <!-- Top COD reassurance strip (static, new) -->
 <div class="rb-topstrip"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام — توصيل <b>58 ولاية</b> خلال 24–72 ساعة</div>
 <!-- [JS HOOK] .glass-navbar (main.js adds .scrolled) · #navbarNav (collapse) · #themeToggle -->
-<nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
+<nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar" dir="ltr">
     <div class="container">
         <a class="navbar-brand" href="index.html">
             <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" 
                  alt="شعار ROBUSTE" width="180" height="50" style="max-height:50px;">
             <span class="d-none d-lg-inline brand-name ms-2">ROBUSTE <b>eulma</b></span>
         </a>
-       
-        <div class="d-flex align-items-center ms-3">
-            <button class="theme-toggle" id="themeToggle" title="الوضع المظلم" aria-label="الوضع المظلم">
-                <i class="bi bi-moon"></i>
-            </button>
-        </div>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="القائمة">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item mx-2"><a class="nav-link active" href="index.html">الرئيسية</a></li>
@@ -171,7 +161,25 @@ gtag('config', 'G-GREM5BTR7T');
                 <li class="nav-item"><a class="nav-link" href="#contact">اتصل بنا</a></li>
             </ul>
         </div>
-        
+
+        <div class="d-flex align-items-center gap-2 ms-3">
+            <button class="theme-toggle" id="themeToggle" title="الوضع المظلم" aria-label="الوضع المظلم">
+                <i class="bi bi-moon"></i>
+            </button>
+            <!-- [JS HOOK] #floatingCart #dragCartBtn #cartCountFloat (open cart in main.js) -->
+            <div class="floating-cart" id="floatingCart">
+                <div class="cart-icon-container">
+                    <button class="cart-btn-drag" id="dragCartBtn" aria-label="سلة التسوق">
+                        <i class="bi bi-cart3"></i>
+                        <span id="cartCountFloat">0</span>
+                    </button>
+                    <span class="cart-label-float">السلة</span>
+                </div>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="القائمة">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
     </div>
 </nav>
 
@@ -203,11 +211,6 @@ gtag('config', 'G-GREM5BTR7T');
 .rb-float-cafe{inline-size:32%;inset-inline-start:0;inset-block-end:4%;z-index:2;--bob-d:6s;--drift:-48px}
 .rb-float-proclean{inline-size:36%;inset-inline-start:32.5%;inset-block-end:22%;z-index:3;--bob-d:6.8s;--bob-delay:-1.8s;--drift:-70px}
 .rb-float-friteuse{inline-size:30%;inset-inline-end:0;inset-block-end:4%;z-index:2;--bob-d:7.2s;--bob-delay:-2.6s;--drift:-90px}
-.rb-float-badge{position:absolute;z-index:4;display:inline-flex;align-items:center;gap:6px;background:var(--rb-surface,#fff);border:1px solid var(--rb-line,#E3E6EB);border-radius:999px;padding:7px 14px;font-size:.875rem;font-weight:700;color:var(--rb-ink,#0E1116);box-shadow:0 10px 24px rgba(16,24,40,.10);animation:rb-bob 5.4s ease-in-out infinite}
-.rb-float-badge .bi{color:var(--rb-accent,#FF4F00)}
-.rb-badge-1{top:24%;inset-inline-start:1%;animation-delay:-1.4s;--drift:-120px}
-.rb-badge-2{top:32%;inset-inline-end:0;animation-delay:-3.8s;--drift:-140px}
-.rb-badge-3{inset-block-end:2%;inset-inline-start:41%;animation-delay:-2.4s;--drift:-100px}
 @keyframes rb-bob{0%,100%{translate:0 0}50%{translate:0 -12px}}
 @keyframes rb-shadow{0%,100%{scale:1 1;opacity:.85}50%{scale:.78 1;opacity:.45}}
 @keyframes rb-hero-vanish{to{opacity:0;transform:translateY(var(--drift,-60px))}}
@@ -215,9 +218,18 @@ gtag('config', 'G-GREM5BTR7T');
   .rb-float,.rb-stage-ring,.rb-stage-glow{animation:rb-hero-vanish linear both;animation-timeline:scroll();animation-range:0 520px}
   .rb-stage-glow{--drift:-30px}.rb-ring-1{--drift:-35px}.rb-ring-2{--drift:-55px}
   .rb-stage-spark{animation:rb-bob 5s ease-in-out infinite,rb-hero-vanish linear both;animation-timeline:auto,scroll();animation-range:normal,0 520px;--drift:-110px}
-  .rb-float-badge{animation:rb-bob 5.4s ease-in-out infinite,rb-hero-vanish linear both;animation-timeline:auto,scroll();animation-range:normal,0 520px}
 }
-@media (prefers-reduced-motion: reduce){.rb-float,.rb-float img,.rb-float-shadow,.rb-float-badge,.rb-stage-spark,.rb-stage-ring,.rb-stage-glow{animation:none!important}}
+@media (prefers-reduced-motion: reduce){.rb-float,.rb-float img,.rb-float-shadow,.rb-stage-spark,.rb-stage-ring,.rb-stage-glow{animation:none!important}}
+/* Navbar: LTR structure — logo left, links row, theme + cart top right */
+.glass-navbar #floatingCart,.glass-navbar .floating-cart{position:static!important;inset:auto!important;top:auto!important;bottom:auto!important;transform:none!important;z-index:auto!important}
+.glass-navbar .cart-icon-container{flex-direction:row}
+.glass-navbar .cart-label-float{display:none}
+.glass-navbar .cart-btn-drag{position:relative;inline-size:40px;block-size:40px;border-radius:12px;background:var(--rb-surface-2,#EFF1F4);color:var(--rb-ink,#0E1116);border:1px solid var(--rb-line,#E3E6EB);display:grid;place-items:center;box-shadow:none;cursor:pointer;padding:0}
+.glass-navbar .cart-btn-drag i{font-size:1.15rem;line-height:1}
+.glass-navbar .cart-btn-drag:hover{border-color:var(--rb-line-strong,#CBD2DC);color:var(--rb-accent,#FF4F00);background:var(--rb-surface-2,#EFF1F4)}
+.glass-navbar #cartCountFloat{position:absolute;top:-6px;right:-6px;min-inline-size:18px;block-size:18px;border-radius:999px;background:var(--rb-accent,#FF4F00);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px;line-height:1}
+[data-theme="dark"] .glass-navbar .cart-btn-drag{background:var(--rb-surface-2)}
+[data-theme="dark"] .glass-navbar #cartCountFloat{background:var(--rb-accent);color:#fff}
 </style>
 <header class="rb-hero">
   <div class="container">
@@ -255,9 +267,6 @@ gtag('config', 'G-GREM5BTR7T');
           <img src="images/hero-friteuse.webp" width="708" height="618" alt="مقلاة ROBUSTE 900 واط" decoding="async">
           <span class="rb-float-shadow" aria-hidden="true"></span>
         </figure>
-        <span class="rb-float-badge rb-badge-1" data-drift="-120"><i class="bi bi-cup-hot-fill"></i> إسبريسو موكا</span>
-        <span class="rb-float-badge rb-badge-2" data-drift="-140"><i class="bi bi-lightning-charge-fill"></i> 900 واط</span>
-        <span class="rb-float-badge rb-badge-3" data-drift="-100"><i class="bi bi-droplet-fill"></i> ProClean</span>
       </div>
     </div>
   </div>
@@ -948,17 +957,7 @@ gtag('config', 'G-GREM5BTR7T');
     <i class="bi bi-whatsapp"></i>
 </a>
 
-<!-- سلة عائمة قابلة للسحب -->
-<!-- [JS HOOK] #floatingCart #dragCartBtn #cartCountFloat (drag + open cart in main.js) -->
-<div class="floating-cart" id="floatingCart">
-    <div class="cart-icon-container">
-        <button class="cart-btn-drag" id="dragCartBtn">
-            <i class="bi bi-cart3"></i>
-            <span id="cartCountFloat">0</span>
-        </button>
-        <span class="cart-label-float">السلة</span>
-    </div>
-</div>
+<!-- السلة انتقلت إلى النافبار (أعلى اليمين) -->
 
 <!-- Toast للمنبهات -->
 <div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
