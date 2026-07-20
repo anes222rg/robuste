@@ -309,8 +309,91 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--rb-font-display); font-weight: 700; color
   font-size: var(--rb-fs-small); font-weight: 600; color: var(--rb-ink-2);
 }
 .rb-chip .bi { color: var(--rb-success); }
-.rb-hero-media { border-radius: var(--rb-r); overflow: hidden; background: var(--rb-surface-2); border: 1px solid var(--rb-line); }
-.rb-hero-img { display: block; inline-size: 100%; block-size: auto; }
+/* -- Hero stage: clipped floating products + realistic shadows.
+      Elements drift up & vanish on scroll (CSS scroll-driven animation,
+      JS fallback in index.html for Safari/Firefox). ------------------- */
+.rb-hero-stage { position: relative; min-block-size: clamp(300px, 62vw, 420px); }
+.rb-stage-glow {
+  position: absolute; inset: 4% 0;
+  background:
+    radial-gradient(46% 42% at 32% 32%, rgba(255,79,0,.13), transparent 70%),
+    radial-gradient(44% 40% at 72% 74%, rgba(16,24,40,.08), transparent 70%);
+  filter: blur(4px);
+}
+[data-theme="dark"] .rb-stage-glow {
+  background:
+    radial-gradient(46% 42% at 32% 32%, rgba(255,92,20,.18), transparent 70%),
+    radial-gradient(44% 40% at 72% 74%, rgba(255,255,255,.05), transparent 70%);
+}
+.rb-stage-ring { position: absolute; border: 1px dashed var(--rb-line-strong); border-radius: 50%; opacity: .7; }
+.rb-ring-1 { inline-size: 56%; aspect-ratio: 1; top: 1%; inset-inline-start: 2%; }
+.rb-ring-2 { inline-size: 32%; aspect-ratio: 1; bottom: 3%; inset-inline-end: 5%; border-style: solid; opacity: .5; }
+.rb-stage-spark {
+  position: absolute; inline-size: 8px; aspect-ratio: 1; border-radius: 50%;
+  background: var(--rb-accent); opacity: .5;
+  animation: rb-bob 5s ease-in-out infinite;
+}
+.rb-spark-1 { top: 9%; inset-inline-end: 12%; }
+.rb-spark-2 { top: 58%; inset-inline-start: 3%; inline-size: 6px; background: var(--rb-muted); }
+.rb-spark-3 { bottom: 7%; inset-inline-start: 42%; inline-size: 5px; }
+.rb-float { position: absolute; margin: 0; }
+.rb-float img {
+  inline-size: 100%; block-size: auto; display: block; position: relative; z-index: 1;
+  filter: drop-shadow(0 14px 16px rgba(16,24,40,.15));
+  animation: rb-bob var(--bob-d, 6s) ease-in-out infinite;
+  animation-delay: var(--bob-delay, 0s);
+}
+.rb-float-shadow {
+  position: absolute; inset-inline: 15%; block-size: 7%; inset-block-end: -5%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(16,24,40,.34), transparent 72%);
+  filter: blur(5px);
+  animation: rb-shadow var(--bob-d, 6s) ease-in-out infinite;
+  animation-delay: var(--bob-delay, 0s);
+}
+.rb-float-cafe { inline-size: 54%; top: 4%; inset-inline-start: 6%; z-index: 2; --bob-d: 6s; --drift: -48px; }
+.rb-float-friteuse { inline-size: 46%; inset-block-end: 4%; inset-inline-end: 3%; z-index: 3; --bob-d: 7.2s; --bob-delay: -2.6s; --drift: -90px; }
+.rb-float-badge {
+  position: absolute; z-index: 4;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--rb-surface); border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-pill); padding: 7px 14px;
+  font-size: var(--rb-fs-small); font-weight: 700; color: var(--rb-ink);
+  box-shadow: var(--rb-shadow-2);
+  animation: rb-bob 5.4s ease-in-out infinite;
+}
+.rb-float-badge .bi { color: var(--rb-accent); }
+.rb-badge-1 { top: 10%; inset-inline-start: 3%; animation-delay: -1.4s; --drift: -120px; }
+.rb-badge-2 { inset-block-end: 30%; inset-inline-end: 1%; animation-delay: -3.8s; --drift: -140px; }
+/* Bob uses the `translate` property; the scroll-vanish uses `transform`,
+   so the two never fight over the same property. */
+@keyframes rb-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -12px; } }
+@keyframes rb-shadow { 0%, 100% { scale: 1 1; opacity: .85; } 50% { scale: .78 1; opacity: .45; } }
+@keyframes rb-hero-vanish { to { opacity: 0; transform: translateY(var(--drift, -60px)); } }
+@supports (animation-timeline: scroll()) {
+  .rb-float, .rb-stage-ring, .rb-stage-glow {
+    animation: rb-hero-vanish linear both;
+    animation-timeline: scroll();
+    animation-range: 0 520px;
+  }
+  .rb-stage-glow { --drift: -30px; }
+  .rb-ring-1 { --drift: -35px; }
+  .rb-ring-2 { --drift: -55px; }
+  .rb-stage-spark {
+    animation: rb-bob 5s ease-in-out infinite, rb-hero-vanish linear both;
+    animation-timeline: auto, scroll();
+    animation-range: normal, 0 520px;
+    --drift: -110px;
+  }
+  .rb-float-badge {
+    animation: rb-bob 5.4s ease-in-out infinite, rb-hero-vanish linear both;
+    animation-timeline: auto, scroll();
+    animation-range: normal, 0 520px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rb-float, .rb-float img, .rb-float-shadow, .rb-float-badge,
+  .rb-stage-spark, .rb-stage-ring, .rb-stage-glow { animation: none !important; }
+}
 @media (min-width: 992px) {
   .rb-hero-grid { grid-template-columns: 1.05fr .95fr; padding: var(--rb-sp-6); }
 }

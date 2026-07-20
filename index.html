@@ -201,12 +201,49 @@ gtag('config', 'G-GREM5BTR7T');
           <span class="rb-chip"><i class="bi bi-shield-check"></i> ضمان سنة</span>
         </div>
       </div>
-      <div class="rb-hero-media">
-        <img width="3780" height="1890" src="images/banner.webp" alt="أجهزة منزلية" class="rb-hero-img" fetchpriority="high" decoding="async">
+      <div class="rb-hero-stage">
+        <div class="rb-stage-glow" data-drift="-30" aria-hidden="true"></div>
+        <div class="rb-stage-ring rb-ring-1" data-drift="-35" aria-hidden="true"></div>
+        <div class="rb-stage-ring rb-ring-2" data-drift="-55" aria-hidden="true"></div>
+        <span class="rb-stage-spark rb-spark-1" data-drift="-110" aria-hidden="true"></span>
+        <span class="rb-stage-spark rb-spark-2" data-drift="-80" aria-hidden="true"></span>
+        <span class="rb-stage-spark rb-spark-3" data-drift="-130" aria-hidden="true"></span>
+        <figure class="rb-float rb-float-cafe" data-drift="-48">
+          <img src="images/hero-cafe.webp" width="695" height="721" alt="آلة قهوة إسبريسو ROBUSTE Moka" fetchpriority="high" decoding="async">
+          <span class="rb-float-shadow" aria-hidden="true"></span>
+        </figure>
+        <figure class="rb-float rb-float-friteuse" data-drift="-90">
+          <img src="images/hero-friteuse.webp" width="708" height="618" alt="مقلاة ROBUSTE 900 واط" decoding="async">
+          <span class="rb-float-shadow" aria-hidden="true"></span>
+        </figure>
+        <span class="rb-float-badge rb-badge-1" data-drift="-120"><i class="bi bi-cup-hot-fill"></i> إسبريسو موكا</span>
+        <span class="rb-float-badge rb-badge-2" data-drift="-140"><i class="bi bi-lightning-charge-fill"></i> 900 واط</span>
       </div>
     </div>
   </div>
 </header>
+<script>
+/* Hero scroll-vanish fallback (only for browsers without CSS scroll-driven animations) */
+(function(){
+  if (CSS.supports('animation-timeline: scroll()')) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var els = document.querySelectorAll('.rb-hero-stage [data-drift]');
+  if (!els.length) return;
+  var ticking = false;
+  function update(){
+    ticking = false;
+    var p = Math.min((window.scrollY || 0) / 520, 1);
+    els.forEach(function(el){
+      var d = parseFloat(el.getAttribute('data-drift')) || -40;
+      el.style.opacity = String(1 - p);
+      el.style.transform = 'translateY(' + (d * p) + 'px)';
+    });
+  }
+  addEventListener('scroll', function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+})();
+</script>
 
 <!-- عرض الشرائح (Slideshow) -->
 <div class="slideshow-container1">
