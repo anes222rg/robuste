@@ -1843,3 +1843,75 @@ img {max-width:100%;}
   .rb-float--2 { inline-size: clamp(105px, 26vw, 150px); }
   .rb-float--3 { inline-size: clamp(95px, 23vw, 135px); }
 }
+
+/* ==== Hero show platform: floating cutouts + grounded shadows + scroll vanish ==== */
+.rb-hero-show { position: relative; min-block-size: clamp(300px, 42vw, 450px); }
+
+/* Platform (stage) */
+.rb-show-platform {
+  position: absolute; inset-block-end: 4%; inset-inline-start: 50%; translate: -50%;
+  inline-size: min(88%, 470px); block-size: clamp(46px, 7vw, 74px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--rb-accent) 12%, var(--rb-surface-2)), var(--rb-surface-2) 72%);
+  border: 1px solid var(--rb-line);
+  box-shadow: 0 20px 44px rgba(16, 24, 40, .16), inset 0 2px 8px rgba(255, 255, 255, .65);
+}
+[dir=rtl] .rb-show-platform { translate: 50%; }
+.rb-show-platform::before {
+  content: ""; position: absolute; inset-inline: 8%; inset-block-end: 55%;
+  block-size: clamp(180px, 26vw, 300px); pointer-events: none;
+  background: radial-gradient(ellipse at bottom, rgba(255, 79, 0, .16), transparent 70%);
+}
+[data-theme=dark] .rb-show-platform {
+  background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--rb-accent) 18%, var(--rb-surface-2)), var(--rb-surface-2) 72%);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, .5), inset 0 2px 8px rgba(255, 255, 255, .06);
+}
+
+/* Floating items */
+.rb-show-item { position: absolute; display: block; text-decoration: none; z-index: 1; }
+.rb-show-item--1 { inline-size: clamp(165px, 22vw, 270px); inset-inline-start: 11%; inset-block-end: 15%; z-index: 2; }
+.rb-show-item--2 { inline-size: clamp(120px, 16vw, 200px); inset-inline-end: 13%; inset-block-end: 19%; }
+.rb-show-item img {
+  inline-size: 100%; block-size: auto; object-fit: contain; position: relative; z-index: 1;
+  filter: drop-shadow(0 18px 22px rgba(16, 24, 40, .18));
+  animation: rbHover 5.5s ease-in-out infinite;
+}
+.rb-show-item--2 img { animation-duration: 7s; animation-delay: -2.4s; }
+@keyframes rbHover {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(1.2deg); }
+}
+
+/* Grounded ellipse shadow — shrinks/fades in counter-phase = levitation illusion */
+.rb-show-shadow {
+  position: absolute; inset-block-end: -14px; inset-inline: 14%; block-size: 16px;
+  border-radius: 50%; background: radial-gradient(ellipse, rgba(16, 24, 40, .30), transparent 68%);
+  animation: rbShadow 5.5s ease-in-out infinite;
+}
+.rb-show-item--2 .rb-show-shadow { animation-duration: 7s; animation-delay: -2.4s; }
+@keyframes rbShadow {
+  0%, 100% { scale: 1; opacity: 1; }
+  50% { scale: .78 1; opacity: .5; }
+}
+
+/* Price tag rides the item */
+.rb-show-item .rb-float-tag { inset-block-end: -38px; z-index: 2; }
+.rb-show-item:hover img { filter: drop-shadow(0 22px 26px rgba(255, 79, 0, .28)); }
+
+/* Vanish on scroll — scrubbed by scroll position (modern Chromium; no-op elsewhere) */
+@supports (animation-timeline: scroll(root)) {
+  .rb-show-item--1 { animation: rbVanish linear both; animation-timeline: scroll(root); animation-range: 0 55vh; }
+  .rb-show-item--2 { animation: rbVanish linear both; animation-timeline: scroll(root); animation-range: 0 72vh; }
+  .rb-show-platform { animation: rbVanishSoft linear both; animation-timeline: scroll(root); animation-range: 0 85vh; }
+  @keyframes rbVanish { to { opacity: 0; translate: 0 -70px; scale: .86; } }
+  @keyframes rbVanishSoft { to { opacity: 0; scale: .92 1; } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rb-show-item, .rb-show-item img, .rb-show-shadow, .rb-show-platform { animation: none !important; }
+}
+@media (max-width: 991px) {
+  .rb-hero-show { min-block-size: clamp(250px, 62vw, 350px); }
+  .rb-show-item--1 { inline-size: clamp(150px, 36vw, 215px); inset-inline-start: 7%; }
+  .rb-show-item--2 { inline-size: clamp(110px, 26vw, 155px); inset-inline-end: 8%; }
+}
