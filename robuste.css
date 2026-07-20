@@ -1659,3 +1659,29 @@ img {max-width:100%;}
 
 /* spacing: keep old price clear of current price in RTL & LTR */
 .price-block .old-price { margin-inline-start: 10px; }
+
+/* Packs are baked statically in index.html; if packs-showcase.js fetch fails it sets [hidden] — keep static cards visible */
+#packsShowcase[hidden] { display: grid !important; }
+@media (max-width: 768px) { #packsShowcase[hidden] { display: flex !important; } }
+
+/* ---- Fix: discount badge bidi ("-3%" was rendering as "3%-" in RTL) ---- */
+.discount-badge, .offer-product-discount { direction: ltr; unicode-bidi: isolate; }
+
+/* ---- Product page: type scale down a notch (user request) ---- */
+#productDetailRow .product-info-card h1.product-title { font-size: 1.2rem; }
+#productDetailRow .price-block .current-price { font-size: 1.3rem; }
+#productDetailRow .price-block .old-price { font-size: .78rem; }
+#productDetailRow .product-info-card p { font-size: .92rem; }
+#productDetailRow .feature-list li { font-size: .9rem; }
+#productDetailRow .stock-status { font-size: .9rem; }
+#productDetailRow .order-assurance .oa-item { font-size: 12.5px; }
+.quick-order-card .quick-order-title { font-size: 1.15rem; }
+.quick-order-card .product-mini strong { font-size: .9rem; }
+#descriptionSection { font-size: .95rem; }
+#descriptionSection h4 { font-size: 1.1rem; }
+.ph-trust .ph-t { font-size: .85rem; }
+.ph-trust .ph-s { font-size: .75rem; }
+@media (max-width: 768px) {
+  #productDetailRow .product-info-card h1.product-title { font-size: 1.08rem !important; }
+  #productDetailRow .price-block .current-price { font-size: 1.45rem !important; }
+}

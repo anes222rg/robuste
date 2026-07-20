@@ -28,7 +28,7 @@ gtag('config', 'G-GREM5BTR7T');
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-<meta name="theme-color" content="#ff6600">
+<meta name="theme-color" content="#FF4F00">
 <meta name="description" content="عصير طبيعي نقي في منزلك مع عصّارة ROBUSTE الاحترافية: فصل ذكي، محرك قوي، وتنظيف سهل. | Extracteur de jus ROBUSTE : jus 100% naturel, séparation intelligente, ne">
 <title>EXTRACTEUR DE JUS | ROBUSTE</title>
 <!-- Canonical + SEO (added; updated dynamically per product) -->
@@ -53,8 +53,8 @@ gtag('config', 'G-GREM5BTR7T');
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://api.dicebear.com">
 <link rel="dns-prefetch" href="https://i.postimg.cc">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"></noscript>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@800;900&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@800;900&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&display=swap"></noscript>
 
 <!-- Bootstrap RTL + Icons + AOS -->
 <link href="bootstrap.rtl.min.css" rel="stylesheet">
@@ -66,645 +66,9 @@ gtag('config', 'G-GREM5BTR7T');
 <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<style>
-/* ---------- نفس متغيرات index.html (متطابقة) ---------- */
-:root {
-    --primary: #FF6B35;
-    --primary-dark: #E05A2B;
-    --secondary: #FFF8F0;
-    --light: #FFFFFF;
-    --dark: #333333;
-    --gray: #6C757D;
-    --success: #28a745;
-    --danger: #dc3545;
-    --border-color: #e7e7e7;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --radius-card: 12px;
-    --transition: all 0.3s ease;
-}
-
-[data-theme="dark"] {
-    --primary: #FF8C42;
-    --primary-dark: #FF6B35;
-    --secondary: #1e2128;
-    --light: #2a2e37;
-    --dark: #ececee;
-    --gray: #9aa0aa;
-    --success: #4CAF50;
-    --danger: #f44336;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --shadow-color: rgba(0, 0, 0, 0.25);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Tajawal', sans-serif;
-    background-color: var(--secondary);
-    color: var(--dark);
-    padding-top: 80px;
-    transition: var(--transition);
-}
-
-/* شريط تمرير أنيق */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 12px; }
-
-/* ========== ال��افبار الزجاجي (مثل index) ========== */
-.glass-navbar {
-    background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255, 255, 255, 0.3) inset;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    transition: var(--transition);
-}
-[data-theme="dark"] .glass-navbar {
-    background: rgba(34, 38, 46, 0.88) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-.navbar-brand img { transition: transform 0.2s; }
-.nav-link {
-    font-weight: 600;
-    position: relative;
-}
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    right: 50%;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-    transition: width 0.3s ease;
-    transform: translateX(50%);
-    border-radius: 2px;
-}
-.nav-link:hover::after, .nav-link.active::after {
-    width: 80%;
-}
-
-/* ========== زر تبديل الوضع (مثل index) ========== */
-.theme-toggle {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--dark);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    font-size: 1.2rem;
-}
-[data-theme="light"] .theme-toggle {
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-.theme-toggle:hover {
-    background: var(--primary);
-    color: white;
-    transform: rotate(15deg) scale(1.1);
-}
-
-/* ========== زر السلة العائمة (مطابق لـ index) ========== */
-.floating-cart {
-    position: fixed;
-    bottom: 100px;
-    left: 20px;
-    z-index: 1100;
-    cursor: grab;
-    user-select: none;
-    touch-action: none;
-}
-.cart-btn-drag {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px var(--shadow-color);
-    transition: var(--transition);
-    position: relative;
-}
-.cart-btn-drag:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-}
-.cart-btn-drag i { font-size: 1.5rem; }
-#cartCountFloat {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--danger);
-    color: white;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    font-weight: bold;
-    border: 2px solid white;
-}
-.cart-label-float {
-    margin-top: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--dark);
-    background: rgba(255, 255, 255, 0.9);
-    padding: 4px 8px;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px var(--shadow-color);
-}
-[data-theme="dark"] .cart-label-float {
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-}
-
-/* ========== أزرار رئيسية (مطابقة لـ index) ========== */
-.btn-orange {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border: none;
-    color: white;
-    font-weight: 700;
-    padding: 10px 25px;
-    border-radius: 8px;
-    transition: var(--transition);
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn-orange:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-.btn-outline-modern {
-    border-radius: 8px;
-    border: 2px solid var(--primary);
-    background: transparent;
-    color: var(--primary);
-    font-weight: 600;
-    padding: 10px 25px;
-    transition: var(--transition);
-}
-.btn-outline-modern:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateY(-2px);
-}
-
-/* ========== معرض الصور ========== */
-.main-image-wrapper {
-    background: var(--light);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px var(--shadow-color);
-    aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-.main-image-wrapper img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-.thumbnail-strip {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-    overflow-x: auto;
-}
-.thumbnail {
-    width: 80px;
-    height: 80px;
-    border-radius: 8px;
-    background: var(--light);
-    border: 2px solid transparent;
-    transition: var(--transition);
-    cursor: pointer;
-    padding: 6px;
-    box-shadow: 0 2px 6px var(--shadow-color);
-}
-.thumbnail.active {
-    border-color: var(--primary);
-}
-.thumbnail img { width: 100%; height: 100%; object-fit: contain; }
-/* CLS fix: reserve space for JS-injected blocks while still empty; auto-clears once filled */
-#productDetailRow:empty { min-height: 1400px; }
-#descriptionSection:empty { min-height: 140px; }
-#relatedSection:empty { min-height: 360px; }
-@media (min-width: 992px){
-  #productDetailRow:empty { min-height: 600px; }
-  #relatedSection:empty { min-height: 320px; }
-}
-/* trust bar (product page) */
-.ph-trust{ margin-top:26px; }
-.ph-trust .ph-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
-.ph-trust .ph-item{ background:var(--light); border:1px solid var(--shadow-color); border-radius:14px; padding:18px 14px; text-align:center; transition:var(--transition); }
-.ph-trust .ph-item:hover{ transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,.10); }
-.ph-trust .ph-ic{ width:48px; height:48px; margin:0 auto 10px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(255,107,53,.12); color:var(--primary); font-size:22px; }
-.ph-trust .ph-t{ font-weight:700; font-size:15px; }
-.ph-trust .ph-s{ font-size:12px; color:#8a8a8a; margin-top:2px; }
-@media (max-width:768px){ .ph-trust .ph-grid{ grid-template-columns:repeat(2,1fr); } }
-@media (max-width:400px){ .ph-trust .ph-grid{ grid-template-columns:1fr; } }
-/* lightbox */
-.ph-lightbox{ position:fixed; inset:0; z-index:30000; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
-.ph-lightbox.open{ display:flex; }
-.ph-lightbox img{ max-width:92vw; max-height:88vh; width:auto; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.5); background:#fff; }
-.ph-lightbox .ph-close{ position:absolute; top:16px; left:18px; color:#fff; font-size:36px; line-height:1; cursor:pointer; background:none; border:none; }
-#mainProductImg{ cursor:zoom-in; }
-
-/* ========== بطاقة المنتج الرئيسية ========== */
-.product-info-card {
-    background: var(--light);
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 12px var(--shadow-color);
-    height: 100%;
-}
-.product-title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--dark);
-}
-.price-block {
-    background: rgba(255, 107, 53, 0.1);
-    border-radius: 12px;
-    padding: 15px;
-    margin: 20px 0;
-}
-.current-price {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--primary);
-}
-.old-price {
-    text-decoration: line-through;
-    color: var(--gray);
-    margin-right: 10px;
-}
-.discount-badge {
-    background: var(--danger);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: white;
-}
-.feature-list {
-    list-style: none;
-    padding: 0;
-}
-.feature-list li {
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.feature-list li i { color: var(--primary); }
-
-/* ========== طلب سريع ========== */
-.quick-order-card {
-    background: var(--light);
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 12px var(--shadow-color);
-    border: 1px solid var(--border-color);
-}
-.quick-order-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    border-right: 4px solid var(--primary);
-    padding-right: 15px;
-    margin-bottom: 20px;
-}
-.product-mini {
-    background: rgba(255, 107, 53, 0.05);
-    border-radius: 12px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-.form-control-premium, .form-select-premium {
-    border-radius: 8px;
-    padding: 10px 12px;
-    border: 1px solid var(--border-color);
-    background: var(--light);
-    color: var(--dark);
-    width: 100%;
-}
-.form-control-premium:focus, .form-select-premium:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-    outline: none;
-}
-.btn-submit-express {
-    background: linear-gradient(135deg, #10B981, #059669);
-    border: none;
-    padding: 12px;
-    font-weight: 700;
-    border-radius: 8px;
-    width: 100%;
-    color: white;
-    transition: var(--transition);
-}
-.btn-submit-express:hover {
-    transform: translateY(-2px);
-}
-
-/* ===== honeypot anti-spam (hidden from humans) ===== */
-.hp-field {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
-    border: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    clip-path: inset(50%) !important;
-    white-space: nowrap !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* ===== Confirm order modal (branded) ===== */
-#orderModal .modal-content {
-    border: none;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 24px 70px rgba(0,0,0,.28);
-}
-#orderModal .modal-header {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border-bottom: none;
-    padding: 18px 22px;
-    align-items: center;
-}
-#orderModal .modal-header .modal-title {
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.15rem;
-    color: #fff;
-}
-#orderModal .modal-body { padding: 22px; background: var(--light); }
-#orderModal .modal-footer { border-top: 1px solid var(--border-color); padding: 14px 22px; background: var(--light); gap: 10px; }
-.order-summary-card {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    background: linear-gradient(135deg, rgba(255,107,53,.08), rgba(255,107,53,.02));
-    border: 1px solid rgba(255,107,53,.18);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin-bottom: 20px;
-}
-.order-summary-card img { border-radius: 10px; object-fit: cover; width: 64px; height: 64px; }
-.order-summary-card .os-title { font-weight: 700; margin: 0 0 2px; font-size: .98rem; }
-.order-summary-card .os-price { color: var(--primary); font-weight: 800; margin: 0; }
-.order-field { margin-bottom: 14px; }
-.order-field label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    font-size: .9rem;
-    margin-bottom: 6px;
-    color: var(--dark);
-}
-.order-field label i { color: var(--primary); }
-.order-input {
-    width: 100%;
-    border: 1.5px solid var(--border-color);
-    border-radius: 10px;
-    padding: 11px 13px;
-    background: var(--light);
-    color: var(--dark);
-    transition: var(--transition);
-    font-size: .95rem;
-}
-.order-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(255,107,53,.12);
-    outline: none;
-}
-.order-pay-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1.5px solid rgba(255,107,53,.35);
-    background: rgba(255,107,53,.05);
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-.order-pay-option i { color: var(--primary); font-size: 1.2rem; }
-.order-trust {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    margin-top: 14px;
-    font-size: .82rem;
-    color: var(--gray);
-}
-.order-trust span { display: inline-flex; align-items: center; gap: 5px; }
-.order-trust i { color: var(--success); }
-.btn-confirm-order {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border: none;
-    color: #fff;
-    font-weight: 800;
-    padding: 12px 26px;
-    border-radius: 12px;
-    transition: var(--transition);
-    box-shadow: 0 8px 20px rgba(255,107,53,.32);
-}
-.btn-confirm-order:hover { transform: translateY(-2px); color: #fff; box-shadow: 0 12px 26px rgba(255,107,53,.4); }
-.btn-confirm-order:disabled { opacity: .7; transform: none; cursor: not-allowed; }
-.btn-cancel-order {
-    background: transparent;
-    border: 1.5px solid var(--border-color);
-    color: var(--gray);
-    font-weight: 600;
-    padding: 11px 20px;
-    border-radius: 12px;
-    transition: var(--transition);
-}
-.btn-cancel-order:hover { background: rgba(0,0,0,.04); }
-
-/* ========== المنتجات المقترحة (كروت مثل index) ========== */
-.related-card {
-    background: var(--light);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: var(--transition);
-    cursor: pointer;
-    height: 100%;
-    text-align: center;
-    padding: 15px;
-}
-.related-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px var(--shadow-color);
-    border-color: var(--primary);
-}
-.related-card img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: contain;
-    margin-bottom: 10px;
-}
-.related-title {
-    font-weight: 700;
-    font-size: 0.9rem;
-    margin: 10px 0 5px;
-    color: var(--dark);
-}
-.related-price {
-    color: var(--primary);
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-/* ========== سلة الأوف كانفس ========== */
-.offcanvas {
-    font-family: 'Tajawal', sans-serif;
-}
-.offcanvas-header {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-}
-.cart-item {
-    background: var(--light);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 12px;
-}
-.cart-summary {
-    border-top: 2px solid var(--border-color);
-    padding-top: 15px;
-}
-.empty-cart-cta {
-    text-align: center;
-    padding: 2rem 1rem;
-    background: rgba(255, 107, 53, 0.05);
-    border-radius: 12px;
-}
-.empty-cart-cta i {
-    font-size: 3rem;
-    color: var(--primary);
-    opacity: 0.7;
-}
-
-/* ========== واتساب ========== */
-.whatsapp-float {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    width: 60px;
-    height: 60px;
-    background-color: #25D366;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    color: white;
-    box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
-    z-index: 1080;
-    transition: var(--transition);
-}
-.whatsapp-float:hover { transform: scale(1.1); }
-
-/* ========== تحسينات عامة ========== */
-@media (max-width: 768px) {
-    .product-title { font-size: 1.4rem; }
-    .floating-cart { bottom: 80px; left: 12px; }
-    .cart-btn-drag { width: 50px; height: 50px; }
-    .cart-btn-drag i { font-size: 1.2rem; }
-}
-
-/* ===== آراء العملاء (مطابق للصفحة الرئيسية) ===== */
-.reviews-section{ background:var(--secondary); }
-.section-title{ text-align:center; font-weight:800; font-size:clamp(1.5rem,3vw,2rem); margin-bottom:34px; position:relative; padding-bottom:14px; color:var(--dark); }
-.section-title::after{ content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:64px; height:4px; border-radius:4px; background:var(--primary); }
-.review-card{ background:var(--light); border:1px solid var(--border-color); border-radius:16px; padding:24px; height:100%; box-shadow:0 4px 14px var(--shadow-color); transition:var(--transition); }
-.review-card:hover{ transform:translateY(-5px); box-shadow:0 14px 32px rgba(0,0,0,.12); }
-
-/* ===== ضمانات الطلب داخل بطاقة المنتج ===== */
-.order-assurance{ margin-top:18px; padding-top:16px; border-top:1px dashed var(--border-color); display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.order-assurance .oa-item{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--dark); }
-.order-assurance .oa-item i{ color:var(--primary); font-size:18px; flex-shrink:0; }
-@media (max-width:480px){ .order-assurance{ grid-template-columns:1fr; } }
-
-/* ===== شريط الدفع الآمن ===== */
-.secure-pay{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px; font-size:13px; color:var(--gray); }
-.secure-pay i{ color:var(--success); }
-
-/* ===== إدخال التقييم بالنجوم ===== */
-.star-input{ display:inline-flex; direction:ltr; gap:6px; font-size:30px; cursor:pointer; }
-.star-input i{ color:#d9d9d9; transition:color .15s ease, transform .15s ease; }
-.star-input i.active{ color:#ffc107; }
-.star-input i:hover{ transform:scale(1.15); }
-.add-review-cta .btn-orange i{ margin-inline-end:6px; }
-
-/* ===== Sticky COD announcement bar (inlined) ===== */
-.top-cod-bar{ position:fixed; top:0; left:0; right:0; z-index:1040; height:40px; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--primary,#FF6B35); color:#fff; font-weight:700; font-size:14px; text-align:center; padding:0 12px; line-height:1.2; white-space:nowrap; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.12); }
-body.has-cod-bar .navbar.fixed-top{ top:40px !important; }
-body.has-cod-bar{ padding-top:96px !important; }
-@media (max-width:768px){ .top-cod-bar{ height:36px; font-size:12.5px; } body.has-cod-bar .navbar.fixed-top{ top:36px !important; } body.has-cod-bar{ padding-top:92px !important; } }
-/* ===== Delivery + order summary (inlined) ===== */
-.order-summary-box{ background:#FFF8F0; border:1px solid var(--border-color,#e7e7e7); border-radius:10px; padding:12px 14px; margin:14px 0; }
-.osb-row{ display:flex; justify-content:space-between; align-items:center; font-size:14px; padding:4px 0; color:var(--dark,#444); }
-.osb-row.osb-total{ border-top:1px dashed rgba(255,107,53,.35); margin-top:6px; padding-top:8px; font-weight:800; font-size:16px; color:var(--primary,#FF6B35); }
-.delivery-type-group{ display:flex; gap:10px; margin-top:6px; }
-.delivery-type-group .dt-opt{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--border-color,#e7e7e7); border-radius:8px; padding:8px 10px; cursor:pointer; font-size:13px; font-weight:600; transition:all .15s; }
-.delivery-type-group .dt-opt:has(input:checked){ border-color:var(--primary,#FF6B35); background:rgba(255,107,53,.12); color:var(--primary,#FF6B35); }
-.delivery-type-group .dt-opt input{ accent-color:var(--primary,#FF6B35); }
-.exp-delivery{ display:flex; gap:6px; margin-bottom:6px; }
-.exp-delivery .exp-dt{ flex:1; display:flex; align-items:center; justify-content:center; gap:4px; border:1px solid var(--border-color,#e7e7e7); border-radius:6px; padding:5px; cursor:pointer; font-size:11.5px; font-weight:600; }
-.exp-delivery .exp-dt:has(input:checked){ border-color:var(--primary,#FF6B35); background:rgba(255,107,53,.12); color:var(--primary,#FF6B35); }
-.exp-summary{ font-size:12.5px; margin-bottom:8px; color:var(--dark,#444); }
-.exp-summary .exp-total{ font-weight:800; color:var(--primary,#FF6B35); font-size:14px; margin-top:2px; }
-.cart-deliv-field{ margin-bottom:8px; }
-.cart-deliv-field label{ font-size:12.5px; font-weight:600; display:block; margin-bottom:3px; }
-.cart-dt-group{ margin-bottom:10px; }
-[data-theme="dark"] .order-summary-box{ background:#262a32; border-color:rgba(255,255,255,.1); }
-[data-theme="dark"] .delivery-type-group .dt-opt:has(input:checked),[data-theme="dark"] .exp-delivery .exp-dt:has(input:checked){ background:rgba(255,140,66,.18); }
-/* ===== Skeleton loader ===== */
-@keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skeleton{background:linear-gradient(90deg,#ebebeb 25%,#f5f5f5 50%,#ebebeb 75%);background-size:200% 100%;animation:skel-shimmer 1.4s infinite linear;border-radius:6px;}
-[data-theme="dark"] .skeleton{background:linear-gradient(90deg,#2a2e37 25%,#353a44 50%,#2a2e37 75%);background-size:200% 100%;}
-/* ===== Safety guards: never hide content, never overflow sideways ===== */
-[data-aos]{opacity:1 !important;transform:none !important;}
-html,body{overflow-x:hidden;max-width:100%;}
-img{max-width:100%;}
-</style>
+<!-- Page styles moved to robuste.css (Signal Graphite consolidated stylesheet) -->
 <!-- UI refinement layer -->
-<link rel="stylesheet" href="robuste-ui.css?v=fb53">
+<link rel="stylesheet" href="robuste.css?v=1">
 <!-- Auto-WebP with safe fallback (added) -->
 <script>
 (function(){
@@ -752,10 +116,11 @@ img{max-width:100%;}
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"EXTRACTEUR DE JUS","image":["https://www.robustedz.store/images/EXTRACTEUR%20DE%20JUS.webp"],"description":"عصّارة ROBUSTE الاحترافية تمنحك عصيرًا طبيعيًا نقيًا في منزلك. يعمل نظام الفصل الذكي على عزل العصير عن القشور والألياف للحصول على قوام صافٍ، بينما يتيح المحرك القوي مع خاصية عكس الاتجاه (Reverse) عصر أصعب الفواكه والخضروات بسهولة. سهلة التفكيك والتنظيف، وبتصميم أنيق يليق بمطبخك. — L'extracteur de jus professionnel ROBUSTE vous permet de préparer des jus 100% naturels à la maison. Son système de séparation intelligent isole le jus des peaux et des fibres pour une texture pure, tandis que son moteur puissant doté de la fonction Reverse vient à bout des fruits et légumes les plus fermes. Facile à démonter et à nettoyer, avec un design élégant qui s'intègre parfaitement à votre cuisine.","sku":"106","mpn":"106","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-106.html","priceCurrency":"DZD","price":12900,"priceValidUntil":"2027-07-12","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
+<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"EXTRACTEUR DE JUS","image":["https://www.robustedz.store/images/EXTRACTEUR%20DE%20JUS.webp"],"description":"عصّارة ROBUSTE الاحترافية تمنحك عصيرًا طبيعيًا نقيًا في منزلك. يعمل نظام الفصل الذكي على عزل العصير عن القشور والألياف للحصول على قوام صافٍ، بينما يتيح المحرك القوي مع خاصية عكس الاتجاه (Reverse) عصر أصعب الفواكه والخضروات بسهولة. سهلة التفكيك والتنظيف، وبتصميم أنيق يليق بمطبخك. — L'extracteur de jus professionnel ROBUSTE vous permet de préparer des jus 100% naturels à la maison. Son système de séparation intelligent isole le jus des peaux et des fibres pour une texture pure, tandis que son moteur puissant doté de la fonction Reverse vient à bout des fruits et légumes les plus fermes. Facile à démonter et à nettoyer, avec un design élégant qui s'intègre parfaitement à votre cuisine.","sku":"106","mpn":"106","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-106.html","priceCurrency":"DZD","price":12900,"priceValidUntil":"2027-07-20","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
+<!-- [JS HOOK] #topCodBar #topBarText — JS injects live price here -->
 <div class="top-cod-bar" id="topCodBar"><span id="topBarText">🛒 الدفع عند الاستلام • التوصيل لكل الولايات</span></div>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
     <div class="container">
@@ -834,7 +199,7 @@ img{max-width:100%;}
     <div class="ph-trust" data-aos="fade-up">
       <div class="ph-grid">
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-truck"></i></div><div class="ph-t">توصيل حتى باب البيت</div><div class="ph-s">إلى 58 ولاية</div></div>
-        <div class="ph-item"><div class="ph-ic"><i class="bi bi-shield-check"></i></div><div class="ph-t">ضمان عام</div><div class="ph-s">منتجات أصلية</div></div>
+        <div class="ph-item"><div class="ph-ic"><i class="bi bi-shield-check"></i></div><div class="ph-t">ضمان عام</div><div class="ph-s">منت��ات أصلية</div></div>
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-headset"></i></div><div class="ph-t">خدمة ما بعد الشراء</div><div class="ph-s">دعم متواصل</div></div>
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-cash-coin"></i></div><div class="ph-t">دفع يد بيد</div><div class="ph-s">عند الاستلام</div></div>
       </div>
@@ -893,6 +258,9 @@ img{max-width:100%;}
   </div>
 </section>
 
+<!-- Sticky mobile buy bar (new, anchor only — no JS) -->
+<a class="rb-stickybuy" href="#productDetailRow"><i class="bi bi-bag-check"></i> اطلب الآن — الدفع عند الاستلام</a>
+
 <footer class="py-4 mt-5" style="background: var(--light); border-top:1px solid var(--border-color);">
     <div class="container text-center"><div class="secure-pay"><i class="bi bi-lock-fill"></i> دفع آمن 100% · الدفع عند الاستلام أو ببطاقة الذهب</div><small class="text-muted">© 2025 ROBUSTE — جميع الحقوق محفوظة</small></div>
 </footer>
@@ -920,6 +288,7 @@ img{max-width:100%;}
 </div>
 
 <!-- مودا���� الطلب -->
+<!-- [JS HOOK] #orderModal #orderForm + all field IDs incl. #orderHp honeypot (.hp-field keeps it hidden) -->
 <div class="modal fade" id="orderModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -963,6 +332,7 @@ img{max-width:100%;}
     </div>
 </div>
 
+<!-- [JS HOOK] #reviewModal #reviewForm #reviewName #reviewText #starInput #submitReviewBtn -->
 <div class="modal fade" id="reviewModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
