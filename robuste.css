@@ -1,0 +1,756 @@
+/* ==========================================================================
+   ROBUSTE — Signal Graphite Design System  (v1.0)
+   ONE consolidated stylesheet. Replaces: style.css, premium.css,
+   robuste-ui.css, _fable5.css, _fable5-mobile.css, _luxe-index.css, _luxe-product.css
+   --------------------------------------------------------------------------
+   - Base framework: Bootstrap 5.3 (loaded before this file). Overrides only.
+   - Themes: light (default) + dark via [data-theme="dark"] custom properties.
+   - RTL/LTR: logical properties only (inset-inline, margin-inline, padding-inline).
+   - Fonts: Readex Pro (display) + Rubik (body) — both support Arabic + Latin.
+   - NO element the JS depends on is restyled structurally. Selectors marked
+     [JS HOOK] are used by main.js / packs-showcase.js / robuste-delivery-index.js
+     / i18n.js — never rename them.
+   ========================================================================== */
+
+/* ==========================================================================
+   0. DESIGN TOKENS
+   ========================================================================== */
+:root {
+  /* -- Palette: Signal Graphite (light) ---------------------------------- */
+  --rb-bg:            #F5F6F8;   /* page canvas (Fog) */
+  --rb-surface:       #FFFFFF;   /* cards, modals, nav */
+  --rb-surface-2:     #EFF1F4;   /* image wells, subtle fills */
+  --rb-ink:           #0E1116;   /* primary text (Graphite) */
+  --rb-ink-2:         #475061;   /* secondary text */
+  --rb-muted:         #7B8497;   /* tertiary / placeholders */
+  --rb-line:          #E3E6EB;   /* borders */
+  --rb-line-strong:   #CBD2DC;   /* hover borders */
+  --rb-accent:        #FF4F00;   /* Signal orange — primary CTA */
+  --rb-accent-strong: #E04500;   /* CTA hover */
+  --rb-accent-soft:   #FFF1EA;   /* accent tint surface */
+  --rb-navy:          #101828;   /* secondary brand block */
+  --rb-success:       #12B76A;   /* COD / stock ok */
+  --rb-success-ink:   #0B7A47;
+  --rb-success-soft:  #E7F8F0;
+  --rb-danger:        #E5484D;
+  --rb-danger-soft:   #FCE9E7;
+  --rb-warning:       #F5A623;
+
+  /* -- Type scale (mobile-first; AR+FR) ---------------------------------- */
+  --rb-font-display: "Readex Pro", "Rubik", "Tajawal", system-ui, sans-serif;
+  --rb-font-body:    "Rubik", "Tajawal", system-ui, sans-serif;
+  --rb-fs-hero:   clamp(1.75rem, 5.5vw, 3rem);     /* 28 → 48 */
+  --rb-fs-h2:     clamp(1.375rem, 4vw, 2rem);      /* 22 → 32 */
+  --rb-fs-h3:     clamp(1.125rem, 3vw, 1.5rem);    /* 18 → 24 */
+  --rb-fs-body:   1rem;                             /* 16 */
+  --rb-fs-small:  .875rem;                          /* 14 */
+  --rb-fs-micro:  .75rem;                           /* 12 — labels/badges only */
+
+  /* -- Spacing scale: 4 8 12 16 24 32 48 64 ------------------------------ */
+  --rb-sp-1: 4px;  --rb-sp-2: 8px;  --rb-sp-3: 12px; --rb-sp-4: 16px;
+  --rb-sp-5: 24px; --rb-sp-6: 32px; --rb-sp-7: 48px; --rb-sp-8: 64px;
+
+  /* -- Radius ------------------------------------------------------------- */
+  --rb-r-sm: 8px; --rb-r: 12px; --rb-r-lg: 16px; --rb-r-pill: 999px;
+
+  /* -- Elevation (borders first, shadows subtle) -------------------------- */
+  --rb-shadow-1: 0 1px 2px rgba(16,24,40,.06);
+  --rb-shadow-2: 0 10px 24px rgba(16,24,40,.10);
+  --rb-shadow-cta: 0 6px 16px rgba(255,79,0,.22);
+
+  /* -- Motion -------------------------------------------------------------- */
+  --rb-ease: cubic-bezier(.2,.7,.3,1);
+  --rb-t-fast: .15s; --rb-t: .25s;
+
+  /* -- Layout -------------------------------------------------------------- */
+  --rb-strip-h: 36px;   /* top COD strip */
+  --rb-nav-h: 64px;     /* navbar */
+
+  /* -- Legacy variable bridge (used by i18n.js injected styles & old code) - */
+  --primary: var(--rb-accent);
+  --light: var(--rb-surface);
+  --dark: var(--rb-ink);
+}
+
+/* Dark theme — [JS HOOK] data-theme is toggled by main.js on <html> */
+[data-theme="dark"] {
+  --rb-bg:            #0C0F14;
+  --rb-surface:       #151A22;
+  --rb-surface-2:     #1B212C;
+  --rb-ink:           #F2F4F7;
+  --rb-ink-2:         #B6BECC;
+  --rb-muted:         #8B94A6;
+  --rb-line:          #232B38;
+  --rb-line-strong:   #33405299;
+  --rb-accent:        #FF5C14;
+  --rb-accent-strong: #FF7038;
+  --rb-accent-soft:   #2A160C;
+  --rb-navy:          #E8ECF3;
+  --rb-success:       #2ED690;
+  --rb-success-ink:   #4ADE97;
+  --rb-success-soft:  #0F2A1E;
+  --rb-danger-soft:   #33171B;
+  --rb-shadow-1: 0 1px 2px rgba(0,0,0,.4);
+  --rb-shadow-2: 0 12px 28px rgba(0,0,0,.5);
+}
+
+/* Bootstrap variable bridge (both themes) */
+:root, [data-theme="dark"] {
+  --bs-body-bg: var(--rb-bg);
+  --bs-body-color: var(--rb-ink);
+  --bs-border-color: var(--rb-line);
+  --bs-link-color: var(--rb-accent);
+  --bs-link-hover-color: var(--rb-accent-strong);
+}
+
+/* ==========================================================================
+   1. BASE
+   ========================================================================== */
+html { scroll-behavior: smooth; }
+body {
+  background: var(--rb-bg);
+  color: var(--rb-ink);
+  font-family: var(--rb-font-body);
+  font-size: var(--rb-fs-body);
+  line-height: 1.6;
+  padding-block-start: calc(var(--rb-strip-h) + var(--rb-nav-h));
+  transition: background-color var(--rb-t) var(--rb-ease), color var(--rb-t) var(--rb-ease);
+}
+h1,h2,h3,h4,h5,h6 { font-family: var(--rb-font-display); font-weight: 700; color: var(--rb-ink); }
+::selection { background: var(--rb-accent); color: #fff; }
+
+/* Section headings */
+.section-title {
+  font-size: var(--rb-fs-h2);
+  font-weight: 700;
+  text-align: center;
+  margin-block-end: var(--rb-sp-6);
+  position: relative;
+  padding-block-end: var(--rb-sp-3);
+}
+.section-title::after {
+  content: "";
+  position: absolute; inset-block-end: 0; inset-inline-start: 50%;
+  translate: -50% 0; /* works for RTL+LTR (centered) */
+  inline-size: 48px; block-size: 3px; border-radius: 2px;
+  background: var(--rb-accent);
+}
+[dir="rtl"] .section-title::after { translate: 50% 0; }
+
+/* Focus visibility (a11y) */
+:focus-visible { outline: 2px solid var(--rb-accent); outline-offset: 2px; border-radius: 4px; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Slim scrollbars for rails */
+.offer-products::-webkit-scrollbar, .packs-showcase::-webkit-scrollbar { block-size: 6px; }
+.offer-products::-webkit-scrollbar-thumb, .packs-showcase::-webkit-scrollbar-thumb { background: var(--rb-line-strong); border-radius: 3px; }
+
+/* Honeypots — [JS HOOK] #orderHp / #expressHp must stay in DOM, invisible */
+#orderHp, #expressHp,
+.rb-hp { position: absolute !important; inline-size: 1px; block-size: 1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0; padding: 0; margin: -1px; }
+
+/* ==========================================================================
+   2. TOP COD STRIP (new, static)
+   ========================================================================== */
+.rb-topstrip {
+  position: fixed; inset-block-start: 0; inset-inline: 0; z-index: 1032;
+  block-size: var(--rb-strip-h);
+  display: flex; align-items: center; justify-content: center; gap: var(--rb-sp-2);
+  background: var(--rb-navy); color: #fff;
+  font-size: var(--rb-fs-small); font-weight: 600; letter-spacing: .01em;
+  padding-inline: var(--rb-sp-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+[data-theme="dark"] .rb-topstrip { background: #060810; color: var(--rb-ink); border-block-end: 1px solid var(--rb-line); }
+.rb-topstrip .bi { color: var(--rb-accent); }
+.rb-topstrip b { color: var(--rb-accent); font-weight: 700; }
+
+/* ==========================================================================
+   3. NAVBAR — [JS HOOK] .glass-navbar (+.scrolled by main.js), #navbarNav,
+      #themeToggle, #i18nSwitcher injected by i18n.js
+   ========================================================================== */
+.glass-navbar {
+  inset-block-start: var(--rb-strip-h) !important;
+  min-block-size: var(--rb-nav-h);
+  background: color-mix(in srgb, var(--rb-surface) 86%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  backdrop-filter: saturate(160%) blur(14px);
+  border-block-end: 1px solid var(--rb-line);
+  transition: box-shadow var(--rb-t) var(--rb-ease), background-color var(--rb-t) var(--rb-ease);
+}
+.glass-navbar.scrolled { box-shadow: var(--rb-shadow-2); }
+.navbar-brand { display: inline-flex; align-items: center; gap: var(--rb-sp-2); }
+.navbar-brand img { border-radius: var(--rb-r-sm); }
+.brand-name { font-family: var(--rb-font-display); font-weight: 700; font-size: 1.25rem; color: var(--rb-ink); letter-spacing: -.01em; }
+.brand-name b { color: var(--rb-accent); }
+.glass-navbar .nav-link {
+  font-weight: 600; color: var(--rb-ink-2);
+  padding-block: 10px; padding-inline: var(--rb-sp-3);
+  border-radius: var(--rb-r-sm);
+  transition: color var(--rb-t-fast), background-color var(--rb-t-fast);
+}
+.glass-navbar .nav-link:hover { color: var(--rb-ink); background: var(--rb-surface-2); }
+.glass-navbar .nav-link.active { color: var(--rb-accent); }
+.navbar-toggler { border: 1px solid var(--rb-line); border-radius: var(--rb-r-sm); padding: 6px 10px; }
+.navbar-toggler:focus { box-shadow: 0 0 0 3px var(--rb-accent-soft); }
+[data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+
+/* Theme toggle — [JS HOOK] #themeToggle (icon swapped by main.js) */
+.theme-toggle {
+  inline-size: 44px; block-size: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--rb-line); border-radius: var(--rb-r-pill);
+  background: var(--rb-surface); color: var(--rb-ink-2);
+  font-size: 1.1rem; cursor: pointer;
+  transition: border-color var(--rb-t-fast), color var(--rb-t-fast), transform var(--rb-t-fast);
+}
+.theme-toggle:hover { border-color: var(--rb-line-strong); color: var(--rb-accent); }
+
+/* i18n switcher — overrides for the style i18n.js injects at runtime */
+#i18nSwitcher .i18n-btn {
+  border: 1px solid var(--rb-line) !important;
+  background: var(--rb-surface) !important;
+  color: var(--rb-ink-2) !important;
+  border-radius: var(--rb-r-pill) !important;
+}
+#i18nSwitcher .i18n-btn:hover { background: var(--rb-accent) !important; border-color: var(--rb-accent) !important; color: #fff !important; }
+#i18nSwitcher .i18n-menu { background: var(--rb-surface) !important; border: 1px solid var(--rb-line) !important; box-shadow: var(--rb-shadow-2) !important; }
+#i18nSwitcher .i18n-menu button { color: var(--rb-ink) !important; }
+#i18nSwitcher .i18n-menu button:hover { background: var(--rb-accent-soft) !important; }
+#i18nSwitcher .i18n-menu button.active { background: var(--rb-accent) !important; color: #fff !important; }
+
+/* ==========================================================================
+   4. BUTTONS
+   ========================================================================== */
+/* Primary CTA — [JS HOOK] .btn-orange class is emitted by main.js templates */
+.btn-orange {
+  --bs-btn-bg: var(--rb-accent);
+  --bs-btn-border-color: var(--rb-accent);
+  --bs-btn-hover-bg: var(--rb-accent-strong);
+  --bs-btn-hover-border-color: var(--rb-accent-strong);
+  --bs-btn-active-bg: var(--rb-accent-strong);
+  --bs-btn-active-border-color: var(--rb-accent-strong);
+  --bs-btn-color: #fff; --bs-btn-hover-color: #fff; --bs-btn-active-color: #fff;
+  --bs-btn-disabled-bg: var(--rb-muted); --bs-btn-disabled-border-color: var(--rb-muted); --bs-btn-disabled-color: #fff;
+  font-weight: 700; font-family: var(--rb-font-body);
+  border-radius: var(--rb-r-sm) !important;
+  min-block-size: 48px;                       /* thumb-friendly */
+  padding-inline: var(--rb-sp-5);
+  box-shadow: var(--rb-shadow-cta);
+  transition: transform var(--rb-t-fast) var(--rb-ease), box-shadow var(--rb-t-fast), background-color var(--rb-t-fast);
+}
+.btn-orange:hover { transform: translateY(-1px); }
+.btn-orange:active { transform: scale(.98); box-shadow: none; }
+[data-theme="dark"] .btn-orange { box-shadow: none; }
+
+/* Ghost / secondary */
+.rb-btn-ghost {
+  --bs-btn-color: var(--rb-ink);
+  --bs-btn-border-color: var(--rb-line-strong);
+  --bs-btn-hover-bg: var(--rb-surface-2);
+  --bs-btn-hover-color: var(--rb-ink);
+  --bs-btn-hover-border-color: var(--rb-line-strong);
+  background: var(--rb-surface);
+  font-weight: 700; border-radius: var(--rb-r-sm); min-block-size: 48px;
+}
+.btn-secondary { --bs-btn-bg: var(--rb-surface-2); --bs-btn-border-color: var(--rb-line); --bs-btn-color: var(--rb-ink-2); --bs-btn-hover-bg: var(--rb-line); --bs-btn-hover-border-color: var(--rb-line-strong); --bs-btn-hover-color: var(--rb-ink); border-radius: var(--rb-r-sm); }
+
+/* ==========================================================================
+   5. STATUS / ALERTS — [JS HOOK] #statusIndicator #statusMessage #statusToast
+   ========================================================================== */
+.status-indicator {
+  position: fixed; z-index: 2000;
+  inset-block-start: calc(var(--rb-strip-h) + var(--rb-nav-h) + var(--rb-sp-3));
+  inset-inline: var(--rb-sp-3);
+  display: flex; justify-content: center; pointer-events: none;
+}
+.status-indicator .alert {
+  pointer-events: auto; max-inline-size: 560px; inline-size: 100%;
+  border: 1px solid var(--rb-line); border-radius: var(--rb-r);
+  background: var(--rb-surface); color: var(--rb-ink);
+  box-shadow: var(--rb-shadow-2); font-weight: 500;
+}
+.status-indicator .alert-success { border-inline-start: 4px solid var(--rb-success); }
+.status-indicator .alert-danger { border-inline-start: 4px solid var(--rb-danger); }
+.status-indicator .alert-info { border-inline-start: 4px solid var(--rb-navy); }
+[data-theme="dark"] .status-indicator .alert-info { border-inline-start-color: var(--rb-accent); }
+
+/* ==========================================================================
+   6. HERO (restructured static HTML)
+   ========================================================================== */
+.rb-hero { padding-block: var(--rb-sp-6) var(--rb-sp-5); }
+.rb-hero-grid {
+  display: grid; grid-template-columns: 1fr; gap: var(--rb-sp-5);
+  align-items: center;
+  background: var(--rb-surface);
+  border: 1px solid var(--rb-line); border-radius: var(--rb-r-lg);
+  padding: var(--rb-sp-5);
+  box-shadow: var(--rb-shadow-1);
+  overflow: hidden;
+}
+.rb-hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--rb-fs-micro); font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--rb-accent); background: var(--rb-accent-soft);
+  border-radius: var(--rb-r-pill); padding: 6px 12px; margin-block-end: var(--rb-sp-3);
+}
+.rb-hero-title { font-size: var(--rb-fs-hero); font-weight: 700; line-height: 1.2; letter-spacing: -.01em; margin-block-end: var(--rb-sp-3); }
+.rb-hero-sub { color: var(--rb-ink-2); font-size: 1.0625rem; max-inline-size: 52ch; margin-block-end: var(--rb-sp-5); }
+.rb-hero-cta { display: flex; flex-wrap: wrap; gap: var(--rb-sp-3); margin-block-end: var(--rb-sp-4); }
+.rb-hero-chips { display: flex; flex-wrap: wrap; gap: var(--rb-sp-2); }
+.rb-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--rb-surface-2); border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-pill); padding: 7px 14px;
+  font-size: var(--rb-fs-small); font-weight: 600; color: var(--rb-ink-2);
+}
+.rb-chip .bi { color: var(--rb-success); }
+.rb-hero-media { border-radius: var(--rb-r); overflow: hidden; background: var(--rb-surface-2); border: 1px solid var(--rb-line); }
+.rb-hero-img { display: block; inline-size: 100%; block-size: auto; }
+@media (min-width: 992px) {
+  .rb-hero-grid { grid-template-columns: 1.05fr .95fr; padding: var(--rb-sp-6); }
+}
+
+/* ==========================================================================
+   7. SLIDESHOW — [JS HOOK] .slideshow-container1 .mySlides1 .fade1 .prev1 .next1 .dot1
+   ========================================================================== */
+.slideshow-container1 {
+  position: relative; max-inline-size: 1120px; margin-inline: auto;
+  border-radius: var(--rb-r-lg); overflow: hidden;
+  border: 1px solid var(--rb-line); background: var(--rb-surface-2);
+  box-shadow: var(--rb-shadow-1);
+}
+.mySlides1 { display: none; }
+.fade1 { animation: rbFade 1s var(--rb-ease); }
+@keyframes rbFade { from { opacity: .35; } to { opacity: 1; } }
+.prev1, .next1 {
+  cursor: pointer; position: absolute; inset-block-start: 50%; translate: 0 -50%;
+  inline-size: 44px; block-size: 44px; display: grid; place-items: center;
+  color: var(--rb-ink); background: color-mix(in srgb, var(--rb-surface) 85%, transparent);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid var(--rb-line); border-radius: var(--rb-r-pill);
+  font-size: 1.1rem; font-weight: 700; user-select: none;
+  transition: background-color var(--rb-t-fast), color var(--rb-t-fast);
+  z-index: 2; text-decoration: none;
+}
+.prev1 { inset-inline-start: var(--rb-sp-3); }
+.next1 { inset-inline-end: var(--rb-sp-3); }
+.prev1:hover, .next1:hover { background: var(--rb-accent); color: #fff; border-color: var(--rb-accent); }
+.dot1 {
+  cursor: pointer; display: inline-block;
+  inline-size: 8px; block-size: 8px; margin-inline: 4px;
+  background: var(--rb-line-strong); border-radius: var(--rb-r-pill);
+  transition: background-color var(--rb-t-fast), inline-size var(--rb-t) var(--rb-ease);
+}
+.dot1.active1, .dot1.active, .dot1:hover { background: var(--rb-accent); }
+.dot1.active1, .dot1.active { inline-size: 22px; }
+
+/* ==========================================================================
+   8. TRUST BAR (static markup, restyled)
+   ========================================================================== */
+.trust-bar { padding-block: var(--rb-sp-5); }
+.trust-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--rb-sp-3);
+}
+.trust-item {
+  display: flex; align-items: center; gap: var(--rb-sp-3);
+  background: var(--rb-surface); border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r); padding: var(--rb-sp-4);
+  transition: border-color var(--rb-t-fast), transform var(--rb-t-fast);
+}
+.trust-item:hover { border-color: var(--rb-line-strong); transform: translateY(-2px); }
+.trust-icon {
+  flex: 0 0 auto; inline-size: 44px; block-size: 44px; display: grid; place-items: center;
+  border-radius: var(--rb-r-sm); background: var(--rb-accent-soft); color: var(--rb-accent);
+  font-size: 1.25rem;
+}
+.trust-text { display: flex; flex-direction: column; }
+.trust-title { font-weight: 700; font-size: var(--rb-fs-small); color: var(--rb-ink); }
+.trust-sub { font-size: var(--rb-fs-micro); color: var(--rb-muted); }
+@media (min-width: 768px) { .trust-grid { grid-template-columns: repeat(4, 1fr); } }
+
+/* ==========================================================================
+   9. OFFERS SECTION + COUNTDOWN — [JS HOOK] #days #hours #minutes #seconds
+   ========================================================================== */
+.offers-section { padding-block: var(--rb-sp-6); }
+.offers-title { font-size: var(--rb-fs-h2); font-weight: 700; }
+.offer-subtitle { color: var(--rb-ink-2); max-inline-size: 62ch; margin-inline: auto; }
+
+.offer-timer {
+  max-inline-size: 560px; margin-inline: auto; margin-block-end: var(--rb-sp-6);
+  background: var(--rb-navy); color: #fff;
+  border-radius: var(--rb-r-lg); padding: var(--rb-sp-4) var(--rb-sp-5);
+  text-align: center; box-shadow: var(--rb-shadow-2);
+}
+[data-theme="dark"] .offer-timer { background: var(--rb-surface); border: 1px solid var(--rb-line); color: var(--rb-ink); }
+.timer-title { font-size: var(--rb-fs-small); font-weight: 600; opacity: .85; margin-block-end: var(--rb-sp-3); }
+.timer-content { display: flex; justify-content: center; gap: var(--rb-sp-3); }
+.timer-item { min-inline-size: 64px; background: rgba(255,255,255,.08); border-radius: var(--rb-r); padding: var(--rb-sp-2) var(--rb-sp-3); }
+[data-theme="dark"] .timer-item { background: var(--rb-surface-2); }
+.timer-value { font-family: var(--rb-font-display); font-size: 1.75rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--rb-accent); line-height: 1.2; }
+.timer-label { font-size: var(--rb-fs-micro); opacity: .8; }
+
+/* Packs intro — [JS HOOK] #packs #packsShowcase .packs-eyebrow .packs-scroll-hint
+   (packs-showcase.js reads these nodes and renders cards with its own injected CSS) */
+.packs-intro { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--rb-sp-3); margin-block-end: var(--rb-sp-4); }
+.packs-eyebrow { display: inline-flex; align-items: center; gap: 6px; color: var(--rb-accent); font-weight: 700; font-size: var(--rb-fs-micro); letter-spacing: .14em; text-transform: uppercase; }
+.packs-intro h2 { font-size: var(--rb-fs-h3); margin-block: var(--rb-sp-1) var(--rb-sp-1); }
+.packs-intro p { color: var(--rb-ink-2); font-size: var(--rb-fs-small); margin: 0; max-inline-size: 60ch; }
+.packs-scroll-hint { color: var(--rb-muted); font-size: var(--rb-fs-micro); font-weight: 600; }
+
+/* Links inside offer cards must inherit ink (no default underline/blue) */
+.offer-product a, .offer-product a:hover { text-decoration: none; color: inherit; }
+/* Show first slide before main.js takes over (prevents layout shift; JS inline styles override this) */
+.mySlides1:first-child { display: block; }
+
+/* Offer product rail — [JS HOOK] .offer-products #offerProducts .offer-product
+   .offer-btn .offer-product-content-link (click routing in main.js) */
+.offer-products {
+  display: flex; gap: var(--rb-sp-4); overflow-x: auto;
+  scroll-snap-type: x mandatory; padding-block-end: var(--rb-sp-3);
+  -webkit-overflow-scrolling: touch;
+}
+.offer-product {
+  position: relative; flex: 0 0 300px; scroll-snap-align: start;
+  background: var(--rb-surface); border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-lg); overflow: hidden;
+  transition: border-color var(--rb-t-fast), transform var(--rb-t) var(--rb-ease), box-shadow var(--rb-t);
+  cursor: pointer;
+}
+.offer-product:hover { border-color: var(--rb-line-strong); transform: translateY(-3px); box-shadow: var(--rb-shadow-2); }
+.offer-product .carousel { background: var(--rb-surface-2); }
+.offer-product .carousel-item img { aspect-ratio: 1/1; object-fit: cover; }
+.offer-product-discount {
+  position: absolute; z-index: 5; inset-block-start: var(--rb-sp-2); inset-inline-end: var(--rb-sp-2);
+  background: var(--rb-accent); color: #fff; font-weight: 700; font-size: var(--rb-fs-micro);
+  padding: 4px 8px; border-radius: 6px;
+}
+.offer-product-badge {
+  position: absolute; z-index: 5; inset-block-start: 0; inset-inline-start: 0;
+  background: var(--rb-navy); color: var(--rb-surface); font-weight: 700; font-size: var(--rb-fs-micro);
+  letter-spacing: .06em; padding: 6px 12px; border-end-end-radius: var(--rb-r);
+}
+[data-theme="dark"] .offer-product-badge { color: #101828; }
+.offer-product-content-link { text-decoration: none; color: inherit; display: block; }
+.offer-product-content { padding: var(--rb-sp-4); }
+.offer-product-title { font-size: 1rem; font-weight: 700; color: var(--rb-ink); line-height: 1.45; min-block-size: 2.9em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.price-container { display: flex; align-items: baseline; gap: var(--rb-sp-2); flex-wrap: wrap; margin-block: var(--rb-sp-2) var(--rb-sp-3); }
+.offer-product-price { font-family: var(--rb-font-display); font-size: 1.25rem; font-weight: 700; color: var(--rb-ink); }
+.offer-product-old-price { font-size: var(--rb-fs-small); color: var(--rb-muted); text-decoration: line-through; }
+.offer-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--rb-accent); color: #fff; font-weight: 700;
+  border: 0; border-radius: var(--rb-r-sm); min-block-size: 46px;
+  inline-size: 100%; cursor: pointer;
+  transition: background-color var(--rb-t-fast), transform var(--rb-t-fast);
+}
+.offer-btn:hover { background: var(--rb-accent-strong); color: #fff; }
+.offer-btn:active { transform: scale(.98); }
+
+/* ==========================================================================
+   10. CATALOG — categories + product cards + skeletons
+   [JS HOOK] .category-btn[data-category] (+.active), #productsContainer,
+   card markup below is EXACTLY what main.js renders — CSS-only styling.
+   ========================================================================== */
+.categories-filter { position: sticky; inset-block-start: calc(var(--rb-strip-h) + var(--rb-nav-h)); z-index: 100; padding-block: var(--rb-sp-2); background: color-mix(in srgb, var(--rb-bg) 88%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.category-btn {
+  --bs-btn-color: var(--rb-ink-2);
+  --bs-btn-border-color: var(--rb-line);
+  --bs-btn-hover-color: var(--rb-ink);
+  --bs-btn-hover-bg: var(--rb-surface);
+  --bs-btn-hover-border-color: var(--rb-line-strong);
+  --bs-btn-active-bg: var(--rb-navy);
+  --bs-btn-active-border-color: var(--rb-navy);
+  --bs-btn-active-color: #fff;
+  background: var(--rb-surface);
+  border-radius: var(--rb-r-pill) !important;
+  font-weight: 600; font-size: var(--rb-fs-small);
+  padding: 9px 18px; min-block-size: 42px;
+}
+.category-btn.active { background: var(--rb-navy) !important; border-color: var(--rb-navy) !important; color: #fff !important; }
+[data-theme="dark"] .category-btn.active { background: var(--rb-accent) !important; border-color: var(--rb-accent) !important; }
+
+/* Product card */
+.product-card {
+  position: relative; display: flex; flex-direction: column;
+  background: var(--rb-surface); border: 1px solid var(--rb-line) !important;
+  border-radius: var(--rb-r) !important; overflow: hidden;
+  box-shadow: var(--rb-shadow-1);
+  transition: transform var(--rb-t) var(--rb-ease), box-shadow var(--rb-t), border-color var(--rb-t-fast);
+  cursor: pointer;
+}
+.product-card:hover { transform: translateY(-3px); border-color: var(--rb-line-strong) !important; box-shadow: var(--rb-shadow-2); }
+.product-card .carousel { background: var(--rb-surface-2); }
+.product-card .carousel-item img { aspect-ratio: 1/1; object-fit: contain; padding: var(--rb-sp-2); }
+.product-badge {
+  position: absolute; z-index: 5; inset-block-start: 0; inset-inline-start: 0;
+  background: var(--rb-navy); color: var(--rb-surface);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  padding: 5px 10px; border-end-end-radius: var(--rb-r-sm);
+  max-inline-size: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+[data-theme="dark"] .product-badge { color: #101828; }
+.discount-badge {
+  position: absolute; z-index: 5; inset-block-start: var(--rb-sp-2); inset-inline-end: var(--rb-sp-2);
+  background: var(--rb-accent); color: #fff;
+  font-size: 11px; font-weight: 700; padding: 4px 7px; border-radius: 6px;
+}
+.stock-badge {
+  position: absolute; z-index: 5; inset-block-start: 38px; inset-inline-end: var(--rb-sp-2);
+  font-size: 9px; font-weight: 700; padding: 3px 7px; border-radius: 6px;
+}
+.stock-available { background: var(--rb-success-soft); color: var(--rb-success-ink); }
+.stock-unavailable { background: var(--rb-danger-soft); color: var(--rb-danger); }
+.product-info { padding: var(--rb-sp-3) var(--rb-sp-3) var(--rb-sp-1); }
+.product-title {
+  font-family: var(--rb-font-body); font-size: .8125rem; font-weight: 700; line-height: 1.45;
+  color: var(--rb-ink); min-block-size: 2.9em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.price-section { display: flex; align-items: baseline; gap: var(--rb-sp-2); flex-wrap: wrap; margin-block-start: var(--rb-sp-2); }
+.current-price { font-family: var(--rb-font-display); font-size: 1.0625rem; font-weight: 700; color: var(--rb-ink); margin: 0; }
+.old-price { font-size: .75rem; color: var(--rb-muted); }
+.product-card .card-footer { background: transparent !important; border: 0 !important; padding: var(--rb-sp-2) var(--rb-sp-3) var(--rb-sp-3); margin-block-start: auto; }
+.product-card .add-to-cart-btn { inline-size: 100%; min-block-size: 44px; font-size: var(--rb-fs-small); padding-inline: var(--rb-sp-2); box-shadow: none; }
+
+/* Skeleton loaders (initial children of #productsContainer; main.js replaces them) */
+.rb-sk { border: 1px solid var(--rb-line); border-radius: var(--rb-r); overflow: hidden; background: var(--rb-surface); }
+.rb-sk-img { aspect-ratio: 1/1; }
+.rb-sk-line { block-size: 12px; border-radius: 6px; margin: var(--rb-sp-3); }
+.rb-sk-line.short { inline-size: 45%; }
+.rb-sk-img, .rb-sk-line {
+  background: linear-gradient(90deg, var(--rb-surface-2) 25%, color-mix(in srgb, var(--rb-surface-2) 55%, var(--rb-surface)) 45%, var(--rb-surface-2) 65%);
+  background-size: 240% 100%;
+  animation: rbShimmer 1.4s linear infinite;
+}
+@keyframes rbShimmer { to { background-position: -120% 0; } }
+
+/* ==========================================================================
+   11. REVIEWS
+   ========================================================================== */
+#reviews.bg-light { background: var(--rb-surface) !important; border-block: 1px solid var(--rb-line); }
+.review-card {
+  background: var(--rb-bg); border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-lg); padding: var(--rb-sp-5);
+  block-size: 100%;
+  transition: border-color var(--rb-t-fast), transform var(--rb-t-fast);
+}
+.review-card:hover { border-color: var(--rb-line-strong); transform: translateY(-2px); }
+.review-card img { border: 2px solid var(--rb-line); }
+.review-card h5 { font-size: 1rem; }
+.review-card p { color: var(--rb-ink-2); font-size: var(--rb-fs-small); line-height: 1.7; margin-block-end: 0; }
+.review-card .text-warning { color: var(--rb-warning) !important; font-size: var(--rb-fs-small); }
+
+/* ==========================================================================
+   12. FORMS / ORDER MODAL — [JS HOOK] #orderModal #orderForm #fullName #phone
+   #email #wilaya #baladiyaInput #address #cashOnDelivery #onlinePayment
+   #sumSubtotal #sumDelivery #sumTotal #submitOrderBtn (all inputs preserved)
+   ========================================================================== */
+.form-label { font-weight: 600; font-size: var(--rb-fs-small); color: var(--rb-ink-2); }
+.form-control, .form-select {
+  background: var(--rb-surface); color: var(--rb-ink);
+  border: 1px solid var(--rb-line); border-radius: var(--rb-r-sm);
+  min-block-size: 46px; font-size: var(--rb-fs-body);
+  transition: border-color var(--rb-t-fast), box-shadow var(--rb-t-fast);
+}
+textarea.form-control { min-block-size: 0; }
+.form-control:focus, .form-select:focus {
+  background: var(--rb-surface); color: var(--rb-ink);
+  border-color: var(--rb-accent); box-shadow: 0 0 0 3px var(--rb-accent-soft);
+}
+.form-control::placeholder { color: var(--rb-muted); }
+.form-check-input { border-color: var(--rb-line-strong); inline-size: 1.15em; block-size: 1.15em; }
+.form-check-input:checked { background-color: var(--rb-accent); border-color: var(--rb-accent); }
+.form-check-input:focus { box-shadow: 0 0 0 3px var(--rb-accent-soft); }
+
+.modal-content {
+  background: var(--rb-surface); color: var(--rb-ink);
+  border: 1px solid var(--rb-line); border-radius: var(--rb-r-lg);
+  box-shadow: var(--rb-shadow-2);
+}
+.modal-header { border-block-end: 1px solid var(--rb-line); }
+.modal-footer { border-block-start: 1px solid var(--rb-line); }
+.modal-title { font-weight: 700; }
+[data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%); }
+
+.order-summary { background: var(--rb-surface-2); border: 1px solid var(--rb-line); border-radius: var(--rb-r); padding: var(--rb-sp-4); }
+.product-image-thumb { inline-size: 64px; block-size: 64px; object-fit: cover; border-radius: var(--rb-r-sm); border: 1px solid var(--rb-line); }
+
+.delivery-type-group { display: flex; gap: var(--rb-sp-2); }
+.dt-opt {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--rb-sp-2);
+  border: 1px solid var(--rb-line); border-radius: var(--rb-r-sm);
+  padding: 11px var(--rb-sp-3); font-weight: 600; font-size: var(--rb-fs-small);
+  cursor: pointer; background: var(--rb-surface);
+  transition: border-color var(--rb-t-fast), background-color var(--rb-t-fast);
+}
+.dt-opt:hover { border-color: var(--rb-line-strong); }
+.dt-opt:has(input:checked) { border-color: var(--rb-accent); background: var(--rb-accent-soft); color: var(--rb-ink); }
+.dt-opt input { accent-color: var(--rb-accent); }
+
+.order-summary-box { background: var(--rb-surface-2); border: 1px solid var(--rb-line); border-radius: var(--rb-r); padding: var(--rb-sp-4); margin-block-start: var(--rb-sp-4); }
+.osb-row { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--rb-fs-small); color: var(--rb-ink-2); padding-block: 4px; }
+.osb-row.osb-total { border-block-start: 1px dashed var(--rb-line-strong); margin-block-start: var(--rb-sp-2); padding-block-start: var(--rb-sp-2); font-size: 1.0625rem; font-weight: 700; color: var(--rb-ink); }
+.osb-total span:last-child { font-family: var(--rb-font-display); color: var(--rb-accent); }
+
+/* ==========================================================================
+   13. CONTACT — [JS HOOK] #contactForm #contactName #contactEmail #contactPhone
+   #contactMessage #contactSpinner #contactSubmitText
+   ========================================================================== */
+.contact-card {
+  background: var(--rb-surface); border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-lg); padding: var(--rb-sp-5);
+  box-shadow: var(--rb-shadow-1);
+}
+.contact-card .text-primary { color: var(--rb-accent) !important; }
+.contact-card h5 { font-size: 1rem; }
+.contact-card p { color: var(--rb-ink-2); }
+.map-container { border-radius: var(--rb-r); overflow: hidden; border: 1px solid var(--rb-line); }
+
+/* ==========================================================================
+   14. FOOTER
+   ========================================================================== */
+footer.bg-dark {
+  background: var(--rb-navy) !important; color: #E8ECF3;
+}
+[data-theme="dark"] footer.bg-dark { background: #060810 !important; border-block-start: 1px solid var(--rb-line); }
+footer h5 { color: #fff; font-size: 1rem; margin-block-end: var(--rb-sp-3); }
+[data-theme="dark"] footer h5 { color: var(--rb-ink); }
+footer p, footer li { color: #B7C0D0; font-size: var(--rb-fs-small); }
+footer a.text-white { color: #B7C0D0 !important; transition: color var(--rb-t-fast); }
+footer a.text-white:hover { color: var(--rb-accent) !important; }
+footer hr { border-color: rgba(255,255,255,.12); opacity: 1; }
+
+/* Social — [JS HOOK] .social-icon (touch feedback in main.js) */
+.social-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  inline-size: 44px; block-size: 44px; border-radius: var(--rb-r-pill);
+  background: rgba(255,255,255,.08); color: #fff; font-size: 1.15rem;
+  text-decoration: none; transition: background-color var(--rb-t-fast), transform var(--rb-t-fast);
+}
+.social-icon:hover { background: var(--rb-accent); color: #fff; transform: translateY(-2px); }
+#contact .social-icon { background: var(--rb-surface-2); color: var(--rb-ink-2); border: 1px solid var(--rb-line); }
+#contact .social-icon:hover { background: var(--rb-accent); color: #fff; border-color: var(--rb-accent); }
+
+/* ==========================================================================
+   15. FLOATING ELEMENTS
+   ========================================================================== */
+/* WhatsApp — [JS HOOK] .whatsapp-btn */
+.whatsapp-btn {
+  position: fixed; z-index: 1040; inset-block-end: var(--rb-sp-5); inset-inline-end: var(--rb-sp-4);
+  inline-size: 54px; block-size: 54px; display: grid; place-items: center;
+  background: #25D366; color: #fff; font-size: 1.6rem;
+  border-radius: var(--rb-r-pill); text-decoration: none;
+  box-shadow: 0 8px 20px rgba(37,211,102,.35);
+  transition: transform var(--rb-t-fast);
+}
+.whatsapp-btn:hover { color: #fff; transform: scale(1.06); }
+.whatsapp-contact-btn { background: #25D366; color: #fff; font-weight: 700; border-radius: var(--rb-r-sm); }
+.whatsapp-contact-btn:hover { background: #1EBE5A; color: #fff; }
+
+/* Floating cart — [JS HOOK] #floatingCart #dragCartBtn #cartCountFloat (drag in main.js) */
+.floating-cart { position: fixed; z-index: 1041; inset-block-end: 96px; inset-inline-start: var(--rb-sp-4); }
+.cart-icon-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cart-btn-drag {
+  position: relative; inline-size: 56px; block-size: 56px;
+  display: grid; place-items: center;
+  background: var(--rb-navy); color: #fff; font-size: 1.4rem;
+  border: 0; border-radius: var(--rb-r-pill); cursor: grab;
+  box-shadow: var(--rb-shadow-2);
+  transition: background-color var(--rb-t-fast);
+}
+[data-theme="dark"] .cart-btn-drag { background: var(--rb-accent); }
+.cart-btn-drag:active { cursor: grabbing; }
+#cartCountFloat {
+  position: absolute; inset-block-start: -4px; inset-inline-end: -4px;
+  min-inline-size: 22px; block-size: 22px; display: grid; place-items: center;
+  background: var(--rb-accent); color: #fff;
+  font-size: 11px; font-weight: 700; border-radius: var(--rb-r-pill);
+  border: 2px solid var(--rb-bg); padding-inline: 4px;
+}
+[data-theme="dark"] #cartCountFloat { background: #fff; color: var(--rb-navy); }
+.cart-label-float { font-size: var(--rb-fs-micro); font-weight: 700; color: var(--rb-ink-2); background: var(--rb-surface); border: 1px solid var(--rb-line); border-radius: var(--rb-r-pill); padding: 2px 10px; }
+
+/* ==========================================================================
+   16. CART OFFCANVAS — [JS HOOK] #cartOffcanvas #cartItems #emptyCartMessage
+   #emptyCartBtn #cartWilaya #cartSubtotal #cartDelivery #cartTotal #checkoutBtn
+   (cart item markup below is generated by main.js — CSS-only)
+   ========================================================================== */
+.offcanvas {
+  background: var(--rb-bg); color: var(--rb-ink);
+  border-inline-start: 1px solid var(--rb-line) !important;
+  max-inline-size: 420px;
+}
+.offcanvas-header { background: var(--rb-surface); border-block-end: 1px solid var(--rb-line); }
+.offcanvas-title { font-weight: 700; }
+.cart-item {
+  background: var(--rb-surface); border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r); padding: var(--rb-sp-3);
+  margin-block-end: var(--rb-sp-2);
+  transition: border-color var(--rb-t-fast);
+}
+.cart-item:hover { border-color: var(--rb-line-strong); }
+.cart-item-img { inline-size: 60px; block-size: 60px; object-fit: cover; border-radius: var(--rb-r-sm); border: 1px solid var(--rb-line); }
+.cart-item-title { font-size: var(--rb-fs-small); font-weight: 700; line-height: 1.4; }
+.cart-item-price { color: var(--rb-accent); font-weight: 700; font-size: var(--rb-fs-small); }
+.quantity-controls { gap: 0; }
+.quantity-btn {
+  inline-size: 34px; block-size: 34px; display: grid; place-items: center;
+  border: 1px solid var(--rb-line); background: var(--rb-surface-2); color: var(--rb-ink);
+  font-weight: 700; border-radius: var(--rb-r-sm); cursor: pointer;
+  transition: background-color var(--rb-t-fast), border-color var(--rb-t-fast);
+}
+.quantity-btn:hover { background: var(--rb-accent-soft); border-color: var(--rb-accent); color: var(--rb-accent); }
+.quantity-input { inline-size: 40px; text-align: center; border: 0; background: transparent; color: var(--rb-ink); font-weight: 700; }
+.remove-item-btn {
+  border: 0; background: transparent; color: var(--rb-muted);
+  inline-size: 38px; block-size: 38px; border-radius: var(--rb-r-sm); cursor: pointer;
+  transition: color var(--rb-t-fast), background-color var(--rb-t-fast);
+}
+.remove-item-btn:hover { color: var(--rb-danger); background: var(--rb-danger-soft); }
+.cart-summary { background: var(--rb-surface); border: 1px solid var(--rb-line) !important; border-radius: var(--rb-r-lg); padding: var(--rb-sp-4) !important; }
+.cart-summary .text-primary { color: var(--rb-accent) !important; font-family: var(--rb-font-display); }
+
+/* ==========================================================================
+   17. CAROUSEL (Bootstrap overrides, both card + offer carousels)
+   ========================================================================== */
+.carousel-indicators { margin-block-end: var(--rb-sp-2); }
+.carousel-indicators [data-bs-target] {
+  inline-size: 6px; block-size: 6px; border-radius: var(--rb-r-pill);
+  background: var(--rb-ink); border: 0; opacity: .25;
+  transition: opacity var(--rb-t-fast), inline-size var(--rb-t) var(--rb-ease);
+}
+.carousel-indicators .active { opacity: 1; inline-size: 18px; background: var(--rb-accent); }
+.carousel-control-prev, .carousel-control-next { inline-size: 40px; opacity: 0; transition: opacity var(--rb-t-fast); }
+.product-card:hover .carousel-control-prev, .product-card:hover .carousel-control-next,
+.offer-product:hover .carousel-control-prev, .offer-product:hover .carousel-control-next { opacity: .9; }
+.carousel-control-prev-icon, .carousel-control-next-icon {
+  inline-size: 28px; block-size: 28px; border-radius: var(--rb-r-pill);
+  background-color: rgba(14,17,22,.55); background-size: 55%;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+@media (hover: none) { .carousel-control-prev, .carousel-control-next { opacity: .8; } }
+
+/* ==========================================================================
+   18. RESPONSIVE / MOBILE POLISH
+   ========================================================================== */
+@media (max-width: 575.98px) {
+  :root { --rb-nav-h: 60px; }
+  .rb-hero { padding-block: var(--rb-sp-4) var(--rb-sp-3); }
+  .rb-hero-grid { padding: var(--rb-sp-4); }
+  .rb-hero-cta .btn { flex: 1 1 auto; }
+  .offer-product { flex-basis: 260px; }
+  .timer-item { min-inline-size: 56px; }
+  .categories-filter .d-flex { flex-wrap: nowrap !important; overflow-x: auto; justify-content: flex-start !important; padding-block-end: var(--rb-sp-1); -webkit-overflow-scrolling: touch; }
+  .category-btn { white-space: nowrap; }
+  .whatsapp-btn { inset-block-end: var(--rb-sp-4); }
+  .floating-cart { inset-block-end: 88px; }
+  .status-indicator { inset-block-start: calc(var(--rb-strip-h) + var(--rb-nav-h) + var(--rb-sp-2)); }
+}
+@media (min-width: 992px) {
+  .glass-navbar .navbar-nav { gap: var(--rb-sp-1); }
+}

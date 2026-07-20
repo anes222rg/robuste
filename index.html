@@ -31,7 +31,7 @@ gtag('config', 'G-GREM5BTR7T');
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 
-<meta name="theme-color" content="#ff6600">
+<meta name="theme-color" content="#FF4F00">
 <title>ROBUSTE eulma - المتجر الرسمي</title>
 <!-- Canonical + SEO (added) -->
 <link rel="canonical" href="https://www.robustedz.store/">
@@ -71,15 +71,15 @@ gtag('config', 'G-GREM5BTR7T');
 }
 </script>
 
-<!-- Google Fonts (Tajawal) -->
+<!-- Google Fonts: Rubik (body) + Readex Pro (display) — Arabic + Latin -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://api.dicebear.com">
 <link rel="dns-prefetch" href="https://i.postimg.cc">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"></noscript>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@800;900&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@800;900&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&display=swap"></noscript>
 
 <!-- Bootstrap -->
 <link href="bootstrap.min.css" rel="stylesheet">
@@ -90,7 +90,8 @@ gtag('config', 'G-GREM5BTR7T');
 <!-- EmailJS -->
 <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-<link rel="stylesheet" href="style.css?v=fb54">
+<!-- ROBUSTE Signal Graphite — ONE consolidated stylesheet (replaces style/premium/robuste-ui/_fable5/_luxe) -->
+<link rel="stylesheet" href="robuste.css?v=1">
 <!-- Auto-WebP with safe fallback (added) -->
 <script>
 (function(){
@@ -140,12 +141,15 @@ gtag('config', 'G-GREM5BTR7T');
 </script>
 </head>
 <body>
+<!-- Top COD reassurance strip (static, new) -->
+<div class="rb-topstrip"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام — توصيل <b>58 ولاية</b> خلال 24–72 ساعة</div>
+<!-- [JS HOOK] .glass-navbar (main.js adds .scrolled) · #navbarNav (collapse) · #themeToggle -->
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
     <div class="container">
         <a class="navbar-brand" href="index.html">
             <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" 
                  alt="شعار ROBUSTE" width="180" height="50" style="max-height:50px;">
-            <span class="d-none d-lg-inline fw-bold fs-4 ms-2" style="color: #FF6B35;">ROBUSTE eulma</span>
+            <span class="d-none d-lg-inline brand-name ms-2">ROBUSTE <b>eulma</b></span>
         </a>
        
         <div class="d-flex align-items-center ms-3">
@@ -171,6 +175,7 @@ gtag('config', 'G-GREM5BTR7T');
     </div>
 </nav>
 
+<!-- [JS HOOK] #statusIndicator / #statusMessage (main.js notifications) -->
 <div class="status-indicator" id="statusIndicator" style="display: none;">
     <div class="alert alert-dismissible fade show" role="alert" aria-live="polite">
         <span id="statusMessage"></span> 
@@ -178,21 +183,30 @@ gtag('config', 'G-GREM5BTR7T');
     </div>
 </div>
 
-<!-- القسم الرئيسي Hero -->
-<section class="hero-container position-relative">
-    <div class="hero-image-container">
-        <img width="3780" height="1890" src="images/banner.webp" alt="أجهزة منزلية" class="hero-image" fetchpriority="high" decoding="async">
-        <div class="image-overlay"></div>
-    </div>
-    <div class="hero-content container text-center position-absolute top-50 start-50 translate-middle">
-        <h1 class="hero-title">أجهزة منزلية تجعل حياتك أسهل</h1>
-        <p class="hero-subtitle">جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة وضمان سنة واحدة</p>
-        <div>
-            <a href="#products" class="btn btn-orange btn-lg px-4 me-2"><i class="bi bi-cart"></i> تسوق الآن</a>
-            <a href="#contact" class="btn btn-outline-light btn-lg px-4"><i class="bi bi-headset"></i> اتصل بنا</a>
+<!-- Hero (restructured — no JS hooks inside) -->
+<header class="rb-hero">
+  <div class="container">
+    <div class="rb-hero-grid">
+      <div class="rb-hero-copy">
+        <span class="rb-hero-eyebrow"><i class="bi bi-lightning-charge-fill"></i> ROBUSTE — EL EULMA</span>
+        <h1 class="rb-hero-title">أجهزة منزلية تجعل حياتك أسهل</h1>
+        <p class="rb-hero-sub">جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة وضمان سنة واحدة</p>
+        <div class="rb-hero-cta">
+          <a href="#products" class="btn btn-orange btn-lg"><i class="bi bi-cart"></i> تسوق الآن</a>
+          <a href="#contact" class="btn rb-btn-ghost btn-lg"><i class="bi bi-headset"></i> اتصل بنا</a>
         </div>
+        <div class="rb-hero-chips">
+          <span class="rb-chip"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام</span>
+          <span class="rb-chip"><i class="bi bi-truck"></i> توصيل 58 ولاية</span>
+          <span class="rb-chip"><i class="bi bi-shield-check"></i> ضمان سنة</span>
+        </div>
+      </div>
+      <div class="rb-hero-media">
+        <img width="3780" height="1890" src="images/banner.webp" alt="أجهزة منزلية" class="rb-hero-img" fetchpriority="high" decoding="async">
+      </div>
     </div>
-</section>
+  </div>
+</header>
 
 <!-- عرض الشرائح (Slideshow) -->
 <div class="slideshow-container1">
@@ -268,7 +282,7 @@ gtag('config', 'G-GREM5BTR7T');
       <p class="offer-subtitle">استفد من عروضنا الاستثنائية مع تخفيضات تصل إلى 30% على أفضل الأجهزة المنزلية. العرض محدود زمنياً!</p>
     </div>
 
-    <!-- العد التنازلي -->
+    <!-- [JS HOOK] countdown: #days #hours #minutes #seconds (main.js) -->
     <div class="offer-timer">
       <div class="timer-title">⏳ ينتهي العرض خلال :</div>
       <div class="timer-content">
@@ -300,9 +314,11 @@ gtag('config', 'G-GREM5BTR7T');
       </div>
       <span class="packs-scroll-hint"><i class="bi bi-arrow-left"></i> اسحبي لاكتشاف الباكات</span>
     </div>
+    <!-- [JS HOOK] #packs / #packsShowcase (packs-showcase.js renders here with its own CSS) -->
     <div class="packs-showcase" id="packsShowcase" data-i18n-skip aria-live="polite"></div>
 
     <!-- المنتجات المعروضة (أسماء المنتجات الأصلية بالفرنسية) -->
+    <!-- [JS HOOK] #offerProducts / .offer-product / .offer-btn / #carousel-offer-1..5 (click routing + carousels in main.js) -->
     <div class="offer-products" id="offerProducts">
       <!-- منتج 1 -->
       <div class="offer-product">
@@ -541,7 +557,8 @@ gtag('config', 'G-GREM5BTR7T');
             </div>
         </div>
         
-        <div class="row" id="productsContainer"></div>
+        <!-- [JS HOOK] #productsContainer — main.js replaces the skeletons below with product cards -->
+        <div class="row" id="productsContainer"><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div><div class="col-6 col-md-4 col-lg-3 mb-4"><div class="rb-sk"><div class="rb-sk-img"></div><div class="rb-sk-line"></div><div class="rb-sk-line short"></div></div></div></div>
     </div>
 </section>
     
@@ -597,6 +614,7 @@ gtag('config', 'G-GREM5BTR7T');
 </section>
 
 <!-- نافذة الطلب (Order Modal) -->
+<!-- [JS HOOK] #orderModal + #orderForm and ALL inner field IDs (fullName, phone, email, wilaya, baladiyaInput, address, cashOnDelivery, onlinePayment, sumSubtotal, sumDelivery, sumTotal, submitOrderBtn, productName, productPriceValue, productImageUrl, productImage, productNameDisplay, productPrice) -->
 <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -742,6 +760,7 @@ gtag('config', 'G-GREM5BTR7T');
             <div class="col-md-6 mb-4">
                 <div class="contact-card h-100">
                     <h4 class="mb-4">أرسل لنا رسالة</h4>
+                    <!-- [JS HOOK] #contactForm #contactName #contactEmail #contactPhone #contactMessage #contactSpinner #contactSubmitText -->
                     <form id="contactForm">
                         <div class="mb-3">
                             <label for="contactName" class="form-label">اسمك<span class="text-danger">*</span></label>
@@ -853,6 +872,7 @@ gtag('config', 'G-GREM5BTR7T');
 </a>
 
 <!-- سلة عائمة قابلة للسحب -->
+<!-- [JS HOOK] #floatingCart #dragCartBtn #cartCountFloat (drag + open cart in main.js) -->
 <div class="floating-cart" id="floatingCart">
     <div class="cart-icon-container">
         <button class="cart-btn-drag" id="dragCartBtn">
@@ -867,6 +887,7 @@ gtag('config', 'G-GREM5BTR7T');
 <div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
 
 <!-- السلة الجانبية -->
+<!-- [JS HOOK] #cartOffcanvas #cartItems #emptyCartMessage #emptyCartBtn #cartWilaya #cartSubtotal #cartDelivery #cartTotal #checkoutBtn -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="cartOffcanvasLabel">سلة التسوق</h5>
