@@ -1657,3 +1657,36 @@ img {max-width:100%;}
 
 /* spacing: keep old price clear of current price in RTL & LTR */
 .price-block .old-price { margin-inline-start: 10px; }
+
+
+/* ==========================================================================
+   CART IN TOP BAR — unified with product pages (no floating basket).
+   Overrides the fixed-position rules above. Keep this block LAST.
+   ========================================================================== */
+nav.glass-navbar #floatingCart,
+nav.glass-navbar .floating-cart{
+  position:static!important;inset:auto!important;top:auto!important;bottom:auto!important;
+  left:auto!important;right:auto!important;transform:none!important;z-index:auto!important;
+  cursor:pointer!important;touch-action:auto!important;
+}
+nav.glass-navbar .cart-icon-container{
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  background:none!important;border:none!important;padding:0!important;
+  box-shadow:none!important;animation:none!important;
+}
+nav.glass-navbar .cart-label-float{display:none!important}
+nav.glass-navbar .cart-btn-drag{
+  position:relative!important;width:44px!important;height:44px!important;
+  border-radius:var(--rb-r-pill,999px)!important;background:var(--rb-surface,#FFFFFF)!important;
+  color:var(--rb-ink-2,#475061)!important;border:1px solid var(--rb-line,#E3E6EB)!important;
+  display:grid!important;place-items:center!important;box-shadow:none!important;
+  padding:0!important;cursor:pointer!important;
+}
+nav.glass-navbar .cart-btn-drag:hover{border-color:var(--rb-line-strong,#CBD2DC)!important;color:var(--rb-accent,#FF4F00)!important;transform:none!important;box-shadow:none!important}
+nav.glass-navbar .cart-btn-drag i{font-size:1.15rem!important;line-height:1!important}
+nav.glass-navbar #cartCountFloat{
+  position:absolute!important;top:-4px!important;left:auto!important;inset-inline-end:-4px!important;
+  min-width:20px!important;height:20px!important;display:grid!important;place-items:center!important;
+  background:var(--rb-accent,#FF4F00)!important;color:#fff!important;font-size:11px!important;font-weight:700!important;
+  border-radius:999px!important;border:2px solid var(--rb-surface,#fff)!important;padding:0 4px!important;
+}
