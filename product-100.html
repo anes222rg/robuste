@@ -69,8 +69,8 @@ gtag('config', 'G-GREM5BTR7T');
 <style>
 /* ---------- نفس متغيرات index.html (متطابقة) ---------- */
 :root {
-    --primary: #FF6B35;
-    --primary-dark: #E05A2B;
+    --primary: #FF4F00;
+    --primary-dark: #E04500;
     --secondary: #FFF8F0;
     --light: #FFFFFF;
     --dark: #333333;
@@ -704,7 +704,7 @@ html,body{overflow-x:hidden;max-width:100%;}
 img{max-width:100%;}
 </style>
 <!-- UI refinement layer -->
-<link rel="stylesheet" href="robuste-ui.css?v=fb53">
+<link rel="stylesheet" href="robuste-ui.css">
 <!-- Auto-WebP with safe fallback (added) -->
 <script>
 (function(){
@@ -752,23 +752,18 @@ img{max-width:100%;}
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"Defroisseur Vapeur","image":["https://www.robustedz.store/images/Robuste%20Defroisseur%201.jpg"],"description":"Le défroisseur vapeur Robuste est l'outil parfait pour éliminer les plis de vos vêtements rapidement et sans effort. Avec sa puissance vapeur optimale et sa conception ergonomique, il vous garantit un repassage parfait en un temps record. Idéal pour les tissus délicats et les vêtements du quotidien.","sku":"100","mpn":"100","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-100.html","priceCurrency":"DZD","price":6600,"priceValidUntil":"2027-07-12","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
+<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"Defroisseur Vapeur","image":["https://www.robustedz.store/images/Robuste%20Defroisseur%201.jpg"],"description":"Le défroisseur vapeur Robuste est l'outil parfait pour éliminer les plis de vos vêtements rapidement et sans effort. Avec sa puissance vapeur optimale et sa conception ergonomique, il vous garantit un repassage parfait en un temps record. Idéal pour les tissus délicats et les vêtements du quotidien.","sku":"100","mpn":"100","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-100.html","priceCurrency":"DZD","price":6600,"priceValidUntil":"2027-07-07","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
 <div class="top-cod-bar" id="topCodBar"><span id="topBarText">🛒 الدفع عند الاستلام • التوصيل لكل الولايات</span></div>
-<nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar">
+<nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar" dir="ltr">
     <div class="container">
         <a class="navbar-brand" href="index.html">
             <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" alt="Robuste" width="160" height="51" style="width: 160px;height:51px;">
-            <span class="d-none d-lg-inline fw-bold fs-4 ms-2" style="color: var(--primary);">ROBUSTE eulma</span>
+            <span class="d-none d-lg-inline fw-bold fs-4 ms-2" style="color: var(--dark);">ROBUSTE <b style="color: var(--primary);">eulma</b></span>
         </a>
-        <div class="d-flex align-items-center">
-            <button class="theme-toggle" id="themeToggle"><i class="bi bi-moon"></i></button>
-        </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="index.html">الرئيسية</a></li>
@@ -776,19 +771,38 @@ img{max-width:100%;}
                 <li class="nav-item"><a class="nav-link" href="index.html#contact">اتصل بنا</a></li>
             </ul>
         </div>
+
+        <div class="d-flex align-items-center gap-2 ms-3">
+            <button class="theme-toggle" id="themeToggle"><i class="bi bi-moon"></i></button>
+            <!-- [JS HOOK] #floatingCart #dragCartBtn #cartCountFloat -->
+            <div class="floating-cart" id="floatingCart">
+                <div class="cart-icon-container">
+                    <button class="cart-btn-drag" id="dragCartBtn" aria-label="سلة التسوق">
+                        <i class="bi bi-cart3"></i>
+                        <span id="cartCountFloat">0</span>
+                    </button>
+                    <span class="cart-label-float">السلة</span>
+                </div>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
     </div>
 </nav>
+<style>
+/* Navbar: LTR structure — logo left, links row, theme + cart top right (مطابق لـ index) */
+.glass-navbar #floatingCart,.glass-navbar .floating-cart{position:static!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;transform:none!important;z-index:auto!important;cursor:pointer!important;touch-action:auto!important}
+.glass-navbar .cart-icon-container{display:flex;flex-direction:row;align-items:center}
+.glass-navbar .cart-label-float{display:none!important}
+.glass-navbar .cart-btn-drag{width:40px!important;height:40px!important;border-radius:12px!important;background:var(--secondary,#FFF8F0)!important;color:var(--dark,#333)!important;border:1px solid var(--border-color,#e7e7e7)!important;display:grid!important;place-items:center!important;box-shadow:none!important;padding:0!important}
+.glass-navbar .cart-btn-drag i{font-size:1.15rem!important;line-height:1}
+.glass-navbar .cart-btn-drag:hover{border-color:var(--primary)!important;color:var(--primary)!important;transform:none!important;box-shadow:none!important}
+.glass-navbar #cartCountFloat{top:-6px;right:-6px;width:18px;height:18px;min-width:18px;background-color:var(--primary);font-size:11px;font-weight:700;border:none}
+[data-theme="dark"] .glass-navbar .cart-btn-drag{background:rgba(255,255,255,.06)!important;color:#fff!important;border-color:rgba(255,255,255,.15)!important}
+</style>
 
-<!-- سلة عائمة قابلة للسحب -->
-<div class="floating-cart" id="floatingCart">
-    <div class="cart-icon-container">
-        <button class="cart-btn-drag" id="dragCartBtn">
-            <i class="bi bi-cart3"></i>
-            <span id="cartCountFloat">0</span>
-        </button>
-        <span class="cart-label-float">السلة</span>
-    </div>
-</div>
+<!-- السلة انتقلت إلى النافبار (أعلى اليمين) -->
 
 <!-- Toast للمنبهات -->
 <div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
@@ -1197,13 +1211,13 @@ async function submitOrderFinal() {
     var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
     if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
     var fullAddress = [baladiya, address].filter(Boolean).join('، ');
-    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, deliveryFee, deliveryType: dType, payment: "الدفع عند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
+    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, deliveryFee, deliveryType: dType, payment: "الدفع ��ند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
     try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
     try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(Object.assign({}, orderData, { address: fullAddress })); } } catch (e) {}
     try {
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;
@@ -1369,7 +1383,7 @@ async function submitExpressOrder() {
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 }, fb: (window.RobusteTracking && window.RobusteTracking.getFbData) ? window.RobusteTracking.getFbData() : {} }) });
+            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
             if (!resp.ok) throw new Error('Worker ' + resp.status);
             const data = await resp.json();
             orderId = data && data.id;
