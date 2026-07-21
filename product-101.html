@@ -69,16 +69,16 @@ gtag('config', 'G-GREM5BTR7T');
 <style>
 /* ---------- نفس متغيرات index.html (متطابقة) ---------- */
 :root {
-    --primary: #FF4F00;
-    --primary-dark: #E04500;
-    --secondary: #F5F6F8;
+    --primary: #FF6B35;
+    --primary-dark: #E05A2B;
+    --secondary: #FFF8F0;
     --light: #FFFFFF;
-    --dark: #0E1116;
-    --gray: #7B8497;
-    --success: #12B76A;
-    --danger: #E5484D;
-    --border-color: #E3E6EB;
-    --shadow-color: rgba(16, 24, 40, 0.1);
+    --dark: #333333;
+    --gray: #6C757D;
+    --success: #28a745;
+    --danger: #dc3545;
+    --border-color: #e7e7e7;
+    --shadow-color: rgba(0, 0, 0, 0.1);
     --radius-card: 12px;
     --transition: all 0.3s ease;
 }
@@ -672,7 +672,7 @@ body {
 .add-review-cta .btn-orange i{ margin-inline-end:6px; }
 
 /* ===== Sticky COD announcement bar (inlined) ===== */
-.top-cod-bar{ position:fixed; top:0; left:0; right:0; z-index:1040; height:40px; display:flex; align-items:center; justify-content:center; gap:8px; background:#101828; color:#fff; font-weight:700; font-size:14px; text-align:center; padding:0 12px; line-height:1.2; white-space:nowrap; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.12); }
+.top-cod-bar{ position:fixed; top:0; left:0; right:0; z-index:1040; height:40px; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--primary,#FF6B35); color:#fff; font-weight:700; font-size:14px; text-align:center; padding:0 12px; line-height:1.2; white-space:nowrap; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.12); }
 body.has-cod-bar .navbar.fixed-top{ top:40px !important; }
 body.has-cod-bar{ padding-top:96px !important; }
 @media (max-width:768px){ .top-cod-bar{ height:36px; font-size:12.5px; } body.has-cod-bar .navbar.fixed-top{ top:36px !important; } body.has-cod-bar{ padding-top:92px !important; } }
@@ -765,7 +765,6 @@ img{max-width:100%;}
         </a>
         <div class="d-flex align-items-center">
             <button class="theme-toggle" id="themeToggle"><i class="bi bi-moon"></i></button>
-            <div class="floating-cart" id="floatingCart"><div class="cart-icon-container"><button class="cart-btn-drag" id="dragCartBtn" aria-label="سلة التسوق"><i class="bi bi-cart3"></i><span id="cartCountFloat">0</span></button><span class="cart-label-float">السلة</span></div></div>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -780,7 +779,16 @@ img{max-width:100%;}
     </div>
 </nav>
 
-
+<!-- سلة عائمة قابلة للسحب -->
+<div class="floating-cart" id="floatingCart">
+    <div class="cart-icon-container">
+        <button class="cart-btn-drag" id="dragCartBtn">
+            <i class="bi bi-cart3"></i>
+            <span id="cartCountFloat">0</span>
+        </button>
+        <span class="cart-label-float">السلة</span>
+    </div>
+</div>
 
 <!-- Toast للمنبهات -->
 <div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
