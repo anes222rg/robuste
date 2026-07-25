@@ -7,11 +7,11 @@
 /* ---------- 1. Design tokens ---------- */
 :root{
   /* Refined orange ramp */
-  --r-orange:#FF6B35;
-  --r-orange-600:#F2581F;
-  --r-orange-700:#D8440E;
+  --r-orange:#FF4F00;
+  --r-orange-600:#E04500;
+  --r-orange-700:#E04500;
   --r-amber:#FF9A52;
-  --r-grad:linear-gradient(135deg,#FF8347 0%,#FF6B35 55%,#F2581F 100%);
+  --r-grad:var(--r-orange); /* مسطّح — موحّد مع index */
   --r-grad-soft:linear-gradient(135deg,#FFF4EC,#FFEAD9);
 
   /* Neutral ink scale (richer than flat #333) */
@@ -34,7 +34,7 @@
   --r-shadow-sm:0 4px 14px rgba(20,20,30,.07);
   --r-shadow:0 12px 32px rgba(20,20,30,.09);
   --r-shadow-lg:0 24px 56px rgba(20,20,30,.14);
-  --r-shadow-orange:0 12px 28px rgba(255,107,53,.30);
+  --r-shadow-orange:0 6px 16px rgba(255,79,0,.22); /* = --rb-shadow-cta */
 
   /* Motion */
   --r-ease:cubic-bezier(.4,0,.2,1);
@@ -90,7 +90,7 @@ section{scroll-margin-top:80px;}
 .btn-submit-express:hover,
 .btn-confirm-order:hover{
   transform:translateY(-2px)!important;
-  box-shadow:0 16px 34px rgba(255,107,53,.40)!important;
+  box-shadow:var(--r-shadow-orange)!important;
   filter:saturate(1.05) brightness(1.02)!important;
   color:#fff!important;
 }
@@ -361,7 +361,7 @@ body {
 .btn-orange,
 .btn-submit-express,
 .btn-confirm-order {
-  background: var(--r-grad, linear-gradient(135deg, #ff8347 0%, #ff6b35 55%, #f2581f 100%));
+  background: var(--r-grad, #FF4F00);
   border: none;
   border-radius: 13px;
   font-weight: 700;
@@ -579,7 +579,7 @@ body {
 }
 .btn-orange:hover,.btn-confirm-order:hover,.btn-submit-express:hover{
   transform:translateY(-2px);
-  box-shadow:0 16px 34px rgba(255,107,53,.42)!important;
+  box-shadow:var(--r-shadow-orange)!important;
 }
 .btn-outline-modern{
   border-radius:14px!important;
@@ -703,14 +703,14 @@ body {
 .quick-order-card h4,
 .related-title,
 .reviews-title {
-  font-family: "Cairo", "Tajawal", sans-serif !important;
+  font-family: var(--rb-font-display, "Readex Pro", "Rubik", sans-serif) !important;
   font-weight: 800 !important;
 }
 
 /* ---------- Price: flame ink, bigger presence ---------- */
 .current-price {
-  font-family: "Cairo", "Tajawal", sans-serif !important;
-  background: var(--r-grad, linear-gradient(135deg, #ffb03a, #ff6b35 45%, #f0431f)) !important;
+  font-family: var(--rb-font-display, "Readex Pro", "Rubik", sans-serif) !important;
+  background: var(--r-grad, #FF4F00) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -794,7 +794,7 @@ body {
   height: 54px !important;
   border-radius: 50% !important;
   border: none !important;
-  background: var(--r-grad, linear-gradient(135deg, #ffb03a, #ff6b35 45%, #f0431f)) !important;
+  background: var(--r-grad, #FF4F00) !important;
   color: #fff !important;
   display: flex !important;
   align-items: center;

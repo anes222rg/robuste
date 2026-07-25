@@ -1,0 +1,80 @@
+/* ==========================================================================
+   rb-bridge.css — طبقة التوحيد (تُحمَّل أخيرًا فتفوز في الـcascade)
+   تعيد توجيه توكنز صفحات المنتج القديمة (--primary/… و --r-*) إلى مصدر
+   الحقيقة الوحيد: توكنز --rb-* في robuste.css.
+   ملاحظة: --rb-* تنقلب تلقائيًا في الوضع الليلي، فتنقلب هذه الأسماء معها.
+   ========================================================================== */
+:root,
+[data-theme="dark"] {
+  /* legacy tokens (بلوك المنتج القديم) */
+  --primary: var(--rb-accent);
+  --primary-dark: var(--rb-accent-strong);
+  --secondary: var(--rb-bg);
+  --light: var(--rb-surface);
+  --dark: var(--rb-ink);
+  --gray: var(--rb-muted);
+  --success: var(--rb-success);
+  --danger: var(--rb-danger);
+  --border-color: var(--rb-line);
+  --radius-card: var(--rb-r);
+
+  /* robuste-ui.css tokens */
+  --r-orange: var(--rb-accent);
+  --r-orange-600: var(--rb-accent-strong);
+  --r-orange-700: var(--rb-accent-strong);
+  --r-amber: var(--rb-accent);
+  --r-grad: var(--rb-accent);            /* مسطّح — مثل index، بدون تدرّج */
+  --r-grad-soft: var(--rb-accent-soft);
+  --r-ink: var(--rb-ink);
+  --r-body: var(--rb-ink-2);
+  --r-muted: var(--rb-muted);
+  --r-line: var(--rb-line);
+  --r-surface: var(--rb-surface);
+  --r-soft: var(--rb-surface-2);
+  --r-radius-xs: var(--rb-r-sm);
+  --r-radius-sm: var(--rb-r);
+  --r-radius: var(--rb-r-lg);
+  --r-radius-lg: var(--rb-r-lg);
+  --r-pill: var(--rb-r-pill);
+  --r-shadow-orange: var(--rb-shadow-cta);
+}
+
+/* .btn-orange وأشقاؤه — مطابق لتعريف index (مسطّح، --rb-accent، ظل CTA) */
+.btn-orange,
+.btn-confirm-order,
+.btn-submit-express,
+.offer-btn {
+  background: var(--rb-accent) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-family: var(--rb-font-body) !important;
+  border-radius: var(--rb-r-sm) !important;
+  min-block-size: 48px !important;
+  box-shadow: var(--rb-shadow-cta) !important;
+  transition: transform var(--rb-t-fast) var(--rb-ease), box-shadow var(--rb-t-fast), background-color var(--rb-t-fast) !important;
+}
+.btn-orange:hover, .btn-confirm-order:hover, .btn-submit-express:hover, .offer-btn:hover {
+  background: var(--rb-accent-strong) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--rb-shadow-cta) !important;
+  filter: none !important;
+}
+.btn-orange:active, .btn-confirm-order:active, .btn-submit-express:active, .offer-btn:active {
+  transform: scale(.98) !important;
+  box-shadow: none !important;
+}
+[data-theme="dark"] .btn-orange,
+[data-theme="dark"] .btn-confirm-order,
+[data-theme="dark"] .btn-submit-express { box-shadow: none !important; }
+
+/* العناوين/السعر: إلغاء Cairo المفروضة في robuste-ui.css — نفس خطوط index */
+.product-title, .quick-order-card h3, .quick-order-card h4, .related-title, .reviews-title {
+  font-family: var(--rb-font-display) !important;
+}
+.current-price {
+  font-family: var(--rb-font-display) !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--rb-accent) !important;
+  color: var(--rb-accent) !important;
+}
