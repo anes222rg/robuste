@@ -92,3 +92,31 @@
 /* ===== v2: top bar navy like index rb-topstrip ===== */
 .top-cod-bar{background:var(--rb-navy,#101828)!important;color:#fff!important;box-shadow:none!important;border-block-end:1px solid rgba(255,255,255,.06)}
 [data-theme="dark"] .top-cod-bar{background:#060810!important;color:var(--rb-ink)!important;border-block-end:1px solid var(--rb-line)}
+
+/* ===== rb-nav-unify: logo left; lang, theme, cart (last) on left; toggler right; compact sizes ===== */
+.glass-navbar .container{display:flex;flex-wrap:wrap;align-items:center}
+.glass-navbar .container>.d-flex{display:contents!important}
+.glass-navbar .navbar-brand{order:1!important;margin:0!important;margin-inline-end:10px!important;display:flex;align-items:center}
+.glass-navbar #i18nSwitcher{order:2!important;margin:0!important;margin-inline-end:8px!important}
+.glass-navbar #themeToggle{order:3!important;margin:0!important;margin-inline-end:8px!important}
+.glass-navbar #floatingCart,.glass-navbar .floating-cart{order:4!important;margin:0!important}
+.glass-navbar .navbar-collapse{order:5!important}
+.glass-navbar .navbar-toggler{order:6!important;margin-inline-start:auto!important}
+.glass-navbar #themeToggle{width:36px!important;height:36px!important;display:grid;place-items:center;padding:0!important}
+.glass-navbar #themeToggle i{font-size:1.05rem!important}
+.glass-navbar .cart-btn-drag{inline-size:36px!important;block-size:36px!important;width:36px!important;height:36px!important;border-radius:10px!important}
+.glass-navbar .cart-btn-drag i{font-size:1.05rem!important}
+.glass-navbar .cart-label-float{display:none!important}
+#i18nSwitcher .i18n-btn{height:36px!important;padding:0 10px!important;border-radius:10px!important;font-size:.85rem!important}
+#i18nSwitcher .i18n-btn:hover{background:var(--rb-accent,#FF4F00)!important;color:#fff!important}
+#i18nSwitcher .i18n-menu{inset-inline-end:auto!important;inset-inline-start:0!important}
+#i18nSwitcher .i18n-menu button.active{background:var(--rb-accent,#FF4F00)!important;color:#fff!important}
+@media (max-width:576px){
+  .glass-navbar #themeToggle{width:32px!important;height:32px!important;margin-inline-end:6px!important}
+  .glass-navbar .cart-btn-drag{inline-size:32px!important;block-size:32px!important;width:32px!important;height:32px!important}
+  .glass-navbar .cart-btn-drag i{font-size:.95rem!important}
+  #i18nSwitcher .i18n-btn{height:32px!important;padding:0 8px!important;font-size:.8rem!important;margin-inline-end:0}
+  .glass-navbar #i18nSwitcher{margin-inline-end:6px!important}
+  .glass-navbar .navbar-brand{margin-inline-end:6px!important}
+  .glass-navbar .navbar-brand img{width:auto!important;height:auto!important;max-height:38px!important}
+}
