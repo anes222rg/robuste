@@ -747,14 +747,7 @@ footer hr { border-color: rgba(255,255,255,.12); opacity: 1; }
   .category-btn { white-space: nowrap; }
   .whatsapp-btn { inset-block-end: var(--rb-sp-4); }
   .floating-cart { inset-block-end: 88px; }
-  .status-indicator { inset-block-start: calc(var(--rb-strip-h) + var(--rb-nav-h) + var(--rb-sp-2));   /* Compact card typography on phones (col-6 grid = 2 cards/row) */
-  .product-title { font-size: .72rem; line-height: 1.35; min-block-size: 2.7em; }
-  .current-price { font-size: .95rem; }
-  .old-price { font-size: .68rem; }
-  .product-badge, .discount-badge, .stock-badge { font-size: .62rem; padding: 2px 6px; }
-  .product-card .add-to-cart-btn { font-size: .72rem; min-block-size: 40px; }
-  .product-info { padding: var(--rb-sp-2) var(--rb-sp-2) var(--rb-sp-1); }
-}
+  .status-indicator { inset-block-start: calc(var(--rb-strip-h) + var(--rb-nav-h) + var(--rb-sp-2)); }
 }
 @media (min-width: 992px) {
   .glass-navbar .navbar-nav { gap: var(--rb-sp-1); }
