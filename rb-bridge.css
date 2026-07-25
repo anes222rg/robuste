@@ -78,3 +78,17 @@
   -webkit-text-fill-color: var(--rb-accent) !important;
   color: var(--rb-accent) !important;
 }
+
+
+/* ===== v2: cart docked in navbar (same as index inline rules) ===== */
+.glass-navbar #floatingCart, .glass-navbar .floating-cart{position:static!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;transform:none!important;z-index:auto!important;animation:none!important}
+.glass-navbar .cart-icon-container{flex-direction:row}
+.glass-navbar .cart-label-float{display:none}
+.glass-navbar .cart-btn-drag{position:relative!important;inline-size:40px!important;block-size:40px!important;width:40px!important;height:40px!important;border-radius:12px!important;background:var(--rb-surface-2,#EFF1F4)!important;color:var(--rb-ink,#0E1116)!important;border:1px solid var(--rb-line,#E3E6EB)!important;display:grid!important;place-items:center!important;box-shadow:none!important;cursor:pointer;padding:0!important;transform:none!important}
+.glass-navbar .cart-btn-drag i{font-size:1.15rem!important;line-height:1}
+.glass-navbar .cart-btn-drag:hover{border-color:var(--rb-line-strong,#CBD2DC)!important;color:var(--rb-accent,#FF4F00)!important;background:var(--rb-surface-2,#EFF1F4)!important;transform:none!important;box-shadow:none!important}
+[data-theme="dark"] .glass-navbar .cart-btn-drag{background:var(--rb-surface-2)!important}
+
+/* ===== v2: top bar navy like index rb-topstrip ===== */
+.top-cod-bar{background:var(--rb-navy,#101828)!important;color:#fff!important;box-shadow:none!important;border-block-end:1px solid rgba(255,255,255,.06)}
+[data-theme="dark"] .top-cod-bar{background:#060810!important;color:var(--rb-ink)!important;border-block-end:1px solid var(--rb-line)}

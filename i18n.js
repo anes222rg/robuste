@@ -1,119 +1,212 @@
-/* Flowers Pavon — EN/ES language toggle. English lives in the HTML; this file
-   provides the Spanish overrides and swaps innerHTML on [data-i18n] nodes.
-   Runs after pixel.js so window.WA and initial DOM text are ready. */
-(function(){
-  var KEY='pavonLang';
-  var nodes=[].slice.call(document.querySelectorAll('[data-i18n]'));
-  var EN={};
-  nodes.forEach(function(n){EN[n.getAttribute('data-i18n')]=n.innerHTML;});
+/* ROBUSTE i18n — AR (default) / FR switcher.
+   Injects #i18nSwitcher into the navbar (styled by robuste.css overrides;
+   closed on scroll by main.js). Translates static UI strings via dictionary;
+   product data (titles/descriptions from products.json) is already French and
+   is left untouched. Layout stays RTL in both languages. */
+(function () {
+  'use strict';
+  var KEY = 'rbLang';
+  var LANGS = { ar: 'العربية', fr: 'Français' };
 
-  var ES={
-    annc:'ORDENA ANTES DE LA <b>1PM</b> Y RECIBE EL MISMO DÍA · NORTHERN VIRGINIA',
-    tagline:'ARTE FLORAL HECHO A MANO',
-    nav_bouquets:'Ramos', nav_anatomy:'Anatomía', nav_studio:'El Estudio', nav_care:'Cuidado', nav_faq:'Preguntas',
-    nav_shop:'💐 Ver ramos',
-    hero_kicker:'♥ Floristería artesanal de Northern Virginia ♥',
-    hero_h1:'Cultivadas con amor,<br><em>atadas a mano.</em>',
-    hero_sub:'Cada ramo empieza con una pregunta — <b>¿para quién es?</b> Cuéntanos el momento y te entregamos las flores perfectas, envueltas y a domicilio hoy en todo Northern Virginia.',
-    hero_hint:'Fresco · atado a mano · entregado en todo Northern Virginia',
-    trust1:'⭐ 4.9 · 300+ reseñas locales', trust2:'🚚 mismo día antes de la 1PM', trust3:'🌱 atadas frescas cada mañana',
-    occ_q:'▼ ¿CUÁL ES LA OCASIÓN? ▼',
-    occ_birthday:'Cumpleaños', occ_love:'Amor', occ_baby:'Bebé', occ_sympathy:'Condolencias', occ_getwell:'Pronta Mejora', occ_just:'Porque Sí',
-    fog_k:'✿ FRESCAS DE NUESTRO ESTUDIO ✿', fog_h:'Tu ramo, a tu manera.',
-    fog_build:'🌸 Arma el tuyo', fog_shop:'💐 Ver los listos',
-    cat_kicker:'El menú de ramos', cat_h:'Elige el momento. Nosotros elegimos las flores.',
-    cat_p:'Nuestros ramos buchón insignia, arreglos frescos y flores preservadas — cada precio en la tarjeta. Cada foto aquí es un ramo real de Flowers Pavon. 🌸',
-    gal_kicker:'Directo de nuestro estudio', gal_h:'Más ramos reales de Flowers Pavon.',
-    gal_p:'Un vistazo a pedidos recientes — corazones, girasoles, tulipanes, lirios y bandas personalizadas. ¿Quieres algo así? Envíanos la foto por WhatsApp. 📸',
-    gcap1:'Mixto y vivo', gcap2:'Rosas blancas', gcap3:'Rosas lavanda', gcap4:'Rosas amarillas en jarrón', gcap5:'Ramo de lirios', gcap6:'Corazón · rosas rojas', gcap7:'Corazón · rosas', gcap8:'Rosas y nube',
-    f_all:'TODOS', f_love:'AMOR',
-    bd_best:'MÁS VENDIDO', bd_lux:'LUJO', bd_gift:'MÁS REGALADO', bd_new:'NUEVO',
-    rec1:'<b>Contiene:</b> una cúpula radiante de girasoles frescos, atada estilo buchón con envoltura premium — nuestra firma para el Día de la Madre.',
-    rec2:'<b>Contiene:</b> nuestro buchón más grande — una cúpula imponente de rosas rojas premium para las declaraciones de amor más grandes.',
-    rec3:'<b>Contiene:</b> un alegre buchón de girasoles frescos hecho a mano, envuelto y con listón — pura alegría en flor.',
-    rec4:'<b>Contiene:</b> un arreglo primaveral exuberante lleno de color y textura — rosas, tulipanes y flores de temporada.',
-    rec5:'<b>Contiene:</b> un encanto rosado suave — rosas rubor y flores delicadas en empaque premium.',
-    rec6:'<b>Contiene:</b> rosas rojas preservadas que duran años — un amor que nunca se marchita, en caja de recuerdo.',
-    rec7:'<b>Contiene:</b> un corazón de rosas rojas esculpido a mano, enmarcado por girasoles dorados, en envoltura negra de corte estrella — con banda de listón personalizada.',
-    order:'Pedir', makeown:'Arma el tuyo',
-    m1:'ATADAS FRESCAS CADA MAÑANA', m2:'MISMO DÍA ANTES DE LA 1PM', m3:'100% LOCAL · SIN INTERMEDIARIOS', m4:'CADA PRECIO EN LA TARJETA',
-    ana_kicker:'Escuela de floristas, 60 segundos', ana_h:'La anatomía de un<br>ramo perfecto.',
-    ana1b:'Flores focales', ana1s:'las estrellas — rosas, lirios, girasoles. 3–5 tallos que marcan el tono.',
-    ana2b:'Flores de relleno', ana2s:'nube de novia, limonium, solidago — las nubes suaves entre las estrellas.',
-    ana3b:'Verdes', ana3s:'eucalipto y helechos — el marco calmado que hace cantar los colores.',
-    ana4b:'La envoltura y el listón', ana4s:'papel kraft, yute o journal, atado a mano. El abrazo que lo envuelve todo.',
-    stu_kicker:'El Estudio de Ramos', stu_h:'O… arma el tuyo,<br>tallo por tallo.',
-    stu_p:'Nuestro Estudio de Ramos te deja diseñar el tuyo, paso a paso: elige entre 26 tallos con precio, escoge la envoltura y el listón, agrega una tarjeta escrita a mano — y ve tu ramo cobrar vida antes de pedirlo.',
-    stu_cta:'Abrir el Estudio →',
-    care_kicker:'Manténlas vivas +7 días', care_h:'Cuidado floral, a lo simple.',
-    care1b:'Corta en ángulo', care1p:'Recorta 2cm de cada tallo a 45° bajo agua corriente. Repítelo cada dos días — los tallos beben desde el corte.',
-    care2b:'Agua fresca y limpia', care2p:'Cambia el agua cada 1–2 días y quita toda hoja que la toque. La bacteria es el verdadero enemigo del ramo.',
-    care3b:'Lugar fresco, sin fruta', care3p:'Manténlas lejos del sol directo, radiadores y fruteros — la fruta madura libera gas que envejece las flores rápido.',
-    wed_kicker:'Bodas y eventos', wed_h:'Tu gran día, en flor.',
-    wed_p:'Ramos de novia, centros de mesa, arcos — diseñamos toda la historia contigo, boho o clásica. Agenda una consulta gratis por WhatsApp.',
-    wed_cta:'Planea con nosotros',
-    sub_kicker:'Suscripción de flores', sub_h:'Flores frescas, cada semana.',
-    sub_p:'Un ramo sorpresa hecho a mano en tu puerta, semanal o quincenal. Pausa cuando quieras. Casas, cafeterías y oficinas en todo Northern Virginia.',
-    sub_cta:'Desde $35/semana',
-    jour_kicker:'✿ DE LA TIERRA A TU PUERTA ✿', jour_h:'El viaje de una rosa.',
-    jour_p:'Cada ramo que sale de nuestra mesa vivió toda una pequeña vida primero. Desliza su historia.',
-    j1b:'5:00 AM · el mercado de flores', j1p:'Elegimos cada tallo a mano mientras la ciudad duerme — solo los de cabezas firmes y orgullosas suben a la van.',
-    j2b:'7:30 AM · la nevera', j2p:'Un largo trago frío, un corte fresco a 45° y dos horas tranquilas de acondicionamiento. La paciencia hace durar los pétalos.',
-    j3b:'10:00 AM · la mesa', j3p:'Atadas a mano, con tallo en espiral, envueltas en kraft — y si lo pediste, un diamante en cada rosa.',
-    j4b:'1:00 PM · tu puerta', j4p:'Timbramos dos veces y las entregamos con una sonrisa. ¿El suspiro? Esa parte es tuya.',
-    jour_cta:'🌹 Empieza su próximo viaje',
-    rev_kicker:'Northern Virginia opina', rev_h:'Amados en todo el DMV.',
-    rev1:'“Pedí un ramo de cumpleaños para mi mamá — hicieron tres preguntas y lo lograron mejor de lo que yo hubiera podido.”',
-    rev2:'“Por fin una floristería que muestra precios. Sin ‘llame para cotizar’, sin juegos. Elegí, pagué y llegó a las 6.”',
-    rev3:'“La web es adorable y el ramo buchón estuvo irreal. Obsesionada.”',
-    rev4:'“Ordené a las 11am para una entrega en el hospital — ahí estaba a las 3pm con la tarjeta más linda.”',
-    faq_kicker:'Buenas preguntas', faq_h:'Antes de preguntar 🌷',
-    faq1q:'¿De verdad hay entrega el mismo día?', faq1a:'Sí — ordena antes de la 1:00 PM de lunes a sábado y entregamos el mismo día en todo Northern Virginia. Después de la 1PM, tu ramo llega a la mañana siguiente.',
-    faq2q:'No sé nada de flores. ¿Ayuda?', faq2a:'Justo por eso el menú se organiza por ocasión. Elige el momento y cada ramo bajo él está diseñado por floristas para exactamente eso. O escríbenos por WhatsApp — personas reales, felices de aconsejarte.',
-    faq3q:'¿Y si quiero cambiar un ramo?', faq3a:'Cada ramo tiene un botón “Arma el tuyo” que abre nuestro Estudio de Ramos — cambia tallos, envolturas y listones y ve el precio actualizarse en vivo.',
-    faq4q:'¿Cómo pago?', faq4a:'Toca Pedir — abre WhatsApp con tu ramo ya escrito. Confirma la dirección, paga con enlace de tarjeta o en efectivo al entregar. Listo en menos de un minuto.',
-    faq5q:'¿Hacen bodas o flores semanales de oficina?', faq5a:'¡Ambas! Las consultas de boda y eventos son gratis, y las suscripciones empiezan en $35/semana con pausa cuando quieras.',
-    g1b:'Atadas frescas a diario', g1s:'tallos elegidos cada mañana',
-    g2b:'Mismo día antes de la 1PM', g2s:'en todo Northern Virginia, o va por nuestra cuenta',
-    g3b:'Precios honestos', g3s:'cada ramo con precio por adelantado',
-    g4b:'100% local', g4s:'sin intermediarios, sin comisiones',
-    story_kicker:'Nuestra historia', story_h:'Flores hechas a mano, con el corazón.',
-    story_p1:'Flowers Pavon es una floristería familiar con una idea terca: comprar flores debería sentirse tan cálido como recibirlas. Por eso organizamos todo alrededor de <b>tus momentos</b>, pusimos cada precio en la tarjeta y mantuvimos la entrega 100% local — porque las flores deberían hacerte sonreír antes de llegar. <em>Donde cada pétalo tiene su propósito.</em>',
-    story_p2:'<b>Encúéntranos:</b> Northern Virginia · Lun–Sáb 9–6 · <a href="#" data-wa="Hi Flowers Pavon! I have a question." data-wa-es="¡Hola Flowers Pavon! Tengo una pregunta.">Escríbenos por WhatsApp</a>',
-    foot_tag:'La floristería artesanal de Northern Virginia. Ramos buchón, arreglos y rosas preservadas, entregadas hoy.',
-    foot_shop:'TIENDA', foot_menu:'Menú de ramos', foot_studio:'Estudio de Ramos', foot_faq:'Entrega y Preguntas',
-    foot_serv:'SERVICIOS', foot_wed:'Bodas y eventos', foot_subs:'Suscripciones', foot_care:'Cuidado floral',
-    foot_visit:'VISITA', foot_hours:'Lun–Sáb · 9am–6pm',
-    mbar_shop:'💐 Ramos', mbar_order:'Pedir por WhatsApp'
+  /* ---------- dictionary: exact (trimmed) text-node matches ---------- */
+  var FR = {
+    // navbar
+    'الرئيسية': 'Accueil', 'المنتجات': 'Produits', 'آراء العملاء': 'Avis clients',
+    'تتبع طلبي': 'Suivre ma commande', 'اتصل بنا': 'Contact',
+    'ROBUSTE': 'ROBUSTE',
+    // index top strip (split around <b>)
+    'الدفع عند الاستلام — توصيل': 'Paiement à la livraison — Livraison',
+    '58 ولاية': '58 wilayas',
+    'خلال 24–72 ساعة': 'sous 24–72h',
+    // hero (index)
+    'أجهزة منزلية تجعل حياتك أسهل': 'Des appareils électroménagers qui simplifient votre vie',
+    'جودة عالية بأسعار تنافسية لكل منزل جزائري مع خدمة توصيل سريعة وضمان سنة واحدة':
+      "Haute qualité à prix compétitifs pour chaque foyer algérien, avec livraison rapide et garantie d'un an",
+    'تسوق الآن': 'Achetez maintenant', 'ضمان سنة': 'Garantie 1 an',
+    'توصيل 58 ولاية': 'Livraison 58 wilayas', 'الدفع عند الاستلام': 'Paiement à la livraison',
+    // common buttons
+    'أضف للسلة': 'Ajouter au panier', 'شراء فوري': 'Achat immédiat',
+    'تأكيد الطلب': 'Confirmer la commande', 'إتمام الشراء': "Finaliser l'achat",
+    'إلغاء': 'Annuler', 'طلب سريع': 'Commande rapide',
+    'أضف رأيك هنا': 'Donnez votre avis ici', 'إرسال التقييم': "Envoyer l'avis",
+    'استكشف المنتجات': 'Voir les produits', 'تصفح المنتجات': 'Voir les produits',
+    // product page
+    'متوفر في المخزون': 'En stock', 'متوفر · توصيل سريع': 'En stock · Livraison rapide',
+    'جديد': 'Nouveau', 'وصف المنتج': 'Description du produit',
+    'قد يعجبك أيضاً': 'Vous aimerez aussi', 'متوفر': 'Disponible', 'غير متوفر': 'Indisponible',
+    'متوفر • توصيل سريع': 'En stock • Livraison rapide',
+    'الدفع عند الاستلام • التوصيل لكل الولايات': 'Paiement à la livraison • Livraison dans toutes les wilayas',
+    'شارك تجربتك مع المنتج وساعد عملاءنا الآخرين': 'Partagez votre expérience et aidez nos autres clients',
+    // trust items
+    'توصيل حتى باب البيت': 'Livraison à domicile', 'إلى 58 ولاية': 'Vers 58 wilayas',
+    'ضمان عام': 'Garantie 1 an', 'منتجات أصلية': 'Produits originaux',
+    'خدمة ما بعد الشراء': 'Service après-vente', 'دعم متواصل': 'Support continu',
+    'دفع يد بيد': 'Paiement main à main', 'عند الاستلام': 'À la livraison',
+    'دفع آمن عند الاستلام': 'Paiement sécurisé à la livraison', 'توصيل سريع': 'Livraison rapide',
+    'إرجاع خلال 7 أيام': 'Retour sous 7 jours', 'منتج أصلي 100%': 'Produit 100% original',
+    'إرجاع سهل خلال 7 أيام': 'Retour facile sous 7 jours',
+    'توصيل سريع لكل الولايات': 'Livraison rapide dans toutes les wilayas',
+    // cart + order forms
+    'سلة التسوق': 'Panier', 'السلة': 'Panier', 'سلة التسوق فارغة': 'Votre panier est vide',
+    'لم تقم بإضافة أي منتجات إلى السلة بعد': "Vous n'avez encore ajouté aucun produit",
+    'استكشف منتجاتنا وأضف ما يناسبك': 'Explorez nos produits et ajoutez vos favoris',
+    'المجموع:': 'Total :', 'المجموع الفرعي:': 'Sous-total :', 'التوصيل:': 'Livraison :',
+    'الإجمالي:': 'Total :', 'الولاية': 'Wilaya', 'الولاية *': 'Wilaya *',
+    'البلدية *': 'Commune *', 'البلدية': 'Commune', 'العنوان *': 'Adresse *',
+    'الاسم الكامل *': 'Nom complet *', 'رقم الهاتف *': 'Numéro de téléphone *',
+    'اختر الولاية': 'Choisir la wilaya', 'اختر البلدية': 'Choisir la commune',
+    'اختر الولاية أولاً': "Choisissez d'abord la wilaya",
+    '🏠 للمنزل': '🏠 À domicile', '🏢 للمكتب': '🏢 Au bureau',
+    'طريقة التوصيل *': 'Mode de livraison *', 'سعر التوصيل': 'Frais de livraison',
+    'المجموع الفرعي': 'Sous-total', 'المجموع الإجمالي': 'Total général',
+    'الاسم *': 'Nom *', 'تقييمك *': 'Votre note *', 'رأيك في المنتج *': 'Votre avis sur le produit *',
+    'أضف رأيك': 'Donnez votre avis',
+    // footer / misc
+    'دفع آمن 100% · الدفع عند الاستلام أو ببطاقة الذهب': 'Paiement 100% sécurisé · à la livraison ou par carte Edahabia',
+    '© 2025 ROBUSTE — جميع الحقوق محفوظة': '© 2025 ROBUSTE — Tous droits réservés',
+    'عروض خاصة': 'Offres spéciales', 'الكل': 'Tous', 'الأكثر مبيعاً': 'Meilleures ventes',
+    'أرسل رسالة': 'Envoyer un message', 'البريد الإلكتروني': 'E-mail', 'رسالتك': 'Votre message',
+    'إرسال الرسالة': 'Envoyer', 'السابق': 'Précédent', 'التالي': 'Suivant'
   };
+  /* attribute translations (placeholder / title / aria-label) */
+  var FR_ATTR = {
+    'الاسم الكامل *': 'Nom complet *', 'رقم الهاتف *': 'Numéro de téléphone *',
+    'البلدية *': 'Commune *', 'العنوان (الحي/الشارع) *': 'Adresse (quartier/rue) *',
+    'اكتب اسم بلديتك': 'Votre commune', 'اسم البلدية': 'Nom de la commune',
+    'الحي، الشارع، رقم المنزل...': 'Quartier, rue, n° de maison...',
+    'الوضع المظلم': 'Mode sombre', 'سلة التسوق': 'Panier', 'القائمة': 'Menu',
+    'صورة المنتج': 'Image du produit'
+  };
+  /* token pass for dynamic price strings (e.g. #topBarText) */
+  var FR_TOKENS = [
+    ['الدفع عند الاستلام', 'Paiement à la livraison'],
+    ['وفّر', 'Économisez'], ['د.ج', 'DA'], ['دج', 'DA']
+  ];
 
-  function rewire(lang){
-    var WA=(typeof window!=='undefined'&&window.WA)?window.WA:'17039534542';
-    document.querySelectorAll('[data-wa]').forEach(function(a){
-      var es=a.getAttribute('data-wa-es');
-      var msg=(lang==='es'&&es)?es:a.getAttribute('data-wa');
-      a.href='https://wa.me/'+WA+'?text='+encodeURIComponent(msg);
+  var saved = new WeakMap();  // node -> original value
+  var savedAttrs = new WeakMap(); // el -> {attr: original}
+  var current = 'ar';
+
+  function txNode(n) {
+    var raw = n.nodeValue; if (!raw) return;
+    var t = raw.trim(); if (!t) return;
+    var out = null;
+    if (FR.hasOwnProperty(t)) out = FR[t];
+    else if (/[0-9٠-٩]/.test(t) && /(دج|د\.ج)/.test(t)) {
+      out = t;
+      for (var i = 0; i < FR_TOKENS.length; i++) out = out.split(FR_TOKENS[i][0]).join(FR_TOKENS[i][1]);
+      if (out === t) out = null;
+    }
+    if (out != null) {
+      if (!saved.has(n)) saved.set(n, raw);
+      n.nodeValue = raw.replace(t, out);
+    }
+  }
+  function txAttrs(el) {
+    ['placeholder', 'title', 'aria-label'].forEach(function (a) {
+      var v = el.getAttribute && el.getAttribute(a);
+      if (v && FR_ATTR.hasOwnProperty(v.trim())) {
+        var m = savedAttrs.get(el) || {}; if (!(a in m)) { m[a] = v; savedAttrs.set(el, m); }
+        el.setAttribute(a, FR_ATTR[v.trim()]);
+      }
+    });
+  }
+  function walk(root, fn, attrFn) {
+    if (root.nodeType === 3) { fn(root); return; }
+    if (root.nodeType !== 1) return;
+    var tag = root.nodeName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return;
+    if (root.hasAttribute && (root.hasAttribute('data-i18n-skip') || root.id === 'i18nSwitcher')) return;
+    attrFn(root);
+    for (var c = root.firstChild; c; c = c.nextSibling) walk(c, fn, attrFn);
+  }
+  function translateTree(root) { walk(root, txNode, txAttrs); }
+  function restoreAll() {
+    // re-walk DOM; restore anything we changed
+    walk(document.body, function (n) { if (saved.has(n)) { n.nodeValue = saved.get(n); saved.delete(n); } },
+      function (el) { var m = savedAttrs.get(el); if (m) { for (var a in m) el.setAttribute(a, m[a]); savedAttrs.delete(el); } });
+  }
+
+  var mo = null;
+  function observe() {
+    if (mo) return;
+    mo = new MutationObserver(function (muts) {
+      if (current !== 'fr') return;
+      muts.forEach(function (m) {
+        for (var i = 0; i < m.addedNodes.length; i++) translateTree(m.addedNodes[i]);
+        if (m.type === 'characterData' && m.target) txNode(m.target);
+      });
+    });
+    mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
+  function apply(lang) {
+    current = (lang === 'fr') ? 'fr' : 'ar';
+    if (current === 'fr') { translateTree(document.body); observe(); }
+    else restoreAll();
+    document.documentElement.lang = current;
+    document.documentElement.setAttribute('data-lang', current);
+    try { localStorage.setItem(KEY, current); } catch (e) {}
+    var cur = document.getElementById('i18nCur');
+    if (cur) cur.textContent = current === 'fr' ? 'FR' : 'ع';
+    var sw = document.getElementById('i18nSwitcher');
+    if (sw) sw.querySelectorAll('.i18n-menu button').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-lang') === current);
     });
   }
 
-  function apply(lang){
-    nodes.forEach(function(n){
-      var k=n.getAttribute('data-i18n');
-      var v=lang==='es'?(ES[k]!=null?ES[k]:EN[k]):EN[k];
-      if(v!=null&&n.innerHTML!==v) n.innerHTML=v;
-    });
-    rewire(lang);
-    document.documentElement.lang=lang;
-    document.querySelectorAll('[data-lang-btn]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-lang-btn')===lang);});
-    try{localStorage.setItem(KEY,lang);}catch(e){}
+  function injectCss() {
+    var s = document.createElement('style');
+    s.textContent =
+      '#i18nSwitcher{position:relative;display:inline-flex;margin-inline-end:8px}' +
+      '#i18nSwitcher .i18n-btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:12px;border:1px solid #E3E6EB;background:#EFF1F4;color:#0E1116;cursor:pointer;font-weight:700;font-size:.9rem;line-height:1}' +
+      '#i18nSwitcher .i18n-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;min-width:150px;background:#fff;border:1px solid #E3E6EB;border-radius:12px;padding:6px;display:none;z-index:1200;box-shadow:0 10px 30px rgba(0,0,0,.12)}' +
+      '#i18nSwitcher.open .i18n-menu{display:block}' +
+      'html[data-lang="fr"] .rb-topstrip,html[data-lang="fr"] .top-cod-bar{direction:ltr}' +
+      '#i18nSwitcher .i18n-menu button{display:block;width:100%;text-align:start;background:none;border:0;padding:9px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.95rem}';
+    document.head.appendChild(s);
   }
 
-  document.addEventListener('click',function(e){
-    var b=e.target.closest?e.target.closest('[data-lang-btn]'):null;
-    if(b){e.preventDefault();apply(b.getAttribute('data-lang-btn'));}
-  });
+  function injectSwitcher() {
+    if (document.getElementById('i18nSwitcher')) return;
+    var host = document.querySelector('.glass-navbar .d-flex.align-items-center');
+    if (!host) return;
+    var w = document.createElement('div');
+    w.id = 'i18nSwitcher';
+    w.innerHTML =
+      '<button type="button" id="i18nBtn" class="i18n-btn" aria-haspopup="true" aria-expanded="false" title="اللغة / Langue">' +
+      '<i class="bi bi-globe2"></i><span id="i18nCur">ع</span></button>' +
+      '<div class="i18n-menu" role="menu">' +
+      Object.keys(LANGS).map(function (k) {
+        return '<button type="button" data-lang="' + k + '" role="menuitem">' + LANGS[k] + '</button>';
+      }).join('') + '</div>';
+    host.insertBefore(w, host.firstChild);
+    var btn = w.querySelector('#i18nBtn');
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = w.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    w.querySelectorAll('.i18n-menu button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        w.classList.remove('open'); btn.setAttribute('aria-expanded', 'false');
+        apply(b.getAttribute('data-lang'));
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (w.classList.contains('open') && !w.contains(e.target)) {
+        w.classList.remove('open'); btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 
-  var saved='en';
-  try{saved=localStorage.getItem(KEY)||'en';}catch(e){}
-  apply(saved);
+  function init() {
+    injectCss();
+    injectSwitcher();
+    var l = 'ar';
+    try { l = localStorage.getItem(KEY) || 'ar'; } catch (e) {}
+    if (l === 'fr') apply('fr'); else apply('ar');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();

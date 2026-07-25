@@ -67,10 +67,10 @@ gtag('config', 'G-GREM5BTR7T');
 <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<link rel="stylesheet" href="product.css?v=1">
+<link rel="stylesheet" href="product.css?v=2">
 <!-- UI refinement layer -->
-<link rel="stylesheet" href="robuste-ui.css?v=fb53">
-<link rel="stylesheet" href="rb-bridge.css?v=1">
+<link rel="stylesheet" href="robuste-ui.css?v=fb54">
+<link rel="stylesheet" href="rb-bridge.css?v=2">
 <!-- Auto-WebP with safe fallback (added) -->
 <script>
 (function(){
@@ -131,6 +131,15 @@ gtag('config', 'G-GREM5BTR7T');
         </a>
         <div class="d-flex align-items-center">
             <button class="theme-toggle" id="themeToggle"><i class="bi bi-moon"></i></button>
+            <div class="floating-cart" id="floatingCart">
+    <div class="cart-icon-container">
+        <button class="cart-btn-drag" id="dragCartBtn" aria-label="سلة التسوق">
+            <i class="bi bi-cart3"></i>
+            <span id="cartCountFloat">0</span>
+        </button>
+        <span class="cart-label-float">السلة</span>
+    </div>
+</div>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -146,15 +155,7 @@ gtag('config', 'G-GREM5BTR7T');
 </nav>
 
 <!-- سلة عائمة قابلة للسحب -->
-<div class="floating-cart" id="floatingCart">
-    <div class="cart-icon-container">
-        <button class="cart-btn-drag" id="dragCartBtn">
-            <i class="bi bi-cart3"></i>
-            <span id="cartCountFloat">0</span>
-        </button>
-        <span class="cart-label-float">السلة</span>
-    </div>
-</div>
+
 
 <!-- Toast للمنبهات -->
 <div id="statusToast" style="position: fixed; top: 90px; right: 20px; z-index: 9999; max-width: 320px;"></div>
@@ -479,7 +480,29 @@ function addToCart(name, price, img, id) {
     saveCart();
     showToast(`✓ تم إضافة "${name.substring(0,30)}" إلى السلة`, "success");
 }
-function toggleCart() { new bootstrap.Offcanvas(document.getElementById('cartOffcanvas')).show(); }
+function toggleCart() {
+    var el = document.getElementById('cartOffcanvas');
+    if (!el) return;
+    if (typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
+        bootstrap.Offcanvas.getOrCreateInstance(el).show();
+    } else {
+        el.classList.add('show');
+        el.style.visibility = 'visible';
+        el.style.transform = 'none';
+        document.body.classList.add('offcanvas-open');
+        if (!el.dataset.fallbackClose) {
+            el.dataset.fallbackClose = '1';
+            el.querySelectorAll('[data-bs-dismiss="offcanvas"]').forEach(function (b) {
+                b.addEventListener('click', function () {
+                    el.classList.remove('show');
+                    el.style.visibility = '';
+                    el.style.transform = '';
+                    document.body.classList.remove('offcanvas-open');
+                });
+            });
+        }
+    }
+}
 function checkoutFromCart() {
     if(cart.length === 0) { showToast("السلة فارغة", "error"); return; }
     const first = cart[0];
@@ -902,7 +925,7 @@ window.openReviewModal = openReviewModal; window.submitReview = submitReview;
 window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; window.goToProduct = goToProduct;
 </script>
 <div class="ph-lightbox" id="phLightbox" onclick="closeLightbox()"><button class="ph-close" type="button" onclick="closeLightbox()">&times;</button><img id="phLightboxImg" src="" alt=""></div>
-<script src="i18n.js"></script>
+<script src="i18n.js?v=2"></script>
 <script src="analytics.js"></script>
 <script src="telegram.js"></script>
 <script defer src="robuste-tracking.js"></script>
