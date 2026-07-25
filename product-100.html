@@ -215,7 +215,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Readex Pro','Rubik','Tajawal',system-ui,sans-seri
     <div class="ph-trust" data-aos="fade-up">
       <div class="ph-grid">
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-truck"></i></div><div class="ph-t">توصيل حتى باب البيت</div><div class="ph-s">إلى 58 ولاية</div></div>
-        <div class="ph-item"><div class="ph-ic"><i class="bi bi-shield-check"></i></div><div class="ph-t">ضمان عام</div><div class="ph-s">م��تجات أصلية</div></div>
+        <div class="ph-item"><div class="ph-ic"><i class="bi bi-shield-check"></i></div><div class="ph-t">ضمان عام</div><div class="ph-s">منتجات أصلية</div></div>
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-headset"></i></div><div class="ph-t">خدمة ما بعد الشراء</div><div class="ph-s">دعم متواصل</div></div>
         <div class="ph-item"><div class="ph-ic"><i class="bi bi-cash-coin"></i></div><div class="ph-t">دفع يد بيد</div><div class="ph-s">عند الاستلام</div></div>
       </div>
@@ -483,7 +483,7 @@ function renderCartItems() {
         </div>`;
     });
     container.innerHTML = html;
-    var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t); if(_fee==null)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=_fee.toLocaleString()+' د.ج'; document.getElementById('cartTotalAmount').innerText=(total+_fee).toLocaleString()+' د.��'; }
+    var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t); if(_fee==null)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=_fee.toLocaleString()+' د.ج'; document.getElementById('cartTotalAmount').innerText=(total+_fee).toLocaleString()+' د.ج'; }
 }
 function updateQty(idx, newQty) { if(newQty<1) return removeCartItem(idx); cart[idx].quantity = newQty; saveCart(); }
 function removeCartItem(idx) { cart.splice(idx,1); saveCart(); showToast("تم إزالة المنت��", "success"); }
