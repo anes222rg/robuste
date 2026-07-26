@@ -125,3 +125,12 @@
 .top-cod-bar .bi{color:var(--rb-accent,#FF4F00)}
 .top-cod-bar b{color:var(--rb-accent,#FF4F00);font-weight:700}
 [data-theme="dark"] .top-cod-bar{color:var(--rb-ink,#E8EAEE)!important;border-block-end:1px solid var(--rb-line,#222)!important}
+
+/* rb-calm-ui-v8: product-page cart at far left; calmer interaction */
+.glass-navbar #floatingCart{order:0!important;margin-inline-end:10px!important}
+.glass-navbar .navbar-brand{order:1!important}
+.glass-navbar #i18nSwitcher{order:2!important}
+.glass-navbar #themeToggle{order:3!important}
+.product-card,.related-card,.thumbnail,.main-image-wrapper img{animation:none!important;transition:none!important}
+.product-card:hover,.related-card:hover,.thumbnail:hover,.main-image-wrapper img:hover{transform:none!important}
+@media(max-width:576px){.glass-navbar #floatingCart{margin-inline-end:6px!important}}

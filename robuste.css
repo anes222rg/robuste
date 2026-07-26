@@ -1685,3 +1685,29 @@ img {max-width:100%;}
   .glass-navbar .navbar-brand{margin-inline-end:6px!important}
   .glass-navbar .navbar-brand img{width:auto!important;height:auto!important;max-height:38px!important}
 }
+
+/* rb-calm-ui-v8: calmer cards, manual imagery, Amazon-like cart position */
+.product-title,.offer-product-title{font-weight:500!important;letter-spacing:0!important}
+.product-info,.offer-product-content{font-weight:400}
+.current-price,.offer-product-price{font-weight:600!important}
+.product-card,.offer-product,.pack-card,.product-card img,.offer-product img{animation:none!important;transition:none!important}
+.product-card:hover,.offer-product:hover,.pack-card:hover{transform:none!important}
+.fade1{animation:none!important}
+.price-container{direction:ltr!important;unicode-bidi:isolate;justify-content:flex-start}
+.offer-product-price,.offer-product-old-price{direction:ltr!important;unicode-bidi:isolate;white-space:nowrap}
+/* Cart is the first independent control at the far left on every navbar. */
+.glass-navbar #floatingCart{order:0!important;margin-inline-end:10px!important}
+.glass-navbar .navbar-brand{order:1!important}
+.glass-navbar #i18nSwitcher{order:2!important}
+.glass-navbar #themeToggle{order:3!important}
+@media(max-width:576px){
+  .product-title,.offer-product-title{font-weight:500!important}
+  .glass-navbar #floatingCart{margin-inline-end:6px!important}
+}
+/* rb-calm-ui-v8.1: no decorative floating/parallax motion */
+.rb-float,.rb-float img,.rb-float-shadow,.rb-stage-spark,.rb-stage-ring,.rb-stage-glow{
+  animation:none!important;transition:none!important;transform:none!important;translate:none!important;opacity:1!important
+}
+.related-card,.related-card img,.related-card h3,.related-card h4,.related-card h5{animation:none!important;transition:none!important}
+.related-card h3,.related-card h4,.related-card h5{font-weight:500!important}
+.btn-confirm-order::after,.btn-submit-express::after{animation:none!important}
