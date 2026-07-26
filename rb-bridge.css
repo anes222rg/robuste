@@ -120,3 +120,8 @@
   .glass-navbar .navbar-brand{margin-inline-end:6px!important}
   .glass-navbar .navbar-brand img{width:auto!important;height:auto!important;max-height:38px!important}
 }
+/* rb-topbar-match: product top bar visually identical to index .rb-topstrip */
+.top-cod-bar{font-size:var(--rb-fs-small,12.5px)!important;font-weight:600!important;letter-spacing:.01em;gap:8px}
+.top-cod-bar .bi{color:var(--rb-accent,#FF4F00)}
+.top-cod-bar b{color:var(--rb-accent,#FF4F00);font-weight:700}
+[data-theme="dark"] .top-cod-bar{color:var(--rb-ink,#E8EAEE)!important;border-block-end:1px solid var(--rb-line,#222)!important}

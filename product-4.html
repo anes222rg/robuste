@@ -146,7 +146,7 @@ gtag('config', 'G-GREM5BTR7T');
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
-<div class="top-cod-bar" id="topCodBar"><span id="topBarText">🛒 الدفع عند الاستلام • التوصيل لكل الولايات</span></div>
+<div class="top-cod-bar" id="topCodBar"><span id="topBarText"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام — توصيل <b>58 ولاية</b> خلال 24–72 ساعة</span></div>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar" dir="ltr">
     <div class="container">
         <a class="navbar-brand" href="index.html">
@@ -703,7 +703,7 @@ function renderProductLayout(p) {
     let thumbHtml = '';
     p.images.forEach((img, idx) => { thumbHtml += `<div class="thumbnail ${idx===0?'active':''}" onclick="changeMainImage('${img}', this)"><img loading="lazy" decoding="async" src="${img}" alt="صورة مصغرة للمنتج"></div>`; });
     const discount = p.old_price ? Math.round(((p.old_price - p.price)/p.old_price)*100) : 0;
-    try { var __tb=document.getElementById('topBarText'); if(__tb){ __tb.innerHTML = '🛒 ' + p.price.toLocaleString() + ' دج' + (discount? ' • وفّر '+discount+'%':'') + ' • الدفع عند الاستلام'; } } catch(e){}
+    try { var __tb=null; /* topbar text fixed, identical to index */ if(__tb){ __tb.innerHTML = '🛒 ' + p.price.toLocaleString() + ' دج' + (discount? ' • وفّر '+discount+'%':'') + ' • الدفع عند الاستلام'; } } catch(e){}
     const discountHtml = discount ? `<span class="discount-badge ms-2">-${discount}%</span>` : '';
     const featuresHtml = (p.features || ['جودة عالية', 'ضمان سنتان', 'توصيل سريع']).map(f => `<li><i class="bi bi-check-circle-fill"></i> ${f}</li>`).join('');
     const html = `
