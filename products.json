@@ -632,24 +632,28 @@
   },
   {
     "id": 25,
-    "title": "PETRIN PROMAX 8L",
-    "price": 20500,
-    "old_price": 21000,
+    "title": "PETRIN PRO MAX 8L 1800W",
+    "price": 19900,
+    "old_price": 24900,
     "images": [
+      "images/petrin-promax-1.webp",
+      "images/petrin-promax-2.webp",
       "images/petrin promax noir.jpg",
       "images/petrin promax g.jpg"
     ],
-    "description_short": "Pétrin professionnel 8 litres 1200W",
-    "description_long": "Pétrin professionnel Promax 8L avec puissance 1200W pour boulangeries et pâtisseries professionnelles.",
+    "description_short": "عجّانة احترافية 1800 واط · وعاء 8 لتر · خطّافان مزدوجان للعجين الثقيل",
+    "description_long": "عجّانة PETRIN PRO MAX بقوة 1800 واط ووعاء ستانلس 8 لتر، مصمّمة للعائلات الكبيرة وللاستعمال الاحترافي. تأتي بتصميم Double Crochet بخطّافين مزدوجين يعجنان العجين الثقيل دون جهد، وـ 8 سرعات متغيرة تغطّي كل الاستعمالات من خبز الدار والمسمن إلى الحلويات والكريمة. تضمّ ثلاثة ملحقات: خطّاف العجين، مضرب البيض، ومخفقة مسطحة. الدفع عند الاستلام في كل الولايات.",
     "features": [
-      "Capacité 8L",
-      "Puissance 1200W",
-      "Moteur professionnel",
-      "Fonctions avancées"
+      "قوة 1800 واط — تعجن الثقيل دون توقف",
+      "وعاء ستانلس 8 لتر — يكفي العائلة الكبيرة",
+      "خطّافان مزدوجان Double Crochet",
+      "8 سرعات متغيرة + وضعية نبض",
+      "3 ملحقات: عجين · بيض · خلط",
+      "الدفع عند الاستلام · 58 ولاية"
     ],
-    "stock": 2,
+    "stock": 12,
     "category": "cuisine",
-    "badge": ""
+    "badge": "عرض خاص"
   },
   {
     "id": 26,
