@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="facebook-domain-verification" content="jbvmmnenti8104d0gvukdlrjcophy0" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>ROBUSTE · مركز التحكم</title>
@@ -126,6 +127,8 @@
         <button class="btn btn-light mobile-toggle" id="menuToggle"><i class="bi bi-list"></i></button>
         <div class="page-title" id="pageTitle">لوحة القيادة</div>
         <div class="who"><i class="bi bi-person-circle"></i> <span id="adminWho"></span></div>
+        <button class="btn btn-sm btn-outline-primary" id="metaBulkBtn" title="إرسال الطلبات المؤكّدة الأخيرة إلى ميتا"><i class="bi bi-send"></i> إرسال لميتا</button>
+        <button class="btn btn-sm btn-outline-success" id="metaCsvBtn" title="تصدير قائمة الزبائن لإنشاء جمهور مشابه"><i class="bi bi-download"></i> CSV ميتا</button>
         <button class="btn btn-sm btn-outline-secondary" id="refreshBtn"><i class="bi bi-arrow-clockwise"></i></button>
         <button class="btn btn-sm btn-outline-danger" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> خروج</button>
       </div>
@@ -645,6 +648,78 @@ function fireWorkerPurchase(id){
       .catch(function(e){rbRemoveToast(wait);rbToast("\u274c \u062a\u0639\u0630\u0651\u0631 \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0628\u0627\u0644\u0633\u064a\u0631\u0641\u0631:\n"+String((e&&e.message)||e),"err",0);});
   }catch(e){rbToast("\u274c \u062e\u0637\u0623 \u062f\u0627\u062e\u0644\u064a: "+String((e&&e.message)||e),"err",0);}
 }
+/* ============ Meta bulk tools (added) ============ */
+function rbPhoneE164(p){var d=String(p||"").replace(/[^0-9]/g,"");if(d.indexOf("00")===0)d=d.slice(2);if(d.indexOf("213")===0)return d;if(d.charAt(0)==="0")return "213"+d.slice(1);if(d.length===9)return "213"+d;return d;}
+function rbEligibleForMeta(){
+  var out=[],now=Date.now(),max=6*86400000;
+  for(var i=0;i<allOrders.length;i++){
+    var o=allOrders[i],d=o.data||{};
+    if(isExcluded(d))continue;
+    if(!isPositiveStatusAdmin(statusKey(d)))continue;
+    if(d.metaPurchaseSentAt)continue;
+    var dt=orderDate(d);if(!dt)continue;
+    if(now-new Date(dt).getTime()>max)continue;
+    out.push(o);
+  }
+  return out;
+}
+function rbBulkSendMeta(){
+  if(!ordersLoaded){rbToast("الطلبات لم تُحمّل بعد. انتظر قليلاً.","info");return;}
+  var list=rbEligibleForMeta();
+  if(!list.length){rbToast("لا توجد طلبات مؤهّلة للإرسال.\nالشروط: مؤكّدة + لم تُرسل سابقاً + عمرها أقل من 6 أيام.","info",14000);return;}
+  if(!confirm("سيتم إرسال "+list.length+" طلب إلى ميتا. هل تريد المتابعة؟"))return;
+  var k=robusteAdminKey();
+  if(!k){rbToast("❌ لم تُدخل مفتاح الإدارة — لم يُرسل شيء.","err",0);return;}
+  var ok=0,already=0,fail=0,i=0;
+  var prog=rbToast("⏳ 0 / "+list.length,"wait",0);
+  function step(){
+    if(i>=list.length){
+      rbRemoveToast(prog);
+      rbToast("انتهى الإرسال:\n✅ نجح: "+ok+"\nℹ️ مُرسل سابقاً: "+already+"\n❌ فشل: "+fail,fail?"err":"ok",0);
+      if(ordersLoaded){ordersLoaded=false;loadOrders();}
+      return;
+    }
+    var id=list[i].id;i++;
+    if(prog)prog.textContent="⏳ "+i+" / "+list.length;
+    fetch(WORKER_URL+"/admin/confirm-purchase",{method:"POST",headers:{"Content-Type":"application/json","X-Admin-Key":k},body:JSON.stringify({id:id})})
+      .then(function(res){return res.json().catch(function(){return null;});})
+      .then(function(d){if(d&&d.already)already++;else if(d&&d.ok)ok++;else fail++;})
+      .catch(function(){fail++;})
+      .then(function(){setTimeout(step,350);});
+  }
+  step();
+}
+function rbExportMetaCsv(){
+  if(!ordersLoaded){rbToast("الطلبات لم تُحمّل بعد. انتظر قليلاً.","info");return;}
+  var map={},order=[];
+  for(var i=0;i<allOrders.length;i++){
+    var d=allOrders[i].data||{};
+    if(isExcluded(d))continue;
+    if(!isPositiveStatusAdmin(statusKey(d)))continue;
+    var ph=rbPhoneE164(orderPhone(d));if(!ph)continue;
+    var nm=String(customerName(d)||"").trim();
+    var parts=nm.split(/\s+/).filter(Boolean);
+    var fn=(parts.shift()||"").toLowerCase();
+    var ln=parts.join(" ").toLowerCase();
+    var em=String(d.email||"").trim().toLowerCase();
+    if(em.indexOf("@")<1)em="";
+    if(!map[ph]){map[ph]={phone:ph,email:em,fn:fn,ln:ln,ct:String(d.baladiya||d.commune||"").trim().toLowerCase(),st:String(d.wilaya||"").trim().toLowerCase(),value:0};order.push(ph);}
+    map[ph].value+=Number(d.totalPrice||0)||0;
+    if(!map[ph].fn&&fn)map[ph].fn=fn;
+    if(!map[ph].email&&em)map[ph].email=em;
+  }
+  if(!order.length){rbToast("لا يوجد زبائن مؤكّدون للتصدير.","info");return;}
+  function q(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"';}
+  var csv="email,phone,fn,ln,ct,st,country,value\n";
+  for(var j=0;j<order.length;j++){var r=map[order[j]];csv+=[q(r.email),q(r.phone),q(r.fn),q(r.ln),q(r.ct),q(r.st),q("dz"),q(r.value)].join(",")+"\n";}
+  var blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="robuste-meta-customers-"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){try{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a);}catch(e){}},1500);
+  rbToast("✅ تم تصدير "+order.length+" زبون.\nارفعه في: Meta → Audiences → Customer list.","ok",16000);
+}
+window.rbBulkSendMeta=rbBulkSendMeta;window.rbExportMetaCsv=rbExportMetaCsv;
 function patchOrder(id,patch){patch.updatedAt=new Date().toISOString();return db.collection('orders').doc(id).update(patch).then(function(){var r=getRec(id);if(r)Object.assign(r.data,patch);try{if(patch&&patch.status&&isPositiveStatusAdmin(patch.status))fireWorkerPurchase(id);}catch(e){}});}
 /* Add a phone + IP to config/watchlist so future orders from them are auto-flagged. */
 function blockCustomer(phone,ip){var u={};if(phone)u.phones=firebase.firestore.FieldValue.arrayUnion(phone);if(ip)u.ips=firebase.firestore.FieldValue.arrayUnion(ip);if(!u.phones&&!u.ips)return Promise.resolve();return db.collection('config').doc('watchlist').set(u,{merge:true});}
@@ -658,6 +733,8 @@ function boot(){
     $("adminEmail").addEventListener('keydown',function(e){if(e.key==='Enter')tryLogin();});
     $("logoutBtn").addEventListener('click',logout);
     $("refreshBtn").addEventListener('click',function(){if(ordersLoaded){ordersLoaded=false;loadCostOverrides().then(loadOrders);}});
+    if($("metaBulkBtn"))$("metaBulkBtn").addEventListener('click',function(){rbBulkSendMeta();});
+    if($("metaCsvBtn"))$("metaCsvBtn").addEventListener('click',function(){rbExportMetaCsv();});
     var mt=$("menuToggle");if(mt)mt.addEventListener('click',function(){$("sidebar").classList.toggle('open');});
     var items=document.querySelectorAll('.nav-item2');for(var i=0;i<items.length;i++)items[i].addEventListener('click',function(){showSection(this.getAttribute('data-sec'));});
     if(auth)auth.onAuthStateChanged(onAuth);

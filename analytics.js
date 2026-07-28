@@ -1,26 +1,31 @@
-/* ROBUSTE — GA4 event tracking (safe & accurate).
-   The base gtag.js tag lives in <head>; this file only adds shop events.
+/* ROBUSTE - GA4 + Meta Pixel event tracking (v2, campaign-grade).
 
-   IMPORTANT: `purchase` now fires ONLY for a real, completed order, exactly
-   once per order id. The old version scanned the whole page (including inline
-   <script> source) for a confirmation phrase, which fired a fake purchase on
-   every product-page load. That is removed.
+   WHAT CHANGED vs v1:
+   - Every funnel event now carries value + currency "DZD" + content_ids +
+     contents + content_name + num_items. Meta can finally tell WHICH product
+     was viewed / added / checked out, and at WHAT price.
+   - InitiateCheckout fires ONLY for #orderModal (the review modal used to
+     fire a fake InitiateCheckout on every review popup).
+   - Advanced Matching (phone, name, city, state, external_id) is pushed to the
+     pixel at order time -> much higher Event Match Quality.
+   - The Arabic-text MutationObserver "purchase detector" is REMOVED. It was
+     fragile and could double-count.
+   - Purchase itself is still sent SERVER-SIDE ONLY, after you confirm the
+     order in the admin panel. The browser fires "PlaceOrder" (custom event).
 
    Everything is wrapped in try/catch so it can never break the site. */
 (function () {
   "use strict";
 
-  function track(name, params) {
+  var CUR = "DZD";
+
+  function gt(name, params) {
     try { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); } catch (e) {}
   }
-  // Mirror to the Meta Pixel (queues safely even before fbq init).
-  function fbqTrack(name, params, opts) {
+  function fb(name, params, opts) {
     try { if (typeof window.fbq === "function") window.fbq("track", name, params || {}, opts || {}); } catch (e) {}
   }
-  // CUSTOM Pixel event (not a standard one). Order submissions now fire
-  // "PlaceOrder" in the browser; the REAL "Purchase" is sent server-side
-  // ONLY after you confirm the order, so fake orders never count.
-  function fbqTrackCustom(name, params, opts) {
+  function fbc(name, params, opts) {
     try { if (typeof window.fbq === "function") window.fbq("trackCustom", name, params || {}, opts || {}); } catch (e) {}
   }
   function ready(fn) {
@@ -33,8 +38,82 @@
     var n = parseFloat(d);
     return isNaN(n) ? undefined : n;
   }
+  function clean(s) { return String(s == null ? "" : s).trim(); }
 
-  // ---- de-dupe: never count the same order twice (survives reloads) ----
+  // ---------- Advanced Matching (raw values; the pixel hashes them) ----------
+  function latin(s) {
+    return clean(s).toLowerCase().replace(/\s+/g, "");
+  }
+  function phoneE164(p) {
+    var d = clean(p).replace(/[^0-9]/g, "");
+    if (!d) return "";
+    if (d.indexOf("213") === 0) return d;
+    if (d.charAt(0) === "0") d = d.slice(1);
+    return "213" + d;
+  }
+  function setUserData(o) {
+    try {
+      if (typeof window.fbq !== "function") return;
+      var pid = window.RB_PIXEL_ID;
+      if (!pid) return;
+      o = o || {};
+      var ph = phoneE164(o.phone);
+      var parts = clean(o.customer).split(/\s+/).filter(Boolean);
+      var ud = { country: "dz" };
+      if (ph) { ud.ph = ph; ud.external_id = ph; }
+      if (parts.length) ud.fn = latin(parts[0]);
+      if (parts.length > 1) ud.ln = latin(parts[parts.length - 1]);
+      if (o.email && o.email.indexOf("@") > 0) ud.em = clean(o.email).toLowerCase();
+      if (o.baladiya) ud.ct = latin(o.baladiya);
+      if (o.wilaya) ud.st = latin(o.wilaya);
+      window.fbq("init", pid, ud);
+    } catch (e) {}
+  }
+  window.RBSetUserData = setUserData;
+
+  // ---------- product catalogue (for value on ViewContent) ----------
+  var _cat = null, _catP = null;
+  function catalogue() {
+    if (_cat) return Promise.resolve(_cat);
+    if (_catP) return _catP;
+    _catP = fetch("products.json")
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (a) { _cat = a || []; return _cat; })
+      .catch(function () { _cat = []; return _cat; });
+    return _catP;
+  }
+  function findProduct(id) {
+    return catalogue().then(function (a) {
+      for (var i = 0; i < a.length; i++) if (String(a[i].id) === String(id)) return a[i];
+      return null;
+    });
+  }
+  function currentPid() {
+    var pid = null;
+    try { pid = new URLSearchParams(location.search).get("pid"); } catch (e) {}
+    if (!pid && window.RB_PID) pid = String(window.RB_PID);
+    if (!pid) {
+      var m = location.pathname.match(/product-(\d+)\.html/i);
+      if (m) pid = m[1];
+    }
+    return pid ? String(pid) : null;
+  }
+
+  function pack(id, name, price, qty) {
+    qty = qty || 1;
+    var p = num(price) || 0;
+    return {
+      content_type: "product",
+      content_ids: [String(id)],
+      content_name: name || "",
+      contents: [{ id: String(id), quantity: qty, item_price: p }],
+      num_items: qty,
+      value: p * qty,
+      currency: CUR
+    };
+  }
+
+  // ---------- de-dupe ----------
   var SENT_KEY = "robuste_ga_purchases";
   function alreadySent(id) {
     try { return JSON.parse(sessionStorage.getItem(SENT_KEY) || "[]").indexOf(id) !== -1; } catch (e) { return false; }
@@ -47,119 +126,176 @@
     } catch (e) {}
   }
 
-  // ---- the ONLY way a purchase is ever sent ----
+  // ---------- order submitted (browser side) ----------
   function trackPurchase(order) {
     try {
       order = order || {};
-      var id = order.transaction_id || order.orderId || ("T" + Date.now());
-      id = String(id);
+      var id = String(order.transaction_id || order.orderId || ("T" + Date.now()));
       if (alreadySent(id)) return;
-      var params = { transaction_id: id, currency: "DZD" };
-      var val = num(order.value != null ? order.value : order.totalPrice);
-      if (val != null) params.value = val;
+
+      // Advanced Matching first, so the event carries the identity.
+      setUserData(order);
+
       var items = order.items;
       if (!items && order.products && order.products.length) {
         items = order.products.map(function (p) {
           return {
             item_id: String(p.id != null ? p.id : (p.name || "")),
             item_name: p.name || p.title || "",
-            price: num(p.price),
+            price: num(p.price) || 0,
             quantity: p.quantity || 1
           };
         });
       }
-      if (items && items.length) params.items = items;
-      track("purchase", params);
-      try {
-        var mContents = (items || []).map(function (i) { return { id: i.item_id, quantity: i.quantity || 1, item_price: i.price }; });
-        fbqTrackCustom("PlaceOrder", {
-          currency: "DZD",
-          value: params.value,
-          content_type: "product",
-          contents: mContents,
-          content_ids: mContents.map(function (c) { return c.id; }),
-          num_items: mContents.reduce(function (a, c) { return a + (c.quantity || 1); }, 0)
-        }, { eventID: "ord_" + id });
-      } catch (e) {}
+      items = items || [];
+
+      // Merchandise value only - delivery fee is NOT revenue.
+      var val = null;
+      if (items.length) {
+        val = items.reduce(function (a, i) { return a + (num(i.price) || 0) * (i.quantity || 1); }, 0);
+      }
+      if (val == null) {
+        val = num(order.value != null ? order.value : order.totalPrice);
+        var fee = num(order.deliveryFee);
+        if (val != null && fee) val = Math.max(0, val - fee);
+      }
+
+      var gp = { transaction_id: id, currency: CUR };
+      if (val != null) gp.value = val;
+      if (items.length) gp.items = items;
+      gt("purchase", gp);
+
+      var contents = items.map(function (i) { return { id: i.item_id, quantity: i.quantity || 1, item_price: i.price }; });
+      fbc("PlaceOrder", {
+        currency: CUR,
+        value: val,
+        content_type: "product",
+        contents: contents,
+        content_ids: contents.map(function (c) { return c.id; }),
+        content_name: items.map(function (i) { return i.item_name; }).filter(Boolean).join(" | "),
+        num_items: contents.reduce(function (a, c) { return a + (c.quantity || 1); }, 0),
+        order_id: id
+      }, { eventID: "ord_" + id });
+
       markSent(id);
     } catch (e) {}
   }
-  // Expose for explicit, accurate calls from the order-submit code.
   window.trackPurchase = trackPurchase;
 
-  // Rendered text of an element EXCLUDING <script>/<style>, so inline script
-  // source can never be mistaken for a confirmation message.
-  function visibleText(node) {
-    try {
-      if (!node || node.nodeType !== 1) return "";
-      var clone = node.cloneNode(true);
-      var bad = clone.querySelectorAll ? clone.querySelectorAll("script,style") : [];
-      for (var i = 0; i < bad.length; i++) bad[i].parentNode && bad[i].parentNode.removeChild(bad[i]);
-      return clone.textContent || "";
-    } catch (e) { return ""; }
-  }
-
-  var ORDERNO = "\u0631\u0642\u0645 \u0627\u0644\u0637\u0644\u0628"; // رقم الطلب
-  var AMOUNT = "\u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a"; // المبلغ الإجمالي
-
-  // Fallback for pages whose submit code we don't call trackPurchase from
-  // directly (e.g. index.html). Fires ONLY when a freshly rendered success
-  // card containing a real order number appears. Never scans document.body
-  // text and never reads <script> source.
-  function scanNode(node) {
-    try {
-      var text = visibleText(node);
-      if (!text || text.indexOf(ORDERNO) === -1) return; // must contain a real order number
-      var afterNo = text.split(ORDERNO)[1] || "";
-      var idMatch = afterNo.match(/[A-Za-z0-9\-]+/);
-      var id = (idMatch && idMatch[0]) || ("T" + Date.now());
-      var value = num((text.split(AMOUNT)[1] || "").split("\u062f")[0]); // digits before "د.ج"
-      trackPurchase({ transaction_id: id, value: value });
-    } catch (e) {}
-  }
-
   ready(function () {
-    // 1) view_item on the product page
+    // 1) ViewContent - with real product id, name and price
     try {
-      var pid = null;
-      try { pid = new URLSearchParams(location.search).get("pid"); } catch (e) {}
-      if (pid || /product/i.test(location.pathname)) track("view_item", pid ? { item_id: pid } : {});
-      if (pid || /product/i.test(location.pathname)) fbqTrack("ViewContent", pid ? { content_ids: [pid], content_type: "product" } : {});
+      var pid = currentPid();
+      if (pid) {
+        findProduct(pid).then(function (p) {
+          var name = p ? (p.title || p.name || "") : "";
+          var price = p ? p.price : undefined;
+          gt("view_item", { currency: CUR, value: num(price) || 0, items: [{ item_id: String(pid), item_name: name, price: num(price) || 0, quantity: 1 }] });
+          fb("ViewContent", pack(pid, name, price, 1));
+        });
+      } else if (/product/i.test(location.pathname)) {
+        fb("ViewContent", { content_type: "product", currency: CUR });
+      }
     } catch (e) {}
 
-    // 2) WhatsApp clicks => contact (lead)
+    // 2) WhatsApp click => Lead (with an estimated value so Meta can rank leads)
     document.addEventListener("click", function (e) {
       try {
         var t = e.target;
         var a = t && t.closest ? t.closest('a[href*="wa.me"],a[href*="whatsapp"]') : null;
-        if (a) { track("contact", { method: "whatsapp" }); fbqTrack("Lead", { method: "whatsapp" }); }
+        if (!a) return;
+        gt("contact", { method: "whatsapp" });
+        fb("Lead", { content_category: "whatsapp", currency: CUR, value: 0 });
       } catch (er) {}
     }, true);
 
-    // 3) add_to_cart => wrap the global addToCart if it exists
+    // 3) AddToCart - reads the product actually added
     try {
       if (typeof window.addToCart === "function" && !window.addToCart.__gaWrapped) {
         var orig = window.addToCart;
-        window.addToCart = function () { track("add_to_cart", {}); fbqTrack("AddToCart", {}); return orig.apply(this, arguments); };
+        window.addToCart = function () {
+          try {
+            var args = Array.prototype.slice.call(arguments);
+            // product pages: addToCart(name, price, img, id)
+            // home page:     addToCart(title, priceLabel, price, images, id)
+            var name = typeof args[0] === "string" ? args[0] : "";
+            var id = args.length ? args[args.length - 1] : currentPid();
+            if (id == null || id === "" || typeof id === "object") id = currentPid() || name;
+            var price;
+            for (var i = 1; i < args.length; i++) {
+              if (typeof args[i] === "number") { price = args[i]; break; }
+            }
+            if (price == null) price = num(args[1]);
+            var d = pack(id, name, price, 1);
+            gt("add_to_cart", { currency: CUR, value: d.value, items: [{ item_id: String(id), item_name: name, price: num(price) || 0, quantity: 1 }] });
+            fb("AddToCart", d);
+          } catch (er) {}
+          return orig.apply(this, arguments);
+        };
         window.addToCart.__gaWrapped = true;
       }
     } catch (e) {}
 
-    // 4) begin_checkout => when the order modal opens
-    try { document.addEventListener("shown.bs.modal", function () { track("begin_checkout", {}); fbqTrack("InitiateCheckout", {}); }); } catch (e) {}
-
-    // 5) purchase => fallback detector, real order cards only, deduped.
+    // 4) InitiateCheckout - ONLY the real order modal (never the review modal)
     try {
-      var mo = new MutationObserver(function (muts) {
-        for (var i = 0; i < muts.length; i++) {
-          var added = muts[i].addedNodes;
-          for (var j = 0; j < added.length; j++) {
-            var n = added[j];
-            if (n.nodeType === 1 && (n.textContent || "").indexOf(ORDERNO) !== -1) scanNode(n);
+      document.addEventListener("shown.bs.modal", function (ev) {
+        try {
+          var el = ev && ev.target;
+          if (!el || el.id !== "orderModal") return;
+
+          var cart = [];
+          try { cart = JSON.parse(localStorage.getItem("robuste_cart") || "[]") || []; } catch (e2) {}
+
+          if (cart.length) {
+            var contents = cart.map(function (c) {
+              return { id: String(c.id), quantity: c.quantity || 1, item_price: num(c.price) || 0 };
+            });
+            var value = contents.reduce(function (a, c) { return a + c.item_price * c.quantity; }, 0);
+            var nItems = contents.reduce(function (a, c) { return a + c.quantity; }, 0);
+            gt("begin_checkout", { currency: CUR, value: value, items: cart.map(function (c) { return { item_id: String(c.id), item_name: c.name || "", price: num(c.price) || 0, quantity: c.quantity || 1 }; }) });
+            fb("InitiateCheckout", {
+              currency: CUR, value: value, content_type: "product",
+              contents: contents,
+              content_ids: contents.map(function (c) { return c.id; }),
+              content_name: cart.map(function (c) { return c.name; }).filter(Boolean).join(" | "),
+              num_items: nItems
+            });
+            return;
           }
-        }
+
+          var pid2 = currentPid();
+          if (pid2) {
+            findProduct(pid2).then(function (p) {
+              var nm = p ? (p.title || p.name || "") : "";
+              var pr = p ? p.price : undefined;
+              var d = pack(pid2, nm, pr, 1);
+              gt("begin_checkout", { currency: CUR, value: d.value, items: [{ item_id: String(pid2), item_name: nm, price: num(pr) || 0, quantity: 1 }] });
+              fb("InitiateCheckout", d);
+            });
+          } else {
+            gt("begin_checkout", { currency: CUR });
+            fb("InitiateCheckout", { currency: CUR, content_type: "product" });
+          }
+        } catch (e3) {}
       });
-      mo.observe(document.body, { childList: true, subtree: true });
     } catch (e) {}
+
+    // 5) AddPaymentInfo - when a payment method is chosen in the order modal
+    try {
+      document.addEventListener("change", function (ev) {
+        try {
+          var t = ev.target;
+          if (!t || t.name !== "paymentMethod") return;
+          if (window.__rbPayFired) return;
+          window.__rbPayFired = true;
+          gt("add_payment_info", { currency: CUR, payment_type: t.value || "cod" });
+          fb("AddPaymentInfo", { currency: CUR, content_type: "product" });
+        } catch (e4) {}
+      }, true);
+    } catch (e) {}
+
+    // NOTE: the old Arabic-text MutationObserver purchase detector was removed
+    // on purpose. Purchase is server-side only (Conversions API, after you
+    // confirm the order in the admin panel).
   });
 })();
