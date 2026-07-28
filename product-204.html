@@ -15,6 +15,7 @@ if(window.RB_PIXEL_ID&&window.RB_PIXEL_ID.indexOf("REPLACE")===-1){fbq("init",wi
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1442050591275047&ev=PageView&noscript=1"/></noscript>
 <!-- End ROBUSTE Meta Pixel -->
+<meta charset="UTF-8">
 <script>window.RB_PID=204;</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GREM5BTR7T"></script>
@@ -725,6 +726,32 @@ function changeMainImage(src, el) {
     el.classList.add('active');
 }
 function directBuy(name, price, img, id) { addToCart(name, price, img, id); checkoutFromCart(); }
+var _rbExpFired = false;
+document.addEventListener('input', function (e) {
+  if (_rbExpFired) return;
+  var t = e.target;
+  if (!t || !t.closest) return;
+  if (!t.closest('#expressForm')) return;
+  _rbExpFired = true;
+  try {
+    var p = (typeof currentProduct !== 'undefined' && currentProduct) ? currentProduct : null;
+    if (!p) return;
+    var qEl = document.getElementById('expressQty');
+    var q = parseInt(qEl && qEl.value) || 1;
+    var payload = {
+      content_type: 'product',
+      content_ids: [String(p.id)],
+      content_name: p.title,
+      contents: [{ id: String(p.id), quantity: q, item_price: p.price }],
+      num_items: q,
+      value: p.price * q,
+      currency: 'DZD'
+    };
+    if (window.fbq) { fbq('track', 'AddToCart', payload); fbq('track', 'InitiateCheckout', payload); }
+    if (window.gtag) { gtag('event', 'begin_checkout', { currency: 'DZD', value: p.price * q }); }
+  } catch (err) {}
+}, true);
+
 let isSubmittingExpress = false;
 async function submitExpressOrder() {
     if(isSubmittingExpress) return;
@@ -738,10 +765,10 @@ async function submitExpressOrder() {
     const qty = parseInt(document.getElementById('expressQty').value) || 1;
     if(!name || !phone || !wilaya) { showToast("يرجى ملء البيانات", "error"); return; }
     var _nw = name.split(/\s+/).filter(function(w){ return w.length>=2; }).length;
-    if(_nw<1 || _nw>2) { showToast("يرجى إدخال الاسم واللقب (كلمة أو كلمتان)", "error"); return; }
+    if(_nw<1 || _nw>5) { showToast("يرجى إدخال الاسم واللقب", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
     if(!baladiya) { showToast("يرجى إدخال البلدية", "error"); return; }
-    if(!addressRaw || addressRaw.length<8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!addressRaw || addressRaw.length<4) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
     const address = [baladiya, addressRaw].filter(Boolean).join("، ");
     const subtotal = currentProduct.price * qty;
     var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
