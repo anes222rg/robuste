@@ -6,6 +6,10 @@
 
   // [arabic source, english, french]
   var ROWS = [
+    // ---- top bar promo + sticky whatsapp (added) ----
+    [`عرض خاص مؤقّت`, `Limited-time offer`, `Offre à durée limitée`],
+    [`لا تفوّت الفرصة`, `Don't miss out`, `Ne manquez pas l'occasion`],
+    [`واتساب`, `WhatsApp`, `WhatsApp`],
     // ---- PETRIN PRO MAX 25 + conversion UI (added) ----
     [`عجّانة احترافية 1800 واط · وعاء 8 لتر · خطّافان مزدوجان للعجين الثقيل`, `Professional 1800 W stand mixer · 8 L bowl · Double hook for heavy dough`, `Pétrin professionnel 1800 W · Bol 8 L · Double crochet pour pâtes lourdes`],
     [`عجّانة PETRIN PRO MAX بقوة 1800 واط ووعاء ستانلس 8 لتر، مصمّمة للعائلات الكبيرة وللاستعمال الاحترافي. تأتي بتصميم Double Crochet بخطّافين مزدوجين يعجنان العجين الثقيل دون جهد، وـ 8 سرعات متغيرة تغطّي كل الاستعمالات من خبز الدار والمسمن إلى الحلويات والكريمة. تضمّ ثلاثة ملحقات: خطّاف العجين، مضرب البيض، ومخفقة مسطحة. الدفع عند الاستلام في كل الولايات.`, `The PETRIN PRO MAX delivers 1800 W of power with an 8 L stainless steel bowl, built for large families and professional use. Its Double Crochet design uses twin hooks that knead heavy dough effortlessly, while 8 variable speeds cover everything from home bread and msemen to pastries and whipped cream. Includes three attachments: dough hook, egg whisk and flat beater. Cash on delivery to every wilaya.`, `Le PETRIN PRO MAX développe 1800 W avec un bol en inox de 8 L, conçu pour les grandes familles et l'usage professionnel. Sa conception Double Crochet pétrit sans effort les pâtes les plus lourdes, et ses 8 vitesses variables couvrent tout, du pain maison et du msemen aux pâtisseries et à la crème fouettée. Livré avec trois accessoires : crochet à pâte, fouet à œufs et batteur plat. Paiement à la livraison dans toutes les wilayas.`],

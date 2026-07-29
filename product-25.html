@@ -142,20 +142,27 @@ gtag('config', 'G-GREM5BTR7T');
 .rb-sb-now{font-weight:800;color:#111827;font-size:1.02rem}
 .rb-sb-old{font-size:.78rem;color:#9ca3af;text-decoration:line-through}
 .rb-sb-btn{flex:1;border:0;border-radius:12px;padding:.75rem .5rem;font-weight:800;color:#fff;background:linear-gradient(90deg,#f97316,#ea580c);font-size:.98rem}
+.rb-sb-wa{flex:0 0 auto;width:46px;height:46px;border-radius:12px;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;text-decoration:none;box-shadow:0 2px 8px rgba(37,211,102,.35)}
+.rb-sb-wa:hover,.rb-sb-wa:focus{color:#fff;background:#1eb959}
+@media(max-width:991.98px){.whatsapp-float{display:none!important}}
+/* cart docked to the RIGHT edge (Amazon-style) */
+nav.glass-navbar #floatingCart,nav.glass-navbar .floating-cart{order:7!important;margin:0!important;margin-inline-start:auto!important}
+nav.glass-navbar .navbar-toggler{order:8!important;margin-inline-start:8px!important}
+nav.glass-navbar .navbar-collapse{order:9!important}
 @media(min-width:992px){.rb-sticky-buy{display:none}}
 @media(max-width:991.98px){body{padding-bottom:78px}}
 </style>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
-<div class="top-cod-bar" id="topCodBar"><span id="topBarText"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام — توصيل <b>58 ولاية</b> خلال 24–72 ساعة</span></div>
+<div class="top-cod-bar" id="topCodBar"><span id="topBarText"><i class="bi bi-lightning-charge-fill"></i> <span>عرض خاص مؤقّت</span> · <b dir="ltr">19,900 د.ج</b> <del dir="ltr">24,900</del> · <span>لا تفوّت الفرصة</span></span></div>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top glass-navbar" dir="ltr">
     <div class="container">
         <a class="navbar-brand" href="index.html">
             <img decoding="async" src="https://i.postimg.cc/7P7BK44r/f525e1dd-9f2c-4160-aed1-882a8b28b75c-20250703-131500-0000.png" alt="Robuste" width="160" height="51" style="width: 160px;height:51px;">
             <span class="d-none d-lg-inline fw-bold fs-4 ms-2" style="color: var(--primary);">ROBUSTE eulma</span>
         </a>
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center rb-nav-actions">
             <button class="theme-toggle" id="themeToggle"><i class="bi bi-moon"></i></button>
             <div class="floating-cart" id="floatingCart">
     <div class="cart-icon-container">
@@ -196,7 +203,7 @@ gtag('config', 'G-GREM5BTR7T');
         <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">الرئيسية</a></li><li class="breadcrumb-item"><a href="index.html#products">المنتجات</a></li><li class="breadcrumb-item active" aria-current="page">PETRIN PRO MAX 8L 1800W</li></ol></nav>
         <h1 class="product-title">PETRIN PRO MAX 8L 1800W</h1>
         <div class="price-section my-3">
-          <span class="current-price fw-bold fs-3" dir="ltr">20,500 DA</span><del class="old-price text-muted ms-2" dir="ltr">21,000 DA</del><span class="discount-badge ms-2">-2%</span>
+          <span class="current-price fw-bold fs-3" dir="ltr">19,900 DA</span><del class="old-price text-muted ms-2" dir="ltr">24,900 DA</del><span class="discount-badge ms-2">-20%</span>
         </div>
         <p class="product-availability">متوفر في المخزون</p>
         <p class="product-description">عجّانة PETRIN PRO MAX بقوة 1800 واط ووعاء ستانلس 8 لتر، مصمّمة للعائلات الكبيرة وللاستعمال الاحترافي. تأتي بتصميم Double Crochet بخطّافين مزدوجين يعجنان العجين الثقيل دون جهد، وـ 8 سرعات متغيرة تغطّي كل الاستعمالات من خبز الدار والمسمن إلى الحلويات والكريمة. تضمّ ثلاثة ملحقات: خطّاف العجين، مضرب البيض، ومخفقة مسطحة. الدفع عند الاستلام في كل الولايات.</p>
@@ -604,7 +611,7 @@ async function submitOrderFinal() {
     if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length !== 2) { showToast("يرجى إدخال الاسم واللقب (كلمتان فقط)", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
     if(!baladiya) { showToast("يرجى اختيار البلدية", "error"); return; }
-    if(!address || address.length < 8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!address) { showToast("يرجى إدخال العنوان", "error"); return; }
     var guard = antiSpamCheck(phone + '|' + totalPrice);
     if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingFinal = true;
@@ -742,6 +749,7 @@ function renderProductLayout(p) {
             </div>
         </div>
         <div class="rb-sticky-buy">
+            <a class="rb-sb-wa" href="https://wa.me/213656360457" target="_blank" rel="noopener" aria-label="واتساب"><i class="bi bi-whatsapp"></i></a>
             <div class="rb-sb-price"><span class="rb-sb-now">${p.price.toLocaleString()} د.ج</span>${p.old_price ? `<span class="rb-sb-old">${p.old_price.toLocaleString()}</span>` : ''}</div>
             <button type="button" class="rb-sb-btn" onclick="rbJumpToOrder()">اطلب الآن · الدفع عند الاستلام</button>
         </div>
@@ -806,7 +814,7 @@ async function submitExpressOrder() {
     if(_nw<1 || _nw>5) { showToast("يرجى إدخال الاسم واللقب", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
     if(!baladiya) { showToast("يرجى إدخال البلدية", "error"); return; }
-    if(!addressRaw || addressRaw.length<4) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!addressRaw) { showToast("يرجى إدخال العنوان", "error"); return; }
     const address = [baladiya, addressRaw].filter(Boolean).join("، ");
     const subtotal = currentProduct.price * qty;
     var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
