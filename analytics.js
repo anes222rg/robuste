@@ -1,4 +1,8 @@
-/* ROBUSTE - GA4 + Meta Pixel event tracking (v2, campaign-grade).
+/* ROBUSTE - GA4 + Meta Pixel event tracking (v3, campaign-grade).
+   v3: (a) InitiateCheckout is never sent without a price (fixes the 12% of
+       events Meta flagged as missing price/currency).
+   (b) Advanced Matching is attached to EVERY event, not only Purchase
+       (raises Event Match Quality from ~6.1 toward 7+).
 
    WHAT CHANGED vs v1:
    - Every funnel event now carries value + currency "DZD" + content_ids +
@@ -183,6 +187,44 @@
   window.trackPurchase = trackPurchase;
 
   ready(function () {
+    // 0) Advanced Matching, as early as possible.
+    //    Previously the phone/name were only sent to the pixel at purchase time,
+    //    so PageView / ViewContent / AddToCart / InitiateCheckout arrived anonymous
+    //    and Event Match Quality was stuck around 6. We now remember the shopper
+    //    (locally, in their own browser) and attach the identity to every event.
+    try {
+      var AM_KEY = "robuste_am_v1";
+      var amSave = function (o) { try { localStorage.setItem(AM_KEY, JSON.stringify(o)); } catch (e) {} };
+      var amLoad = function () { try { return JSON.parse(localStorage.getItem(AM_KEY) || "null"); } catch (e) { return null; } };
+      var val = function (id) { var el = document.getElementById(id); return el ? String(el.value == null ? "" : el.value).trim() : ""; };
+
+      var saved = amLoad();
+      if (saved && saved.phone) { setUserData(saved); }
+
+      var amCollect = function () {
+        try {
+          var ph = val("expressPhone") || val("phone");
+          var digits = ph.replace(/[^0-9]/g, "");
+          if (digits.length < 9) return;
+          var o = {
+            phone: ph,
+            customer: val("expressName") || val("fullName"),
+            wilaya: val("expressWilaya") || val("wilayaSelect"),
+            baladiya: val("expressBaladiya") || val("baladiyaInput"),
+            email: val("email")
+          };
+          var sig = o.phone + "|" + o.customer + "|" + o.wilaya + "|" + o.baladiya;
+          if (sig === window.__rbAmSig) return;
+          window.__rbAmSig = sig;
+          amSave(o);
+          setUserData(o);
+        } catch (e) {}
+      };
+      document.addEventListener("change", amCollect, true);
+      document.addEventListener("blur", amCollect, true);
+      window.RBAmCollect = amCollect;
+    } catch (e) {}
+
     // 1) ViewContent - with real product id, name and price
     try {
       var pid = currentPid();
@@ -253,6 +295,7 @@
             var value = contents.reduce(function (a, c) { return a + c.item_price * c.quantity; }, 0);
             var nItems = contents.reduce(function (a, c) { return a + c.quantity; }, 0);
             gt("begin_checkout", { currency: CUR, value: value, items: cart.map(function (c) { return { item_id: String(c.id), item_name: c.name || "", price: num(c.price) || 0, quantity: c.quantity || 1 }; }) });
+            if (!value || value <= 0) return;
             fb("InitiateCheckout", {
               currency: CUR, value: value, content_type: "product",
               contents: contents,
@@ -269,13 +312,13 @@
               var nm = p ? (p.title || p.name || "") : "";
               var pr = p ? p.price : undefined;
               var d = pack(pid2, nm, pr, 1);
+              // Never report a checkout with no price: it corrupts ROAS.
+              if (!d.value || d.value <= 0) return;
               gt("begin_checkout", { currency: CUR, value: d.value, items: [{ item_id: String(pid2), item_name: nm, price: num(pr) || 0, quantity: 1 }] });
               fb("InitiateCheckout", d);
             });
-          } else {
-            gt("begin_checkout", { currency: CUR });
-            fb("InitiateCheckout", { currency: CUR, content_type: "product" });
           }
+          // No product and no cart => no price is known => send nothing.
         } catch (e3) {}
       });
     } catch (e) {}
