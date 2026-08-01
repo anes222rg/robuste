@@ -435,6 +435,7 @@ function rbNormPhone(v){ try{ var s=String(v==null?"":v);
 window.rbNormPhone=rbNormPhone;
 function rbBlocked(reason){ try{ if(window.fbq){ fbq('trackCustom','FormBlocked',{reason:reason, page_id:'4'}); } if(window.gtag){ gtag('event','form_blocked',{reason:reason}); } }catch(e){} }
 window.rbBlocked=rbBlocked;
+window.RB_PAGE_BUILD = "2026-08-01-offer-v4";
 var RB_QTY_MIN = 2, RB_QTY_OFF = 200, RB_FREEDEL_MIN = 4;
 function rbFreeDelivery(qty, type){ try{ return (String(type)==='office' && Number(qty)>=RB_FREEDEL_MIN); }catch(e){ return false; } }
 function rbQtyDiscount(qty, type){ try{ if(rbFreeDelivery(qty,type)) return 0; return (Number(qty)>=RB_QTY_MIN ? RB_QTY_OFF : 0); }catch(e){ return 0; } }
@@ -442,8 +443,8 @@ function rbCartQty(){ try{ return cart.reduce(function(s,i){ return s+i.quantity
 window.rbFreeDelivery=rbFreeDelivery; window.rbQtyDiscount=rbQtyDiscount; window.rbCartQty=rbCartQty;
 function deliveryFeeFor(wilaya, type){ var f=deliveryFees[wilaya]; if(!f) return null; var home=f[0], office=f[1]; if(type==='office'){ return (office==null? home : office); } return home; }
 function fmtDzd(n){ try{ return Number(n||0).toLocaleString(); }catch(e){ return String(n); } }
-function updateOrderSummary(){ try{ var subEl=document.getElementById('orderProductPrice'); var sub=subEl? (parseFloat(subEl.value)||0):0; var ws=document.getElementById('wilayaSelect'); var wilaya=ws? ws.value:''; var tEl=document.querySelector('input[name="deliveryType"]:checked'); var type=tEl? tEl.value:'home'; var sSub=document.getElementById('sumSubtotal'), sDel=document.getElementById('sumDelivery'), sTot=document.getElementById('sumTotal'); if(sSub) sSub.innerText=fmtDzd(sub)+' د.ج'; if(!wilaya){ if(sDel) sDel.innerText='اختر الولاية'; if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } var fee=deliveryFeeFor(wilaya,type); var na=(type==='office' && deliveryFees[wilaya] && deliveryFees[wilaya][1]==null); if(fee==null) fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,type); var _disc=rbQtyDiscount(_q,type); if(_free) fee=0; if(sDel) sDel.innerText=(_free?'مجاني':(fmtDzd(fee)+' د.ج'+(na?' (للمنزل)':''))); if(sTot) sTot.innerText=fmtDzd(sub+fee-_disc)+' د.ج'; }catch(e){} }
-function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); var free=rbFreeDelivery(qty,type); var disc=rbQtyDiscount(qty,type); var dr=document.getElementById('expDiscountRow'), dv=document.getElementById('expDiscount'); if(dr) dr.style.display=(disc>0?'':'none'); if(dv) dv.innerText='-'+fmtDzd(disc)+' دج'; if(!wilaya){ if(de) de.innerText=(free?'مجاني':'اختر الولاية'); if(te) te.innerText=fmtDzd(sub-disc)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type); if(fee==null) fee=0; if(free) fee=0; if(de) de.innerText=(free?'مجاني':(fmtDzd(fee)+' دج')); if(te) te.innerText=fmtDzd(sub+fee-disc)+' دج'; }catch(e){} }
+function updateOrderSummary(){ try{ var subEl=document.getElementById('orderProductPrice'); var sub=subEl? (parseFloat(subEl.value)||0):0; var ws=document.getElementById('wilayaSelect'); var wilaya=ws? ws.value:''; var tEl=document.querySelector('input[name="deliveryType"]:checked'); var type=tEl? tEl.value:'home'; var sSub=document.getElementById('sumSubtotal'), sDel=document.getElementById('sumDelivery'), sTot=document.getElementById('sumTotal'); if(sSub) sSub.innerText=fmtDzd(sub)+' د.ج'; if(!wilaya){ if(sDel) sDel.innerText='اختر الولاية'; if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } var fee=deliveryFeeFor(wilaya,type); var na=(type==='office' && deliveryFees[wilaya] && deliveryFees[wilaya][1]==null); if(fee==null) fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,type); var _disc=rbQtyDiscount(_q,type); if(_free) fee=0; if(sDel) sDel.innerText=(_free?'مجاني إلى المكتب':(fmtDzd(fee)+' د.ج'+(na?' (للمنزل)':(type==='office'?' (مكتب)':' (منزل)')))); if(sTot) sTot.innerText=fmtDzd(sub+fee-_disc)+' د.ج'; }catch(e){} }
+function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); var free=rbFreeDelivery(qty,type); var disc=rbQtyDiscount(qty,type); var dr=document.getElementById('expDiscountRow'), dv=document.getElementById('expDiscount'); if(dr) dr.style.display=(disc>0?'':'none'); if(dv) dv.innerText='-'+fmtDzd(disc)+' دج'; var sr=document.getElementById('expSubRow'), sv=document.getElementById('expSubtotal'); if(sr) sr.style.display=''; if(sv) sv.innerText=fmtDzd(sub)+' دج'; if(!wilaya){ if(de) de.innerText=(free?'مجاني إلى المكتب':'اختر الولاية'); if(te) te.innerText=fmtDzd(sub-disc)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type); if(fee==null) fee=0; if(free) fee=0; if(de) de.innerText=(free?'مجاني إلى المكتب':(fmtDzd(fee)+' دج'+(type==='office'?' (مكتب)':' (منزل)'))); if(te) te.innerText=fmtDzd(sub+fee-disc)+' دج'; }catch(e){} }
 function onCartWilayaChange(){ try{ var w=(document.getElementById('cartWilaya')||{}).value; if(w) localStorage.setItem('robuste_wilaya', w); }catch(e){} renderCartItems(); }
 function onCartDtChange(){ renderCartItems(); }
 window.updateOrderSummary=updateOrderSummary; window.updateExpressSummary=updateExpressSummary; window.onCartWilayaChange=onCartWilayaChange; window.onCartDtChange=onCartDtChange; window.deliveryFeeFor=deliveryFeeFor;
@@ -527,7 +528,7 @@ function renderCartItems() {
         </div>`;
     });
     container.innerHTML = html;
-    var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t); if(_fee==null)_fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,_t); var _dc=rbQtyDiscount(_q,_t); if(_free)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=(_free?'مجاني':(_fee.toLocaleString()+' د.ج')); document.getElementById('cartTotalAmount').innerText=(total+_fee-_dc).toLocaleString()+' د.ج'; }
+    var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t); if(_fee==null)_fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,_t); var _dc=rbQtyDiscount(_q,_t); if(_free)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=(_free?'مجاني إلى المكتب':(_fee.toLocaleString()+' د.ج'+(_t==='office'?' (مكتب)':' (منزل)'))); document.getElementById('cartTotalAmount').innerText=(total+_fee-_dc).toLocaleString()+' د.ج'; }
 }
 function updateQty(idx, newQty) { if(newQty<1) return removeCartItem(idx); cart[idx].quantity = newQty; saveCart(); }
 function removeCartItem(idx) { cart.splice(idx,1); saveCart(); showToast("تم إزالة المنت��", "success"); }
@@ -633,6 +634,7 @@ async function submitOrderFinal() {
     var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
     var _cq = rbCartQty(); if(rbFreeDelivery(_cq, dType)) deliveryFee = 0;
     var discount = rbQtyDiscount(_cq, dType);
+    var deliveryLabel = (dType==='office' ? 'مكتب' : 'منزل');
     const totalPrice = subtotal + deliveryFee - discount;
     if(!fullName || !phone || !wilaya) { rbBlocked("missing_fields"); showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
     if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length > 5) { rbBlocked("name"); showToast("يرجى إدخال الاسم واللقب", "error"); return; }
@@ -646,7 +648,7 @@ async function submitOrderFinal() {
     var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
     if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
     var fullAddress = [baladiya, address].filter(Boolean).join('، ');
-    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, discount, deliveryFee, deliveryType: dType, payment: "الدفع عند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
+    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, discount, deliveryFee, deliveryType: dType, deliveryLabel: deliveryLabel, payment: "الدفع عند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
     try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
     try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(Object.assign({}, orderData, { address: fullAddress })); } } catch (e) {}
     try {
@@ -768,7 +770,7 @@ function renderProductLayout(p) {
                     <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع) *" required>
                     <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;border-radius:10px;padding:.5rem .7rem;margin-bottom:.5rem;font-weight:700;font-size:.9rem;line-height:1.6"><div><i class="bi bi-gift-fill"></i> <span>قطعتان: خصم 200 د.ج</span></div><div><i class="bi bi-truck"></i> <span>4 قطع فما فوق: التوصيل للمكتب مجاني</span></div></div><input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" oninput="updateExpressSummary()">
                     <div class="exp-delivery"><label class="exp-dt"><input type="radio" name="expDeliveryType" value="home" onchange="updateExpressSummary()"> 🏠 للمنزل</label><label class="exp-dt"><input type="radio" name="expDeliveryType" value="office" checked onchange="updateExpressSummary()"> 🏢 للمكتب</label></div>
-                    <div class="exp-summary"><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div id="expDiscountRow" style="display:none;color:#16a34a;font-weight:700"><span>الخصم:</span> <span id="expDiscount">-200 دج</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
+                    <div class="exp-summary"><div id="expSubRow"><span>المجموع الفرعي:</span> <span id="expSubtotal">-</span></div><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div id="expDiscountRow" style="display:none;color:#16a34a;font-weight:700"><span>الخصم:</span> <span id="expDiscount">-200 دج</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
                     <button type="button" class="btn-submit-express" onclick="submitExpressOrder()">تأكيد الطلب</button>
                 </form>
             </div>
@@ -807,6 +809,7 @@ async function submitExpressOrder() {
     var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
     if(rbFreeDelivery(qty, dType)) deliveryFee = 0;
     var discount = rbQtyDiscount(qty, dType);
+    var deliveryLabel = (dType==='office' ? 'مكتب' : 'منزل');
     const total = subtotal + deliveryFee - discount;
     var guard = antiSpamCheck(phone + '|' + total);
     if(!guard.ok) { showToast(guard.msg, "error"); return; }
@@ -815,7 +818,7 @@ async function submitExpressOrder() {
     var expressBtnOrig = expressBtn ? expressBtn.innerHTML : '';
     if(expressBtn){ expressBtn.disabled = true; expressBtn.innerHTML = 'جاري المعالجة...'; }
     try {
-        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, baladiya:baladiya, address:address, payment:"الدفع عند الاستلام", subtotal, discount, deliveryFee, deliveryType:dType, totalPrice:total, timestamp:new Date().toISOString() };
+        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, baladiya:baladiya, address:address, payment:"الدفع عند الاستلام", subtotal, discount, deliveryFee, deliveryType:dType, deliveryLabel:deliveryLabel, totalPrice:total, timestamp:new Date().toISOString() };
         try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
