@@ -2,18 +2,22 @@
   {
     "id": 205,
     "title": "PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1",
-    "price": 26800,
-    "old_price": 27300,
+    "price": 26500,
+    "old_price": 27500,
     "images": [
+      "images/pack-maison-1.webp",
+      "images/pack-maison-2.webp",
       "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png",
       "images/NETTOYEUR DE TACHES 4 EN 1.jpg"
     ],
-    "description_short": "Aspirateur souffleur à main + nettoyeur de taches 4 en 1 : les deux appareils pour 26 800 DA au lieu de 27 300 DA. | مكنسة نافخة يدوية + منظف البقع 4 في 1 بسعر 26,800 دج بدل 27,300 دج.",
-    "description_long": "Le pack maison associe l’aspirateur souffleur à main et le nettoyeur de taches 4 en 1. Une solution pratique pour l’entretien quotidien de la maison, avec 500 DA de réduction par rapport à l’achat séparé. — يجمع باك المنزل بين المكنسة النافخة اليدوية ومنظف البقع 4 في 1. حل عملي للعناية اليومية بالمنزل، مع تخفيض 500 دج مقارنة بشراء الجهازين منفصلين.",
+    "description_short": "منظف البقع 4 في 1 (1650W) + المكنسة اليدوية اللاسلكية AM80 بـ 26,500 د.ج بدل 27,500 د.ج. | Nettoyeur de taches 4 en 1 (1650W) + aspirateur souffleur à main sans fil AM80 à 26 500 DA au lieu de 27 500 DA.",
+    "description_long": "باك المنزل يجمع جهازين يكمّل كل واحد الآخر: منظف البقع ROBUSTE ProClean 4 في 1 بقوة 1650 واط (بخار · ماء بارد · ماء ساخن 60° · تعقيم 100°) ينزع البقع من الأرائك والمفارش والزرابي ومقاعد السيارة دون مواد كيميائية، والمكنسة اليدوية اللاسلكية AM80 بمحرك BLDC ووضعي شفط ونفخ و 7 ملحقات تصل للأماكن الضيقة في السيارة والبيت. الاول يغسل والثاني يلمّع وينشف ويشفط الغبار. توفر 1,000 د.ج مقارنة بشراء الجهازين منفصلين، مع ضمان 12 شهر، تجربة المنتجين قبل الشحن، وحق التبديل خلال 7 أيام إذا وُجد خلل. الدفع عند الاستلام في كل الولايات. — Le pack maison réunit le nettoyeur de taches ProClean 4 en 1 (1650W : vapeur, eau froide, eau chaude 60°, stérilisateur 100°) et l’aspirateur souffleur à main sans fil AM80 (moteur BLDC, 7 accessoires). 1 000 DA d’économie, garantie 12 mois, paiement à la livraison.",
     "features": [
-      "ASPIRATEUR SOUFFLEUR À MAIN",
-      "NETTOYEUR DE TACHES 4 EN 1",
-      "وفّر 500 دج مقارنة بالشراء المنفصل",
+      "منظف البقع 4 في 1 — 1650 واط",
+      "مكنسة يدوية لاسلكية AM80 + 7 ملحقات",
+      "للأرائك · المفارش · الزرابي · مقاعد السيارة",
+      "توفر 1,000 د.ج عن الشراء المنفصل",
+      "ضمان 12 شهر · تبديل خلال 7 أيام",
       "الدفع عند الاستلام"
     ],
     "stock": 5,
