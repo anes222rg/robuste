@@ -15,7 +15,6 @@ if(window.RB_PIXEL_ID&&window.RB_PIXEL_ID.indexOf("REPLACE")===-1){fbq("init",wi
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1442050591275047&ev=PageView&noscript=1"/></noscript>
 <!-- End ROBUSTE Meta Pixel -->
-<meta charset="UTF-8">
 <script>window.RB_PID=205;</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GREM5BTR7T"></script>
@@ -120,7 +119,7 @@ gtag('config', 'G-GREM5BTR7T');
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1","image":["https://www.robustedz.store/images/ASPIRATEUR%20SOUFFLEUR%20A%20MAIN%203.png"],"description":"Le pack maison associe l’aspirateur souffleur à main et le nettoyeur de taches 4 en 1. Une solution pratique pour l’entretien quotidien de la maison, avec 500 DA de réduction par rapport à l’achat séparé. — يجمع باك المنزل بين المكنسة النافخة اليدوية ومنظف البقع 4 في 1. حل عملي للعناية اليومية بالمنزل، مع تخفيض 500 دج مقارنة بشراء الجهازين منفصلين.","sku":"205","mpn":"205","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-205.html","priceCurrency":"DZD","price":26800,"priceValidUntil":"2027-07-12","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
+<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1","image":["https://www.robustedz.store/images/pack-maison-1.webp"],"description":"Le pack maison associe l’aspirateur souffleur à main et le nettoyeur de taches 4 en 1. Une solution pratique pour l’entretien quotidien de la maison, avec 500 DA de réduction par rapport à l’achat séparé. — يجمع باك المنزل بين المكنسة النافخة اليدوية ومنظف البقع 4 في 1. حل عملي للعناية اليومية بالمنزل، مع تخفيض 500 دج مقارنة بشراء الجهازين منفصلين.","sku":"205","mpn":"205","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-205.html","priceCurrency":"DZD","price":26500,"priceValidUntil":"2027-07-12","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
@@ -172,7 +171,7 @@ gtag('config', 'G-GREM5BTR7T');
         <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">الرئيسية</a></li><li class="breadcrumb-item"><a href="index.html#products">المنتجات</a></li><li class="breadcrumb-item active" aria-current="page">PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1</li></ol></nav>
         <h1 class="product-title">PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1</h1>
         <div class="price-section my-3">
-          <span class="current-price fw-bold fs-3" dir="ltr">26,800 DA</span><del class="old-price text-muted ms-2" dir="ltr">27,300 DA</del><span class="discount-badge ms-2">-2%</span>
+          <span class="current-price fw-bold fs-3" dir="ltr">26,500 DA</span><del class="old-price text-muted ms-2" dir="ltr">27,500 DA</del><span class="discount-badge ms-2">-4%</span>
         </div>
         <p class="product-availability">متوفر في المخزون</p>
         <p class="product-description">Le pack maison associe l’aspirateur souffleur à main et le nettoyeur de taches 4 en 1. Une solution pratique pour l’entretien quotidien de la maison, avec 500 DA de réduction par rapport à l’achat séparé. — يجمع باك المنزل بين المكنسة النافخة اليدوية ومنظف البقع 4 في 1. حل عملي للعناية اليومية بالمنزل، مع تخفيض 500 دج مقارنة بشراء الجهازين منفصلين.</p>
@@ -384,10 +383,24 @@ const wilayas = Object.keys(deliveryFees);
 const wilayaSelect = document.getElementById('wilayaSelect');
 if (wilayaSelect) { var __ph=document.createElement('option'); __ph.value=''; __ph.textContent='اختر الولاية'; __ph.disabled=true; __ph.selected=true; wilayaSelect.appendChild(__ph); wilayas.forEach(function(w){ var opt=document.createElement('option'); opt.value=w; opt.textContent=w; wilayaSelect.appendChild(opt); }); }
 (function(){ var cw=document.getElementById('cartWilaya'); if(cw){ var p0=document.createElement('option'); p0.value=''; p0.textContent='اختر الولاية'; p0.disabled=true; p0.selected=true; cw.appendChild(p0); wilayas.forEach(function(w){ var o=document.createElement('option'); o.value=w; o.textContent=w; cw.appendChild(o); }); try{ var sv=localStorage.getItem('robuste_wilaya'); if(sv){ cw.value=sv; } }catch(e){} } })();
+function rbNormPhone(v){ try{ var s=String(v==null?"":v);
+ s=s.replace(/[\u0660-\u0669]/g,function(d){return String(d.charCodeAt(0)-1632);});
+ s=s.replace(/[\u06F0-\u06F9]/g,function(d){return String(d.charCodeAt(0)-1776);});
+ s=s.replace(/[^0-9+]/g,"");
+ if(s.indexOf("00213")===0) s="0"+s.slice(5);
+ else if(s.indexOf("+213")===0) s="0"+s.slice(4);
+ else if(s.indexOf("213")===0 && s.length>=12) s="0"+s.slice(3);
+ s=s.replace(/\+/g,"");
+ if(/^[5-7][0-9]{8}$/.test(s)) s="0"+s;
+ return s; }catch(e){ return String(v==null?"":v); } }
+window.rbNormPhone=rbNormPhone;
+function rbBlocked(reason){ try{ if(window.fbq){ fbq('trackCustom','FormBlocked',{reason:reason, page_id:'205'}); } if(window.gtag){ gtag('event','form_blocked',{reason:reason}); } }catch(e){} }
+window.rbBlocked=rbBlocked;
+window.RB_PAGE_BUILD = "2026-08-04-pack205-v1";
 function deliveryFeeFor(wilaya, type){ var f=deliveryFees[wilaya]; if(!f) return null; var home=f[0], office=f[1]; if(type==='office'){ return (office==null? home : office); } return home; }
 function fmtDzd(n){ try{ return Number(n||0).toLocaleString(); }catch(e){ return String(n); } }
 function updateOrderSummary(){ try{ var subEl=document.getElementById('orderProductPrice'); var sub=subEl? (parseFloat(subEl.value)||0):0; var ws=document.getElementById('wilayaSelect'); var wilaya=ws? ws.value:''; var tEl=document.querySelector('input[name="deliveryType"]:checked'); var type=tEl? tEl.value:'home'; var sSub=document.getElementById('sumSubtotal'), sDel=document.getElementById('sumDelivery'), sTot=document.getElementById('sumTotal'); if(sSub) sSub.innerText=fmtDzd(sub)+' د.ج'; if(!wilaya){ if(sDel) sDel.innerText='اختر الولاية'; if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } var fee=deliveryFeeFor(wilaya,type); var na=(type==='office' && deliveryFees[wilaya] && deliveryFees[wilaya][1]==null); if(fee==null) fee=0; if(sDel) sDel.innerText=fmtDzd(fee)+' د.ج'+(na?' (للمنزل)':''); if(sTot) sTot.innerText=fmtDzd(sub+fee)+' د.ج'; }catch(e){} }
-function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); if(!wilaya){ if(de) de.innerText='اختر الولاية'; if(te) te.innerText=fmtDzd(sub)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type); if(fee==null) fee=0; if(de) de.innerText=fmtDzd(fee)+' دج'; if(te) te.innerText=fmtDzd(sub+fee)+' دج'; }catch(e){} }
+function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); var sv=document.getElementById('expSubtotal'); if(sv) sv.innerText=fmtDzd(sub)+' دج'; if(!wilaya){ if(de) de.innerText='اختر الولاية'; if(te) te.innerText=fmtDzd(sub)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type); if(fee==null) fee=0; if(de) de.innerText=fmtDzd(fee)+' دج'+(type==='office'?' (مكتب)':' (منزل)'); if(te) te.innerText=fmtDzd(sub+fee)+' دج'; }catch(e){} }
 function onCartWilayaChange(){ try{ var w=(document.getElementById('cartWilaya')||{}).value; if(w) localStorage.setItem('robuste_wilaya', w); }catch(e){} renderCartItems(); }
 function onCartDtChange(){ renderCartItems(); }
 window.updateOrderSummary=updateOrderSummary; window.updateExpressSummary=updateExpressSummary; window.onCartWilayaChange=onCartWilayaChange; window.onCartDtChange=onCartDtChange; window.deliveryFeeFor=deliveryFeeFor;
@@ -568,7 +581,7 @@ async function submitOrderFinal() {
     if(isSubmittingFinal) return;
     if(honeypotFilled('orderHp')) { showOrderSuccess('', '', null); return; }
     const fullName = document.getElementById('fullName').value.trim();
-    const phone = document.getElementById('phone').value.trim();
+    const phone = rbNormPhone(document.getElementById('phone').value); try{var _pe1=document.getElementById('phone'); if(_pe1) _pe1.value=phone;}catch(e){}
     const wilaya = document.getElementById('wilayaSelect').value;
     const baladiya = (document.getElementById('baladiyaInput') ? document.getElementById('baladiyaInput').value.trim() : '');
     const address = document.getElementById('address').value.trim();
@@ -576,11 +589,11 @@ async function submitOrderFinal() {
     var dType = (document.querySelector('input[name="deliveryType"]:checked')||{}).value || 'home';
     var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
     const totalPrice = subtotal + deliveryFee;
-    if(!fullName || !phone || !wilaya) { showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
-    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length !== 2) { showToast("يرجى إدخال الاسم واللقب (كلمتان فقط)", "error"); return; }
-    if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
-    if(!baladiya) { showToast("يرجى اختيار البلدية", "error"); return; }
-    if(!address || address.length < 8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!fullName || !phone || !wilaya) { rbBlocked("missing_fields"); showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
+    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length > 5) { rbBlocked("name"); showToast("يرجى إدخال الاسم واللقب", "error"); return; }
+    if(!/^0[5-7][0-9]{8}$/.test(phone)) { rbBlocked("phone"); showToast("رقم الهاتف لازم 10 أرقام يبدأ بـ 05 أو 06 أو 07", "error"); return; }
+    if(!baladiya) { rbBlocked("baladiya"); showToast("يرجى اختيار البلدية", "error"); return; }
+    if(!address) { rbBlocked("address"); showToast("يرجى إدخال العنوان", "error"); return; }
     var guard = antiSpamCheck(phone + '|' + totalPrice);
     if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingFinal = true;
@@ -588,7 +601,7 @@ async function submitOrderFinal() {
     var finalBtnOrig = finalBtn ? finalBtn.innerHTML : '';
     if(finalBtn){ finalBtn.disabled = true; finalBtn.innerHTML = 'جاري المعالجة...'; }
     var fullAddress = [baladiya, address].filter(Boolean).join('، ');
-    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, deliveryFee, deliveryType: dType, payment: "الدفع عند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
+    const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, deliveryFee, deliveryType: dType, deliveryLabel: (dType==='office'?'مكتب':'منزل'), payment: "الدفع عند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
     try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
     try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(Object.assign({}, orderData, { address: fullAddress })); } } catch (e) {}
     try {
@@ -708,9 +721,9 @@ function renderProductLayout(p) {
                     <select id="expressWilaya" class="form-select-premium mb-2" onchange="updateExpressSummary()"><option value="" disabled selected>اختر الولاية</option>${wilayas.map(w=>`<option value="${w}">${w}</option>`).join('')}</select>
                     <input type="text" id="expressBaladiya" class="form-control-premium mb-2" placeholder="البلدية *" required>
                     <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع) *" required>
-                    <input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" oninput="updateExpressSummary()">
+                    <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;border-radius:10px;padding:.55rem .7rem;margin-bottom:.55rem;font-weight:700;font-size:.9rem;line-height:1.7"><div><i class="bi bi-box-seam"></i> <span>جهازان في طلبية واحدة</span></div><div><i class="bi bi-piggy-bank"></i> <span>توفر 1,000 د.ج عن الشراء المنفصل</span></div><div><i class="bi bi-shield-check"></i> <span>ضمان 12 شهر · تجربة المنتج قبل الشحن</span></div></div><input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" oninput="updateExpressSummary()">
                     <div class="exp-delivery"><label class="exp-dt"><input type="radio" name="expDeliveryType" value="home" onchange="updateExpressSummary()"> 🏠 للمنزل</label><label class="exp-dt"><input type="radio" name="expDeliveryType" value="office" checked onchange="updateExpressSummary()"> 🏢 للمكتب</label></div>
-                    <div class="exp-summary"><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
+                    <div class="exp-summary"><div><span>المجموع الفرعي:</span> <span id="expSubtotal">-</span></div><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
                     <button type="button" class="btn-submit-express" onclick="submitExpressOrder()">تأكيد الطلب</button>
                 </form>
             </div>
@@ -726,49 +739,23 @@ function changeMainImage(src, el) {
     el.classList.add('active');
 }
 function directBuy(name, price, img, id) { addToCart(name, price, img, id); checkoutFromCart(); }
-var _rbExpFired = false;
-document.addEventListener('input', function (e) {
-  if (_rbExpFired) return;
-  var t = e.target;
-  if (!t || !t.closest) return;
-  if (!t.closest('#expressForm')) return;
-  _rbExpFired = true;
-  try {
-    var p = (typeof currentProduct !== 'undefined' && currentProduct) ? currentProduct : null;
-    if (!p) return;
-    var qEl = document.getElementById('expressQty');
-    var q = parseInt(qEl && qEl.value) || 1;
-    var payload = {
-      content_type: 'product',
-      content_ids: [String(p.id)],
-      content_name: p.title,
-      contents: [{ id: String(p.id), quantity: q, item_price: p.price }],
-      num_items: q,
-      value: p.price * q,
-      currency: 'DZD'
-    };
-    if (window.fbq) { fbq('track', 'AddToCart', payload); fbq('track', 'InitiateCheckout', payload); }
-    if (window.gtag) { gtag('event', 'begin_checkout', { currency: 'DZD', value: p.price * q }); }
-  } catch (err) {}
-}, true);
-
 let isSubmittingExpress = false;
 async function submitExpressOrder() {
     if(isSubmittingExpress) return;
     if(!currentProduct) return;
     if(honeypotFilled('expressHp')) { showOrderSuccess('', '', null); return; }
     const name = document.getElementById('expressName').value.trim();
-    const phone = document.getElementById('expressPhone').value.trim();
+    const phone = rbNormPhone(document.getElementById('expressPhone').value); try{var _pe2=document.getElementById('expressPhone'); if(_pe2) _pe2.value=phone;}catch(e){}
     const wilaya = document.getElementById('expressWilaya').value;
     const baladiya = (document.getElementById('expressBaladiya') ? document.getElementById('expressBaladiya').value.trim() : "");
     const addressRaw = (document.getElementById('expressAddress') ? document.getElementById('expressAddress').value.trim() : "");
     const qty = parseInt(document.getElementById('expressQty').value) || 1;
-    if(!name || !phone || !wilaya) { showToast("يرجى ملء البيانات", "error"); return; }
+    if(!name || !phone || !wilaya) { rbBlocked("missing_fields"); showToast("يرجى ملء البيانات", "error"); return; }
     var _nw = name.split(/\s+/).filter(function(w){ return w.length>=2; }).length;
-    if(_nw<1 || _nw>5) { showToast("يرجى إدخال الاسم واللقب", "error"); return; }
-    if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
-    if(!baladiya) { showToast("يرجى إدخال البلدية", "error"); return; }
-    if(!addressRaw || addressRaw.length<4) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(_nw<1 || _nw>5) { rbBlocked("name"); showToast("يرجى إدخال الاسم واللقب", "error"); return; }
+    if(!/^0[5-7][0-9]{8}$/.test(phone)) { rbBlocked("phone"); showToast("رقم الهاتف لازم 10 أرقام يبدأ بـ 05 أو 06 أو 07", "error"); return; }
+    if(!baladiya) { rbBlocked("baladiya"); showToast("يرجى إدخال البلدية", "error"); return; }
+    if(!addressRaw) { rbBlocked("address"); showToast("يرجى إدخال العنوان", "error"); return; }
     const address = [baladiya, addressRaw].filter(Boolean).join("، ");
     const subtotal = currentProduct.price * qty;
     var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
@@ -781,7 +768,7 @@ async function submitExpressOrder() {
     var expressBtnOrig = expressBtn ? expressBtn.innerHTML : '';
     if(expressBtn){ expressBtn.disabled = true; expressBtn.innerHTML = 'جاري المعالجة...'; }
     try {
-        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, baladiya:baladiya, address:address, payment:"الدفع عند الاستلام", subtotal, deliveryFee, deliveryType:dType, totalPrice:total, timestamp:new Date().toISOString() };
+        const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, baladiya:baladiya, address:address, payment:"الدفع عند الاستلام", subtotal, deliveryFee, deliveryType:dType, deliveryLabel:(dType==='office'?'مكتب':'منزل'), totalPrice:total, timestamp:new Date().toISOString() };
         try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
