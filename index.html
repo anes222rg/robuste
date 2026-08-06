@@ -626,6 +626,33 @@ gtag('config', 'G-GREM5BTR7T');
   </div>
 </section>
 
+<!-- Special offers: prices always synced from products.json (JSON = source of truth) -->
+<script>
+(function(){
+  "use strict";
+  function fmt(n){ return Number(n).toLocaleString('en-US').replace(/,/g,' ') + ' دج'; }
+  fetch('products.json').then(function(r){ if(!r.ok) throw new Error('products'); return r.json(); }).then(function(all){
+    var byId = {};
+    all.forEach(function(p){ byId[p.id] = p; });
+    document.querySelectorAll('.offer-product').forEach(function(card){
+      var link = card.querySelector('a[href^="product-"]');
+      if(!link) return;
+      var m = link.getAttribute('href').match(/^product-(\d+)\.html/);
+      if(!m) return;
+      var p = byId[m[1]];
+      if(!p) return;
+      var priceEl = card.querySelector('.offer-product-price');
+      var oldEl = card.querySelector('.offer-product-old-price');
+      if(priceEl) priceEl.textContent = fmt(p.price);
+      if(oldEl){
+        if(p.old_price){ oldEl.textContent = fmt(p.old_price); oldEl.style.display=''; }
+        else { oldEl.style.display='none'; }
+      }
+    });
+  }).catch(function(){ /* keep static fallback prices */ });
+})();
+</script>
+
 <!-- قسم المنتجات (يتم تحميلها بواسطة main.js، أسماء المنتجات الأصلية تبقى كما هي) -->
 <section id="products" class="py-5">
     <div class="container">
