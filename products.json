@@ -3,20 +3,20 @@
     "id": 205,
     "title": "PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1",
     "price": 26500,
-    "old_price": 27500,
+    "old_price": 27300,
     "images": [
       "images/pack-maison-1.webp",
       "images/pack-maison-2.webp",
       "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png",
       "images/NETTOYEUR DE TACHES 4 EN 1.jpg"
     ],
-    "description_short": "منظف البقع 4 في 1 (1650W) + المكنسة اليدوية اللاسلكية AM80 بـ 26,500 د.ج بدل 27,500 د.ج. | Nettoyeur de taches 4 en 1 (1650W) + aspirateur souffleur à main sans fil AM80 à 26 500 DA au lieu de 27 500 DA.",
-    "description_long": "باك المنزل يجمع جهازين يكمّل كل واحد الآخر: منظف البقع ROBUSTE ProClean 4 في 1 بقوة 1650 واط (بخار · ماء بارد · ماء ساخن 60° · تعقيم 100°) ينزع البقع من الأرائك والمفارش والزرابي ومقاعد السيارة دون مواد كيميائية، والمكنسة اليدوية اللاسلكية AM80 بمحرك BLDC ووضعي شفط ونفخ و 7 ملحقات تصل للأماكن الضيقة في السيارة والبيت. الاول يغسل والثاني يلمّع وينشف ويشفط الغبار. توفر 1,000 د.ج مقارنة بشراء الجهازين منفصلين، مع ضمان 12 شهر، تجربة المنتجين قبل الشحن، وحق التبديل خلال 7 أيام إذا وُجد خلل. الدفع عند الاستلام في كل الولايات. — Le pack maison réunit le nettoyeur de taches ProClean 4 en 1 (1650W : vapeur, eau froide, eau chaude 60°, stérilisateur 100°) et l’aspirateur souffleur à main sans fil AM80 (moteur BLDC, 7 accessoires). 1 000 DA d’économie, garantie 12 mois, paiement à la livraison.",
+    "description_short": "منظف البقع 4 في 1 (1650W) + المكنسة اليدوية اللاسلكية AM80 بـ 26,500 د.ج بدل 27,300 د.ج. | Nettoyeur de taches 4 en 1 (1650W) + aspirateur souffleur à main sans fil AM80 à 26 500 DA au lieu de 27 300 DA.",
+    "description_long": "باك المنزل يجمع جهازين يكمّل كل واحد الآخر: منظف البقع ROBUSTE ProClean 4 في 1 بقوة 1650 واط (بخار · ماء بارد · ماء ساخن 60° · تعقيم 100°) ينزع البقع من الأرائك والمفارش والزرابي ومقاعد السيارة دون مواد كيميائية، والمكنسة اليدوية اللاسلكية AM80 بمحرك BLDC ووضعي شفط ونفخ و 7 ملحقات تصل للأماكن الضيقة في السيارة والبيت. الاول يغسل والثاني يلمّع وينشف ويشفط الغبار. توفر 800 د.ج مقارنة بشراء الجهازين منفصلين، مع ضمان 12 شهر، تجربة المنتجين قبل الشحن، وحق التبديل خلال 7 أيام إذا وُجد خلل. الدفع عند الاستلام في كل الولايات. — Le pack maison réunit le nettoyeur de taches ProClean 4 en 1 (1650W : vapeur, eau froide, eau chaude 60°, stérilisateur 100°) et l’aspirateur souffleur à main sans fil AM80 (moteur BLDC, 7 accessoires). 800 DA d’économie, garantie 12 mois, paiement à la livraison.",
     "features": [
       "منظف البقع 4 في 1 — 1650 واط",
       "مكنسة يدوية لاسلكية AM80 + 7 ملحقات",
       "للأرائك · المفارش · الزرابي · مقاعد السيارة",
-      "توفر 1,000 د.ج عن الشراء المنفصل",
+      "توفر 800 د.ج عن الشراء المنفصل",
       "ضمان 12 شهر · تبديل خلال 7 أيام",
       "الدفع عند الاستلام"
     ],
@@ -37,11 +37,11 @@
     "images": [
       "images/FRITEUSE DF 900 W.png"
     ],
-    "description_short": "مقلاتان DF 900W بـ 12٬000 دج بدل 12٬400 دج. | 2 friteuses DF 900W à 12 000 DA au lieu de 12 400 DA.",
+    "description_short": "مقلاتان DF 900W بـ 12٬800 دج بدل 13٬000 دج. | 2 friteuses DF 900W à 12 800 DA au lieu de 13 000 DA.",
     "description_long": "اقتنِ مقلاتين FRITEUSE DF 900W معًا بسعر 6٬400 دج للواحدة بدل 6٬500 دج — مثالية للعائلات أو كهدية. — Achetez 2 friteuses DF 900W ensemble à 6 400 DA l’unité au lieu de 6 500 DA. Idéal pour la famille ou comme cadeau.",
     "features": [
       "2× FRITEUSE DF 900W",
-      "وفّر 400 دج مقارنة بالشراء المنفصل",
+      "وفّر 200 دج مقارنة بالشراء المنفصل",
       "الدفع عند الاستلام"
     ],
     "stock": 5,
@@ -56,7 +56,7 @@
     "id": 201,
     "title": "SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W",
     "price": 13000,
-    "old_price": 13100,
+    "old_price": 13400,
     "images": [
       "images/PANINEUSE ET GRILL 1000W.png",
       "images/FRITEUSE DF 900 W.png"
@@ -66,7 +66,7 @@
     "features": [
       "PANINEUSE ET GRILL 1000W",
       "FRITEUSE DF 900W",
-      "وفّر 100 دج",
+      "وفّر 400 دج",
       "الدفع عند الاستلام"
     ],
     "stock": 10,

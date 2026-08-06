@@ -172,7 +172,7 @@ gtag('config', 'G-GREM5BTR7T');
         <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">الرئيسية</a></li><li class="breadcrumb-item"><a href="index.html#products">المنتجات</a></li><li class="breadcrumb-item active" aria-current="page">SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W</li></ol></nav>
         <h1 class="product-title">SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W</h1>
         <div class="price-section my-3">
-          <span class="current-price fw-bold fs-3" dir="ltr">13,000 DA</span><del class="old-price text-muted ms-2" dir="ltr">13,100 DA</del><span class="discount-badge ms-2">-1%</span>
+          <span class="current-price fw-bold fs-3" dir="ltr">13,000 DA</span><del class="old-price text-muted ms-2" dir="ltr">13,400 DA</del><span class="discount-badge ms-2">-3%</span>
         </div>
         <p class="product-availability">متوفر في المخزون</p>
         <p class="product-description">باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.</p>
@@ -957,5 +957,45 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
 <script src="analytics.js"></script>
 <script src="telegram.js"></script>
 <script defer src="robuste-tracking.js"></script>
+<!-- RB-PRICE-SYNC: price, old price and discount badge always come from products.json -->
+<script>
+(function(){
+  "use strict";
+  var id = (location.pathname.match(/product-(\d+)\.html/) || [])[1];
+  if (!id) return;
+  function da(n){ return Number(n).toLocaleString('en-US') + ' DA'; }
+  fetch('products.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(all){
+    if (!all) return;
+    var p = null;
+    for (var i = 0; i < all.length; i++){ if (String(all[i].id) === id){ p = all[i]; break; } }
+    if (!p) return;
+    var sec = document.querySelector('.price-section');
+    if (sec){
+      var cur = sec.querySelector('.current-price');
+      var old = sec.querySelector('.old-price');
+      var bad = sec.querySelector('.discount-badge');
+      if (cur) cur.textContent = da(p.price);
+      if (old){
+        if (p.old_price){ old.textContent = da(p.old_price); old.style.display = ''; }
+        else { old.style.display = 'none'; }
+      }
+      if (bad){
+        if (p.old_price && p.old_price > p.price){
+          bad.textContent = '-' + Math.round(100 * (p.old_price - p.price) / p.old_price) + '%';
+          bad.style.display = '';
+        } else { bad.style.display = 'none'; }
+      }
+    }
+    var bar = document.getElementById('topBarText');
+    if (bar){
+      var b = bar.querySelector('b'), d = bar.querySelector('del');
+      if (b && d && /\d/.test(d.textContent)){
+        b.textContent = Number(p.price).toLocaleString('en-US') + ' د.ج';
+        if (p.old_price) d.textContent = Number(p.old_price).toLocaleString('en-US');
+      }
+    }
+  }).catch(function(){});
+})();
+</script>
 </body>
 </html>

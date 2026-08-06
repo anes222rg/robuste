@@ -1007,5 +1007,45 @@ window.goToOrder=goToOrder;
 <script src="analytics.js"></script>
 <script src="telegram.js"></script>
 <script defer src="robuste-tracking.js"></script>
+<!-- RB-PRICE-SYNC: price, old price and discount badge always come from products.json -->
+<script>
+(function(){
+  "use strict";
+  var id = (location.pathname.match(/product-(\d+)\.html/) || [])[1];
+  if (!id) return;
+  function da(n){ return Number(n).toLocaleString('en-US') + ' DA'; }
+  fetch('products.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(all){
+    if (!all) return;
+    var p = null;
+    for (var i = 0; i < all.length; i++){ if (String(all[i].id) === id){ p = all[i]; break; } }
+    if (!p) return;
+    var sec = document.querySelector('.price-section');
+    if (sec){
+      var cur = sec.querySelector('.current-price');
+      var old = sec.querySelector('.old-price');
+      var bad = sec.querySelector('.discount-badge');
+      if (cur) cur.textContent = da(p.price);
+      if (old){
+        if (p.old_price){ old.textContent = da(p.old_price); old.style.display = ''; }
+        else { old.style.display = 'none'; }
+      }
+      if (bad){
+        if (p.old_price && p.old_price > p.price){
+          bad.textContent = '-' + Math.round(100 * (p.old_price - p.price) / p.old_price) + '%';
+          bad.style.display = '';
+        } else { bad.style.display = 'none'; }
+      }
+    }
+    var bar = document.getElementById('topBarText');
+    if (bar){
+      var b = bar.querySelector('b'), d = bar.querySelector('del');
+      if (b && d && /\d/.test(d.textContent)){
+        b.textContent = Number(p.price).toLocaleString('en-US') + ' د.ج';
+        if (p.old_price) d.textContent = Number(p.old_price).toLocaleString('en-US');
+      }
+    }
+  }).catch(function(){});
+})();
+</script>
 </body>
 </html>

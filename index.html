@@ -409,7 +409,7 @@ gtag('config', 'G-GREM5BTR7T');
     <div class="offer-products" id="offerProducts">
       <!-- منتج 1 -->
       <div class="offer-product">
-        <div class="offer-product-discount">-15%</div>
+        <div class="offer-product-discount">-6%</div>
         <div class="offer-product-badge">الأكثر مبيعاً</div>
 
         <div id="carousel-offer-1" class="carousel slide">
@@ -497,7 +497,7 @@ gtag('config', 'G-GREM5BTR7T');
 
       <!-- منتج 3 -->
       <div class="offer-product">
-        <div class="offer-product-discount">-25%</div>
+        <div class="offer-product-discount">-11%</div>
         <div class="offer-product-badge">الأعلى مبيعاً</div>
 
         <div id="carousel-offer-3" class="carousel slide">
@@ -643,10 +643,17 @@ gtag('config', 'G-GREM5BTR7T');
       if(!p) return;
       var priceEl = card.querySelector('.offer-product-price');
       var oldEl = card.querySelector('.offer-product-old-price');
+      var discEl = card.querySelector('.offer-product-discount');
       if(priceEl) priceEl.textContent = fmt(p.price);
       if(oldEl){
         if(p.old_price){ oldEl.textContent = fmt(p.old_price); oldEl.style.display=''; }
         else { oldEl.style.display='none'; }
+      }
+      if(discEl){
+        if(p.old_price && p.old_price > p.price){
+          discEl.textContent = '-' + Math.round(100*(p.old_price-p.price)/p.old_price) + '%';
+          discEl.style.display='';
+        } else { discEl.style.display='none'; }
       }
     });
   }).catch(function(){ /* keep static fallback prices */ });
