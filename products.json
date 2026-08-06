@@ -22,7 +22,12 @@
     ],
     "stock": 5,
     "category": "packs",
-    "badge": "PACK MAISON"
+    "badge": "PACK MAISON",
+    "members": [
+      "NETTOYEUR DE TACHES 4 EN 1 (1650W)",
+      "ASPIRATEUR SOUFFLEUR À MAIN AM80"
+    ],
+    "devices": 2
   },
   {
     "id": 200,
@@ -41,7 +46,11 @@
     ],
     "stock": 5,
     "category": "packs",
-    "badge": "PACK وفر"
+    "badge": "PACK وفر",
+    "members": [
+      "2× FRITEUSE DF 900W"
+    ],
+    "devices": 2
   },
   {
     "id": 201,
@@ -62,7 +71,12 @@
     ],
     "stock": 10,
     "category": "packs",
-    "badge": "SUMMER PACK"
+    "badge": "SUMMER PACK",
+    "members": [
+      "PANINEUSE ET GRILL 1000W",
+      "FRITEUSE DF 900W"
+    ],
+    "devices": 2
   },
   {
     "id": 202,
@@ -83,7 +97,12 @@
     ],
     "stock": 12,
     "category": "packs",
-    "badge": "PACK وفر"
+    "badge": "PACK وفر",
+    "members": [
+      "SECHE CHEVEUX PRO2000",
+      "LISSEUR CHEVEUX SW 207"
+    ],
+    "devices": 2
   },
   {
     "id": 203,
@@ -104,7 +123,12 @@
     ],
     "stock": 7,
     "category": "packs",
-    "badge": "GIRLY PACK"
+    "badge": "GIRLY PACK",
+    "members": [
+      "EPILATEUR SES 3",
+      "BROSSE NETTOYANTE VISAGE BNV 4"
+    ],
+    "devices": 2
   },
   {
     "id": 204,
@@ -129,7 +153,14 @@
     ],
     "stock": 7,
     "category": "packs",
-    "badge": "MEGA PACK"
+    "badge": "MEGA PACK",
+    "members": [
+      "SECHE CHEVEUX PRO2000",
+      "LISSEUR CHEVEUX SW 207",
+      "EPILATEUR SES 3",
+      "BROSSE NETTOYANTE VISAGE BNV 4"
+    ],
+    "devices": 4
   },
   {
     "id": 1,

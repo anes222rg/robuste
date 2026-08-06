@@ -48,8 +48,8 @@
         root.innerHTML = packs.map(function (p, index) {
           var name = displayName(p);
           var images = (p.images || []).slice(0, 4);
-          var members = titleParts(p);
-          var count = members.length || images.length;
+          var members = (Array.isArray(p.members) && p.members.length) ? p.members.slice(0, 4) : titleParts(p);
+          var count = (typeof p.devices === 'number' && p.devices > 0) ? p.devices : (members.length || images.length);
           var mosaic = images.map(function (src, i) {
             return '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(name) + ' — ' + (i + 1) + '" loading="lazy" decoding="async">';
           }).join('');
