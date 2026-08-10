@@ -1,0 +1,133 @@
+/* =====================================================================
+   ROBUSTE — rb-tune.css (v2)
+   1) Cart = LAST control in the top bar, on the right
+   2) Product / offer cards: slightly smaller type
+   3) Small phones (<=430px, iPhone X class): calmer, less crowded
+   Loaded after robuste.css / rb-bridge.css so it wins the cascade.
+   ===================================================================== */
+
+/* ---------- 1. TOP BAR ------------------------------------------------
+   The nav renders LTR: brand · links · theme · lang · (toggler) · cart.
+   Older rules pinned the cart to order:0 (far left) — overridden here. */
+.glass-navbar .container{
+  display:flex!important; flex-wrap:wrap!important; align-items:center!important;
+}
+.glass-navbar .navbar-brand{ order:1!important; margin-inline-end:12px!important; }
+.glass-navbar .navbar-collapse{ order:2!important; }
+.glass-navbar .navbar-collapse .navbar-nav{
+  margin-inline-start:auto!important; margin-inline-end:0!important;
+}
+.glass-navbar #themeToggle,
+.glass-navbar .theme-toggle{
+  order:3!important; margin-inline-start:auto!important; margin-inline-end:8px!important;
+}
+.glass-navbar #i18nSwitcher{ order:4!important; margin-inline-end:8px!important; }
+.glass-navbar .navbar-toggler{
+  order:5!important; margin-inline-start:0!important; margin-inline-end:8px!important;
+}
+.glass-navbar #floatingCart,
+.glass-navbar .floating-cart{
+  order:6!important;                    /* last item in the bar */
+  margin-inline-start:0!important; margin-inline-end:0!important;
+  position:static!important; inset:auto!important;
+  top:auto!important; right:auto!important; bottom:auto!important; left:auto!important;
+  transform:none!important; z-index:auto!important;
+}
+.glass-navbar .cart-icon-container{ display:flex!important; flex-direction:row!important; align-items:center; }
+.glass-navbar .cart-label-float{ display:none!important; }
+.glass-navbar #cartCountFloat{
+  position:absolute!important; top:-6px!important; right:-6px!important; left:auto!important;
+  min-width:18px!important; width:auto!important; height:18px!important;
+  border-radius:999px!important; background:var(--rb-accent,#FF4F00)!important; color:#fff!important;
+  font-size:11px!important; font-weight:700; line-height:1; padding:0 4px!important;
+  border:0!important; display:grid!important; place-items:center!important;
+}
+@media (min-width:992px){
+  .glass-navbar .navbar-collapse{ flex:1 1 auto!important; }
+}
+@media (max-width:991.98px){
+  .glass-navbar .navbar-collapse{ order:9!important; flex-basis:100%!important; width:100%!important; }
+}
+
+/* ---------- 2. CARDS: a touch smaller type --------------------------- */
+.product-card .product-title{
+  font-size:13.5px!important; line-height:1.45!important;
+  height:auto!important; min-height:2.9em; margin:12px 12px 6px!important;
+}
+.product-card .price-section{ padding:0 12px!important; margin:0 0 12px!important; }
+.product-card .current-price{ font-size:16px!important; }
+.product-card .old-price{ font-size:12px!important; }
+.product-card .card-footer{ padding:0 12px 12px!important; }
+.product-card .btn-orange,
+.product-card .add-to-cart-btn{ font-size:13px!important; min-height:40px!important; padding:9px 10px!important; }
+.product-card .discount-badge{ font-size:10.5px!important; padding:3px 8px!important; }
+/* keep "-18%" reading left-to-right inside the RTL page */
+.discount-badge,
+.offer-product-discount,
+.product-card .old-price,
+.product-card .current-price{ direction:ltr!important; unicode-bidi:isolate; }
+.product-card .product-badge{ font-size:10px!important; padding:3px 8px!important; }
+.product-card .stock-badge{ font-size:9.5px!important; padding:2px 7px!important; }
+
+.offer-product-title{ font-size:1rem!important; height:auto!important; min-height:2.7em; margin-bottom:12px!important; }
+.offer-product-price{ font-size:1.45rem!important; }
+.offer-product-old-price{ font-size:.95rem!important; }
+.offer-product-discount,
+.offer-product-badge{ font-size:12px!important; padding:6px 13px!important; }
+.offer-btn{ font-size:.93rem!important; padding:13px!important; }
+
+/* ---------- 3. SMALL PHONES (iPhone X / SE and friends) -------------- */
+@media (max-width:430px){
+  .container{ padding-inline:14px!important; }
+  section.py-5{ padding-top:34px!important; padding-bottom:34px!important; }
+  .section-title{ font-size:1.35rem!important; margin-bottom:20px!important; padding-bottom:12px!important; }
+
+  /* grid: two calm columns */
+  #productsContainer{ --bs-gutter-x:14px!important; }
+  #productsContainer > [class*="col-"]{ margin-bottom:14px!important; }
+  .product-card{ border-radius:14px!important; min-height:0!important; margin-bottom:0!important; }
+  .product-card .product-title{ font-size:12.5px!important; margin:10px 10px 6px!important; }
+  .product-card .price-section{ padding:0 10px!important; margin:0 0 10px!important; gap:6px!important; }
+  .product-card .current-price{ font-size:14.5px!important; }
+  .product-card .old-price{ font-size:11px!important; }
+  .product-card .card-footer{ padding:0 10px 10px!important; }
+  .product-card .btn-orange,
+  .product-card .add-to-cart-btn{ font-size:12px!important; min-height:38px!important; padding:8px 6px!important; border-radius:10px!important; }
+  .product-card .discount-badge{ font-size:9.5px!important; padding:2px 6px!important; }
+  .product-card .stock-badge{ font-size:9px!important; padding:2px 6px!important; }
+  .product-card .product-badge{ display:none!important; }
+  .product-card .carousel-indicators{ display:none!important; }
+
+  /* offers: one clean card per swipe */
+  .offer-products{ gap:12px!important; padding:12px 0 22px!important; scroll-snap-type:x mandatory; }
+  .offer-product{ flex:0 0 82vw!important; scroll-snap-align:center; border-radius:16px!important; }
+  .offer-product-content{ padding:14px!important; }
+  .offer-product-title{ font-size:.95rem!important; min-height:2.6em; margin-bottom:10px!important; }
+  .offer-product-price{ font-size:1.25rem!important; }
+  .offer-product-old-price{ font-size:.85rem!important; }
+  .offer-product-discount,
+  .offer-product-badge{ font-size:10.5px!important; padding:5px 10px!important; }
+  .offer-btn{ padding:11px!important; font-size:.88rem!important; border-radius:10px!important; }
+  .offers-title{ font-size:1.6rem!important; }
+  .offer-subtitle{ font-size:.9rem!important; margin-bottom:18px!important; }
+
+  /* filter chips */
+  .categories-filter{ padding:10px 0!important; margin-bottom:18px!important; }
+  .category-btn{ padding:6px 14px!important; font-size:.82rem!important; min-height:38px!important; }
+
+  /* top bar */
+  .glass-navbar{ padding-top:4px!important; padding-bottom:4px!important; }
+  .glass-navbar .navbar-brand img{ max-height:32px!important; width:auto!important; }
+  .glass-navbar .navbar-brand{ margin-inline-end:6px!important; }
+
+  /* product page */
+  .product-page .product-title{ font-size:1.15rem!important; line-height:1.35!important; }
+  .product-page .current-price{ font-size:1.35rem!important; }
+  .product-page .price-section{ padding:12px!important; }
+  .product-page .product-info{ padding:14px!important; }
+
+  /* floating helpers should not crowd the screen */
+  .whatsapp-btn{ width:50px!important; height:50px!important; font-size:23px!important; bottom:16px!important; left:16px!important; }
+  .trust-item{ padding:12px!important; }
+  .trust-icon{ width:46px!important; height:46px!important; font-size:21px!important; border-radius:12px!important; }
+}

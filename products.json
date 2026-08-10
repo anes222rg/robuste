@@ -2,7 +2,7 @@
   {
     "id": 205,
     "title": "PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1",
-    "price": 26500,
+    "price": 24500,
     "old_price": 27300,
     "images": [
       "images/pack-maison-1.webp",
@@ -481,7 +481,7 @@
   {
     "id": 16,
     "title": "ASPIRATEUR SOUFFLEUR A MAIN AM80",
-    "price": 5100,
+    "price": 4500,
     "old_price": 6500,
     "images": [
       "images/ASPIRATEUR SOUFFLEUR A MAIN.png",
@@ -504,7 +504,7 @@
   {
     "id": 17,
     "title": "NETTOYEUR DE TACHES 4 EN 1",
-    "price": 22200,
+    "price": 20500,
     "old_price": 25000,
     "images": [
       "images/NETTOYEUR DE TACHES 4 EN 1.jpg",
@@ -777,7 +777,7 @@
   {
     "id": 101,
     "title": "ASPIRATEUR SOUFFLEUR A MAIN",
-    "price": 4400,
+    "price": 4500,
     "old_price": 5500,
     "images": [
       "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png",
@@ -800,7 +800,7 @@
   {
     "id": 102,
     "title": "NETTOYEUR DE TACHES 4 EN 1",
-    "price": 22200,
+    "price": 20500,
     "old_price": 25000,
     "images": [
       "images/NETTOYEUR DE TACHES 4 EN 1.jpg",
