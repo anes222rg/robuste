@@ -31,7 +31,7 @@ gtag('config', 'G-GREM5BTR7T');
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 <meta name="theme-color" content="#ff6600">
-<meta name="description" content="Summer Pack : grill 1000W + friteuse DF 900W à 13 000 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,000 دج.">
+<meta name="description" content="Summer Pack : grill 1000W + friteuse DF 900W à 13 300 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,300 دج.">
 <title>SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W | ROBUSTE</title>
 <!-- Canonical + SEO (added; updated dynamically per product) -->
 <link rel="canonical" href="https://www.robustedz.store/product-201.html">
@@ -40,12 +40,12 @@ gtag('config', 'G-GREM5BTR7T');
 <meta property="og:site_name" content="ROBUSTE">
 <meta property="og:locale" content="ar_DZ">
 <meta property="og:title" content="SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W | ROBUSTE">
-<meta property="og:description" content="Summer Pack : grill 1000W + friteuse DF 900W à 13 000 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,000 دج.">
+<meta property="og:description" content="Summer Pack : grill 1000W + friteuse DF 900W à 13 300 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,300 دج.">
 <meta property="og:url" content="https://www.robustedz.store/product-201.html">
 <meta property="og:image" content="https://www.robustedz.store/images/PANINEUSE%20ET%20GRILL%201000W.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W | ROBUSTE">
-<meta name="twitter:description" content="Summer Pack : grill 1000W + friteuse DF 900W à 13 000 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,000 دج.">
+<meta name="twitter:description" content="Summer Pack : grill 1000W + friteuse DF 900W à 13 300 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,300 دج.">
 <meta name="twitter:image" content="https://www.robustedz.store/images/PANINEUSE%20ET%20GRILL%201000W.png">
 
 <!-- Google Fonts -->
@@ -89,13 +89,17 @@ gtag('config', 'G-GREM5BTR7T');
   }, true);
   function swap(im){
     if (!im || im.tagName !== 'IMG') return;
-    if (im.getAttribute('data-orig')) return;
+    if (im.getAttribute('data-webp-checked')) return;
     var s = im.getAttribute('src');
     if (!s) return;
     var m = s.match(/^(images\/.+)\.(png|jpe?g)$/i);
     if (!m) return;
-    im.setAttribute('data-orig', s);
-    im.setAttribute('src', m[1] + '.webp');
+    im.setAttribute('data-webp-checked', '1');
+    var cand = m[1] + '.webp';
+    var probe = new Image();
+    probe.onload = function(){ if (im.getAttribute('src') === s) im.setAttribute('src', cand); };
+    probe.onerror = function(){};
+    probe.src = cand;
   }
   function scan(root){
     try {
@@ -121,7 +125,7 @@ gtag('config', 'G-GREM5BTR7T');
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W","image":["https://www.robustedz.store/images/PANINEUSE%20ET%20GRILL%201000W.png"],"description":"باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.","sku":"201","mpn":"201","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-201.html","priceCurrency":"DZD","price":13000,"priceValidUntil":"2027-07-12","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
+<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W","image":["https://www.robustedz.store/images/PANINEUSE%20ET%20GRILL%201000W.png"],"description":"باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.","sku":"201","mpn":"201","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-201.html","priceCurrency":"DZD","price":13300,"priceValidUntil":"2027-07-12","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
@@ -173,7 +177,7 @@ gtag('config', 'G-GREM5BTR7T');
         <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">الرئيسية</a></li><li class="breadcrumb-item"><a href="index.html#products">المنتجات</a></li><li class="breadcrumb-item active" aria-current="page">SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W</li></ol></nav>
         <h1 class="product-title">SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W</h1>
         <div class="price-section my-3">
-          <span class="current-price fw-bold fs-3" dir="ltr">13,000 DA</span><del class="old-price text-muted ms-2" dir="ltr">13,400 DA</del><span class="discount-badge ms-2">-3%</span>
+          <span class="current-price fw-bold fs-3" dir="ltr">13,300 DA</span><del class="old-price text-muted ms-2" dir="ltr">13,700 DA</del><span class="discount-badge ms-2">-3%</span>
         </div>
         <p class="product-availability">متوفر في المخزون</p>
         <p class="product-description">باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.</p>

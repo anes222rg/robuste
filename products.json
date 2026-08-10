@@ -4,7 +4,7 @@
     "title": "PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1",
     "price": 24500,
     "old_price": 27300,
-    "images": [
+    "mosaic_images": 1, "images": [
       "images/pack-maison-1.webp",
       "images/pack-maison-2.webp",
       "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png",
@@ -32,13 +32,13 @@
   {
     "id": 200,
     "title": "PACK DUO — 2× FRITEUSE DF 900W",
-    "price": 12800,
-    "old_price": 13000,
+    "price": 13400,
+    "old_price": 13600,
     "images": [
       "images/FRITEUSE DF 900 W.png"
     ],
-    "description_short": "مقلاتان DF 900W بـ 12٬800 دج بدل 13٬000 دج. | 2 friteuses DF 900W à 12 800 DA au lieu de 13 000 DA.",
-    "description_long": "اقتنِ مقلاتين FRITEUSE DF 900W معًا بسعر 6٬400 دج للواحدة بدل 6٬500 دج — مثالية للعائلات أو كهدية. — Achetez 2 friteuses DF 900W ensemble à 6 400 DA l’unité au lieu de 6 500 DA. Idéal pour la famille ou comme cadeau.",
+    "description_short": "مقلاتان DF 900W بـ 13٬400 دج بدل 13٬600 دج. | 2 friteuses DF 900W à 13 400 DA au lieu de 13 600 DA.",
+    "description_long": "اقتنِ مقلاتين FRITEUSE DF 900W معًا بسعر 6٬700 دج للواحدة بدل 6٬800 دج — مثالية للعائلات أو كهدية. — Achetez 2 friteuses DF 900W ensemble à 6 700 DA l’unité au lieu de 6 800 DA. Idéal pour la famille ou comme cadeau.",
     "features": [
       "2× FRITEUSE DF 900W",
       "وفّر 200 دج مقارنة بالشراء المنفصل",
@@ -55,13 +55,13 @@
   {
     "id": 201,
     "title": "SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W",
-    "price": 13000,
-    "old_price": 13400,
+    "price": 13300,
+    "old_price": 13700,
     "images": [
       "images/PANINEUSE ET GRILL 1000W.png",
       "images/FRITEUSE DF 900 W.png"
     ],
-    "description_short": "Summer Pack : grill 1000W + friteuse DF 900W à 13 000 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,000 دج.",
+    "description_short": "Summer Pack : grill 1000W + friteuse DF 900W à 13 300 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,300 دج.",
     "description_long": "باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.",
     "features": [
       "PANINEUSE ET GRILL 1000W",
@@ -229,7 +229,7 @@
   {
     "id": 4,
     "title": "FRITEUSE DF 900 W",
-    "price": 6500,
+    "price": 6800,
     "old_price": 7800,
     "images": [
       "images/FRITEUSE DF 900 W.png",

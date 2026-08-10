@@ -89,13 +89,17 @@ gtag('config', 'G-GREM5BTR7T');
   }, true);
   function swap(im){
     if (!im || im.tagName !== 'IMG') return;
-    if (im.getAttribute('data-orig')) return;
+    if (im.getAttribute('data-webp-checked')) return;
     var s = im.getAttribute('src');
     if (!s) return;
     var m = s.match(/^(images\/.+)\.(png|jpe?g)$/i);
     if (!m) return;
-    im.setAttribute('data-orig', s);
-    im.setAttribute('src', m[1] + '.webp');
+    im.setAttribute('data-webp-checked', '1');
+    var cand = m[1] + '.webp';
+    var probe = new Image();
+    probe.onload = function(){ if (im.getAttribute('src') === s) im.setAttribute('src', cand); };
+    probe.onerror = function(){};
+    probe.src = cand;
   }
   function scan(root){
     try {

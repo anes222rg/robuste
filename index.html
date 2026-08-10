@@ -108,13 +108,17 @@ gtag('config', 'G-GREM5BTR7T');
   }, true);
   function swap(im){
     if (!im || im.tagName !== 'IMG') return;
-    if (im.getAttribute('data-orig')) return;
+    if (im.getAttribute('data-webp-checked')) return;
     var s = im.getAttribute('src');
     if (!s) return;
     var m = s.match(/^(images\/.+)\.(png|jpe?g)$/i);
     if (!m) return;
-    im.setAttribute('data-orig', s);
-    im.setAttribute('src', m[1] + '.webp');
+    im.setAttribute('data-webp-checked', '1');
+    var cand = m[1] + '.webp';
+    var probe = new Image();
+    probe.onload = function(){ if (im.getAttribute('src') === s) im.setAttribute('src', cand); };
+    probe.onerror = function(){};
+    probe.src = cand;
   }
   function scan(root){
     try {
@@ -582,7 +586,7 @@ gtag('config', 'G-GREM5BTR7T');
 
       <!-- منتج 5 -->
       <div class="offer-product">
-        <div class="offer-product-discount">-17%</div>
+        <div class="offer-product-discount">-13%</div>
         <div class="offer-product-badge">عرض خاص</div>
 
         <div id="carousel-offer-5" class="carousel slide">
@@ -616,7 +620,7 @@ gtag('config', 'G-GREM5BTR7T');
         <div class="offer-product-content">
           <h4 class="offer-product-title">Friteuse DF 900 W</h4>
           <div class="price-container">
-<div class="offer-product-price">6 500 دج</div>
+<div class="offer-product-price">6 800 دج</div>
             <div class="offer-product-old-price">7 800 دج</div>
           </div>
           <div class="offer-btn"><i class="bi bi-bolt"></i> اشتر الآن</div>

@@ -43,11 +43,14 @@
         var packs = all.filter(function (p) { return p.category === 'packs'; });
         if (!packs.length) { root.hidden = true; return; }
         var lang = language();
+        lastLang = lang;
+        root.setAttribute('data-i18n-skip', '1');
         var copy = UI[lang] || UI.ar;
         updateIntro(lang);
         root.innerHTML = packs.map(function (p, index) {
           var name = displayName(p);
-          var images = (p.images || []).slice(0, 4);
+          var maxImgs = (typeof p.mosaic_images === 'number' && p.mosaic_images > 0) ? p.mosaic_images : 4;
+          var images = (p.images || []).slice(0, maxImgs);
           var members = (Array.isArray(p.members) && p.members.length) ? p.members.slice(0, 4) : titleParts(p);
           var count = (typeof p.devices === 'number' && p.devices > 0) ? p.devices : (members.length || images.length);
           var mosaic = images.map(function (src, i) {
@@ -70,6 +73,11 @@
         }).join('');
       }).catch(function () { root.hidden = true; });
   }
-  window.addEventListener('robuste:languagechange', render);
+  var lastLang = null;
+  window.addEventListener('robuste:languagechange', function () {
+    var l = language();
+    if (l === lastLang) { updateIntro(l); return; }  // no needless re-render (image flicker)
+    render();
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render); else render();
 }());

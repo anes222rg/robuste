@@ -7,6 +7,26 @@
   // [arabic source, english, french]
   var ROWS = [
     // ---- top bar promo + form messages (added) ----
+    // ---- missing UI strings (added 2026-08-10) ----
+    [`الدفع عند الاستلام — توصيل`, `Cash on delivery — shipping to`, `Paiement à la livraison — livraison dans`],
+    [`58 ولاية`, `58 wilayas`, `58 wilayas`],
+    [`خلال 24–72 ساعة`, `within 24–72 hours`, `sous 24–72 heures`],
+    [`توصيل 58 ولاية`, `Delivery to 58 wilayas`, `Livraison dans 58 wilayas`],
+    [`ضمان سنة`, `1-year warranty`, `Garantie 1 an`],
+    [`🎁 باكات التوفير`, `🎁 Value packs`, `🎁 Packs éco`],
+    [`باكات التوفير`, `Value packs`, `Packs éco`],
+    [`PACK وفر`, `SAVER PACK`, `PACK ÉCO`],
+    [`تفعيل وضع الظلام`, `Switch to dark mode`, `Activer le mode sombre`],
+    [`تفعيل وضع النهار`, `Switch to light mode`, `Activer le mode clair`],
+    [`اكتب اسم بلديتك`, `Enter your commune`, `Saisissez votre commune`],
+    [`أدخل عنوانك بالتفصيل (الحي، الشارع، رقم المنزل)`, `Full address (district, street, house number)`, `Adresse complète (quartier, rue, numéro)`],
+    [`الحي، الشارع، رقم المنزل...`, `District, street, house number...`, `Quartier, rue, numéro...`],
+    [`اتركه فارغاً`, `Leave this empty`, `Laissez vide`],
+    [`تيك توك`, `TikTok`, `TikTok`],
+    [`إنستغرام`, `Instagram`, `Instagram`],
+    [`أضف رأيك هنا`, `Add your review`, `Ajoutez votre avis`],
+    [`شارك تجربتك مع المنتج وساعد عملاءنا الآخرين`, `Share your experience and help our other customers`, `Partagez votre expérience et aidez nos autres clients`],
+    [`دفع آمن 100% · الدفع عند الاستلام أو ببطاقة الذهب`, `100% secure payment · cash on delivery or Edahabia card`, `Paiement 100% sécurisé · à la livraison ou par carte Edahabia`],
     [`عرض خاص مؤقّت`, `Limited-time offer`, `Offre à durée limitée`],
     [`لا تفوّت الفرصة`, `Don't miss out`, `Ne manquez pas l'occasion`],
     [`واتساب`, `WhatsApp`, `WhatsApp`],
