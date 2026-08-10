@@ -1,261 +1,420 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.robustedz.store/</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.robustedz.store/product-205.html</loc>
-    <lastmod>2026-07-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.robustedz.store/product-200.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/FRITEUSE%20DF%20900%20W.png</image:loc>
+      <image:title>PACK DUO — 2× FRITEUSE DF 900W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-201.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/PANINEUSE%20ET%20GRILL%201000W.png</image:loc>
+      <image:title>SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-202.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/SECHE%20CHEVEUX%20magenta.jpg</image:loc>
+      <image:title>PACK COIFFURE — SÈCHE-CHEVEUX PRO2000 + LISSEUR SW 207</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-203.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/EPILATOIR.png</image:loc>
+      <image:title>GIRLY PACK — ÉPILATEUR SES 3 + BROSSE VISAGE BNV 4</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-204.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/SECHE%20CHEVEUX%20magenta.jpg</image:loc>
+      <image:title>MEGA PACK — COIFFURE + BEAUTÉ (4 APPAREILS)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.robustedz.store/product-205.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/pack-maison-1.webp</image:loc>
+      <image:title>PACK MAISON — ASPIRATEUR À MAIN + NETTOYEUR 4 EN 1</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-1.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/SECHE%20CHEVEUX%20magenta.jpg</image:loc>
+      <image:title>SECHE CHEVEUX PRO2000</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-2.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/LISSEUR%20CHEVEUX.jpg</image:loc>
+      <image:title>LISSEUR CHEVEUX SW 207</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-3.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/LISSEUR%20CHEVEUX%20BROSSE.jpg</image:loc>
+      <image:title>LISSEUR CHEVEUX BROSSE LCB200N</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-4.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/FRITEUSE%20DF%20900%20W.png</image:loc>
+      <image:title>FRITEUSE DF 900 W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-5.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/EPILATOIR.png</image:loc>
+      <image:title>EPILATEUR SES 3</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-6.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/BROSSE%20NETOYANTE%20VISAGE.png</image:loc>
+      <image:title>BROSSE NETTOYANTE VISAGE BNV 4</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-7.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/mini%20hachior%20inox%20robuste.png</image:loc>
+      <image:title>MINI HACHOIR EN VERRE MH 400</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-8.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/quatro%20hachior.jpg</image:loc>
+      <image:title>HACHOIR LEGUMES 4 LAMES EN VERRE</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-9.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/hachior%20plastic%20Robuste.jpg</image:loc>
+      <image:title>HACHOIR HN19 350 W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-10.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/hachoir%20400w.jpg</image:loc>
+      <image:title>HACHOIRE LEGUME 400 W HLS 350</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-11.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/p%C3%A8trin%20pk2%20noir.jpg</image:loc>
+      <image:title>PETRIN 1000 W PK2</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-12.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/hachior%20daily.jpg</image:loc>
+      <image:title>HACHOIR 400 W 2L DAILY</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-13.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/Fer%20%C3%A0%20repasser%20blue.jpg</image:loc>
+      <image:title>Fer à repasser Robuste</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-14.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/multifonction%20p%C3%A8trin.jpg</image:loc>
+      <image:title>ROBOT 26F</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-15.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/CENTRALE%20VAPEUR%20SMART.jpg</image:loc>
+      <image:title>CENTRALE VAPEUR SMART 2400W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-16.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/ASPIRATEUR%20SOUFFLEUR%20A%20MAIN.png</image:loc>
+      <image:title>ASPIRATEUR SOUFFLEUR A MAIN AM80</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-17.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/NETTOYEUR%20DE%20TACHES%204%20EN%201.jpg</image:loc>
+      <image:title>NETTOYEUR DE TACHES 4 EN 1</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-19.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/cafeti%C3%A8re%20a%20bra%20CB.jpg</image:loc>
+      <image:title>CAFETIERE ELECTRIQUE CBL15B</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-20.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/cafeti%C3%A8re%20a%20bras%20c850.jpg</image:loc>
+      <image:title>CAFETIERE ELECTRIQUE C850</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-21.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/cafeti%C3%A8re%20a%20bras%20moka.jpg</image:loc>
+      <image:title>CAFETIERE ELECTRIQUE A BRAS MOKA 850 W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-22.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/cafeti%C3%A8re%20roma%201000w.jpg</image:loc>
+      <image:title>CAFETIERE ELECTRIQUE A BRAS ROMA 1000 W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-23.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/air%20fryer%203.2L.jpg</image:loc>
+      <image:title>FRITEUSE ELECTRIQUE SANS HUILE 3.2L</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-24.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/product-29.html</loc>
-    <lastmod>2026-07-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/air%20fryer%2010%20L.jpg</image:loc>
+      <image:title>FRITEUSE ELECTRIQUE SANS HUILE MAX 10L</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-25.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/petrin%20promax%20noir.jpg</image:loc>
+      <image:title>PETRIN PRO MAX 8L 1800W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-26.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/Cafeti%C3%A8re%20capsule.jpg</image:loc>
+      <image:title>CAFETIERE A CAPSULES AUTO ITALIA</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-27.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/planche%20moderne.jpg</image:loc>
+      <image:title>PLANCHE MODERNE</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-28.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/panineuse.jpg</image:loc>
+      <image:title>PANINEUSE 2000W</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.robustedz.store/product-29.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/air%20fryer%20friture%20max%205.7l.webp</image:loc>
+      <image:title>FRITEUSE ELECTRIQUE SANS HUILE 5.7 TACTILE</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-100.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/Robuste%20Defroisseur%201.jpg</image:loc>
+      <image:title>Defroisseur Vapeur</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-101.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/ASPIRATEUR%20SOUFFLEUR%20A%20MAIN%203.png</image:loc>
+      <image:title>ASPIRATEUR SOUFFLEUR A MAIN</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-102.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/NETTOYEUR%20DE%20TACHES%204%20EN%201.jpg</image:loc>
+      <image:title>NETTOYEUR DE TACHES 4 EN 1</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-103.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/PANINEUSE%20ET%20GRILL%201000W.png</image:loc>
+      <image:title>ROBUSTE PANINEUSE ET GRILL 1000W</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-104.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/AUTOCUISEUR%20MARMITE%202EN1%206L.webp</image:loc>
+      <image:title>Autocuiseur &amp; Marmite 2 en 1 – 6 litres</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-105.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/ROBO%2026F.webp</image:loc>
+      <image:title>ROBO 26F</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.robustedz.store/product-106.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.robustedz.store/privacy.html</loc>
-    <lastmod>2026-07-20</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <image:image>
+      <image:loc>https://www.robustedz.store/images/EXTRACTEUR%20DE%20JUS.webp</image:loc>
+      <image:title>EXTRACTEUR DE JUS</image:title>
+    </image:image>
   </url>
 </urlset>

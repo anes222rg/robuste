@@ -43,6 +43,10 @@ gtag('config', 'G-GREM5BTR7T');
 <meta property="og:description" content="طنجرة ضغط 2 في 1، سعة 6 لترات، فولاذ مقاوم للصدأ 18/10">
 <meta property="og:url" content="https://www.robustedz.store/product-104.html">
 <meta property="og:image" content="https://www.robustedz.store/images/AUTOCUISEUR%20MARMITE%202EN1%206L.webp">
+<meta property="product:price:amount" content="12500.00">
+<meta property="product:price:currency" content="DZD">
+<meta property="product:availability" content="in stock">
+<meta property="og:image:alt" content="Autocuiseur & Marmite 2 en 1 – 6 litres">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Autocuiseur &amp; Marmite 2 en 1 – 6 litres | ROBUSTE">
 <meta name="twitter:description" content="طنجرة ضغط 2 في 1، سعة 6 لترات، فولاذ مقاوم للصدأ 18/10">
@@ -125,7 +129,7 @@ gtag('config', 'G-GREM5BTR7T');
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"Autocuiseur & Marmite 2 en 1 – 6 litres","image":["https://www.robustedz.store/images/AUTOCUISEUR%20MARMITE%202EN1%206L.webp"],"description":"طنجرة ضغط 2 في 1 بغطاءين مصنوعة من الفولاذ المقاوم للصدأ عالي الجودة 18/10 بسعة 6 لترات وقطر 22 سم. مزودة بمقابض مضادة للحرارة وسلة بخار من الفولاذ. تضغط على مستويين (60 و 100 كيلوباسكال) مع 2 برنامج طهي. الغطاء من الزجاج مع حلقتين من السيليكون. قفل تلقائي وضمان 10 سنوات.","sku":"104","mpn":"104","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-104.html","priceCurrency":"DZD","price":12500,"priceValidUntil":"2027-07-12","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
+<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"Autocuiseur & Marmite 2 en 1 – 6 litres","image":["https://www.robustedz.store/images/AUTOCUISEUR%20MARMITE%202EN1%206L.webp"],"description":"طنجرة ضغط 2 في 1 بغطاءين مصنوعة من الفولاذ المقاوم للصدأ عالي الجودة 18/10 بسعة 6 لترات وقطر 22 سم. مزودة بمقابض مضادة للحرارة وسلة بخار من الفولاذ. تضغط على مستويين (60 و 100 كيلوباسكال) مع 2 برنامج طهي. الغطاء من الزجاج مع حلقتين من السيليكون. قفل تلقائي وضمان 10 سنوات.","sku":"104","mpn":"104","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-104.html","priceCurrency":"DZD","price":"12500.00","priceValidUntil":"2027-12-31","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"},"priceSpecification":{"@type":"UnitPriceSpecification","priceType":"https://schema.org/ListPrice","price":"15000.00","priceCurrency":"DZD"},"shippingDetails":{"@type":"OfferShippingDetails","shippingDestination":{"@type":"DefinedRegion","addressCountry":"DZ"},"deliveryTime":{"@type":"ShippingDeliveryTime","handlingTime":{"@type":"QuantitativeValue","minValue":0,"maxValue":1,"unitCode":"DAY"},"transitTime":{"@type":"QuantitativeValue","minValue":1,"maxValue":3,"unitCode":"DAY"}}},"hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","applicableCountry":"DZ","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","merchantReturnDays":7,"returnMethod":"https://schema.org/ReturnByMail"}}}</script>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
@@ -648,7 +652,10 @@ function applyProductSEO(p){
     seoSetMeta("property","product:price:amount",String(p.price));
     seoSetMeta("property","product:price:currency","DZD");
     var avail = (p.stock==null || Number(p.stock)>0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock";
-    var ld = { "@context":"https://schema.org/", "@type":"Product", "name":p.title, "image":[img], "description":String(p.description_long||p.description_short||""), "sku":String(p.id), "brand":{"@type":"Brand","name":"ROBUSTE"}, "offers":{ "@type":"Offer", "url":url, "priceCurrency":"DZD", "price":Number(p.price)||0, "availability":avail, "itemCondition":"https://schema.org/NewCondition" } };
+    var _price = (Number(p.price)||0).toFixed(2);
+    var _offer = { "@type":"Offer", "url":url, "priceCurrency":"DZD", "price":_price, "priceValidUntil":"2027-12-31", "availability":avail, "itemCondition":"https://schema.org/NewCondition", "seller":{"@type":"Organization","name":"ROBUSTE"}, "shippingDetails":{"@type": "OfferShippingDetails", "shippingDestination": {"@type": "DefinedRegion", "addressCountry": "DZ"}, "deliveryTime": {"@type": "ShippingDeliveryTime", "handlingTime": {"@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY"}, "transitTime": {"@type": "QuantitativeValue", "minValue": 1, "maxValue": 3, "unitCode": "DAY"}}}, "hasMerchantReturnPolicy":{"@type": "MerchantReturnPolicy", "applicableCountry": "DZ", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail"} };
+    if(p.old_price && Number(p.old_price) > Number(p.price)){ _offer["priceSpecification"] = { "@type":"UnitPriceSpecification", "priceType":"https://schema.org/ListPrice", "price":Number(p.old_price).toFixed(2), "priceCurrency":"DZD" }; }
+    var ld = { "@context":"https://schema.org/", "@type":"Product", "name":p.title, "image":[img], "description":String(p.description_long||p.description_short||""), "sku":String(p.id), "mpn":String(p.id), "brand":{"@type":"Brand","name":"ROBUSTE"}, "offers":_offer };
     var s = document.getElementById("product-jsonld");
     if(!s){ s=document.createElement("script"); s.type="application/ld+json"; s.id="product-jsonld"; document.head.appendChild(s); }
     s.textContent = JSON.stringify(ld);
