@@ -33,15 +33,15 @@
     "id": 200,
     "title": "PACK DUO — 2× FRITEUSE DF 900W",
     "price": 12800,
-    "old_price": 14200,
+    "old_price": 13000,
     "images": [
       "images/FRITEUSE DF 900 W.png"
     ],
-    "description_short": "مقلاتان DF 900W بـ 12٬800 دج بدل 14٬200 دج. | 2 friteuses DF 900W à 12 800 DA au lieu de 14 200 DA.",
-    "description_long": "اقتنِ مقلاتين FRITEUSE DF 900W معًا بسعر 6٬400 دج للواحدة بدل 7٬100 دج — مثالية للعائلات أو كهدية. — Achetez 2 friteuses DF 900W ensemble à 6 400 DA l’unité au lieu de 7 100 DA. Idéal pour la famille ou comme cadeau.",
+    "description_short": "مقلاتان DF 900W بـ 12٬800 دج بدل 13٬000 دج. | 2 friteuses DF 900W à 12 800 DA au lieu de 13 000 DA.",
+    "description_long": "اقتنِ مقلاتين FRITEUSE DF 900W معًا بسعر 6٬400 دج للواحدة بدل 6٬500 دج — مثالية للعائلات أو كهدية. — Achetez 2 friteuses DF 900W ensemble à 6 400 DA l’unité au lieu de 6 500 DA. Idéal pour la famille ou comme cadeau.",
     "features": [
       "2× FRITEUSE DF 900W",
-      "وفّر 1400 دج مقارنة بالشراء المنفصل",
+      "وفّر 200 دج مقارنة بالشراء المنفصل",
       "الدفع عند الاستلام"
     ],
     "stock": 5,
@@ -56,7 +56,7 @@
     "id": 201,
     "title": "SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W",
     "price": 13000,
-    "old_price": 14000,
+    "old_price": 13400,
     "images": [
       "images/PANINEUSE ET GRILL 1000W.png",
       "images/FRITEUSE DF 900 W.png"
@@ -66,7 +66,7 @@
     "features": [
       "PANINEUSE ET GRILL 1000W",
       "FRITEUSE DF 900W",
-      "وفّر 1000 دج",
+      "وفّر 400 دج",
       "الدفع عند الاستلام"
     ],
     "stock": 10,
@@ -229,7 +229,7 @@
   {
     "id": 4,
     "title": "FRITEUSE DF 900 W",
-    "price": 7100,
+    "price": 6500,
     "old_price": 7800,
     "images": [
       "images/FRITEUSE DF 900 W.png",
