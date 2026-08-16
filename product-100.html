@@ -64,6 +64,7 @@ gtag('config', 'G-GREM5BTR7T');
 
 <!-- Bootstrap RTL + Icons + AOS -->
 <link href="bootstrap.rtl.min.css" rel="stylesheet">
+<script src="rb-compat.js?v=1"></script>
 <link rel="stylesheet" href="robuste.css?v=81">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
 <!-- AOS CSS removed: lazy-loaded opacity:0 was causing a white-flash on mobile -->
@@ -530,7 +531,7 @@ function checkoutFromCart() {
     try{ var _cw=(document.getElementById('cartWilaya')||{}).value; if(_cw && document.getElementById('wilayaSelect')) document.getElementById('wilayaSelect').value=_cw; var _cdt=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value; if(_cdt){ var _mr=document.querySelector('input[name="deliveryType"][value="'+_cdt+'"]'); if(_mr)_mr.checked=true; } }catch(e){}
     try{ updateOrderSummary(); }catch(e){}
     try{ onWilayaCommune(); }catch(e){}
-    new bootstrap.Modal(document.getElementById('orderModal')).show();
+    (window.rbShowModal ? rbShowModal('orderModal') : new bootstrap.Modal(document.getElementById('orderModal')).show());
 }
 function showOrderSuccess(orderId, phone, total) {
     var ex = document.getElementById('orderSuccessOverlay');
@@ -590,10 +591,10 @@ async function submitOrderFinal() {
     var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
     const totalPrice = subtotal + deliveryFee;
     if(!fullName || !phone || !wilaya) { showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
-    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length !== 2) { showToast("يرجى إدخال الاسم واللقب (كلمتان فقط)", "error"); return; }
-    if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length > 5) { showToast("يرجى إدخال الاسم واللقب", "error"); return; }
+    if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم الهاتف لازم 10 أرقام يبدأ بـ 05 أو 06 أو 07", "error"); return; }
     if(!baladiya) { showToast("يرجى اختيار البلدية", "error"); return; }
-    if(!address || address.length < 8) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!address) { showToast("يرجى إدخال العنوان", "error"); return; }
     var guard = antiSpamCheck(phone + '|' + totalPrice);
     if(!guard.ok) { showToast(guard.msg, "error"); return; }
     isSubmittingFinal = true;
@@ -603,13 +604,14 @@ async function submitOrderFinal() {
     var fullAddress = [baladiya, address].filter(Boolean).join('، ');
     const orderData = { customer: fullName, phone, wilaya, baladiya, address, products: cart, subtotal, deliveryFee, deliveryType: dType, payment: "الدفع ��ند الاستلام", totalPrice, timestamp: new Date().toISOString(), status: "جديد" };
     try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
+    try { if (window.rbRememberOrder) rbRememberOrder(Object.assign({}, orderData, { address: fullAddress })); } catch(e){}
     try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(Object.assign({}, orderData, { address: fullAddress })); } } catch (e) {}
     try {
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
-            if (!resp.ok) throw new Error('Worker ' + resp.status);
-            const data = await resp.json();
+            const resp = await (window.rbPostOrder ? rbPostOrder(window.ROBUSTE_WORKER_URL, { order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) : fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: Object.assign({}, orderData, { address: fullAddress }), meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) }).then(function(r){ return r.text().then(function(t){ var d=null; try{ d=JSON.parse(t); }catch(_){} return { ok:r.ok, status:r.status, data:d }; }); }));
+            if (!resp.ok) throw (window.rbOrderHttpError ? rbOrderHttpError(resp) : new Error('Worker ' + resp.status));
+            const data = resp.data || {};
             orderId = data && data.id;
         } else {
             const docRef = await db.collection('orders').add(orderData);
@@ -621,9 +623,9 @@ async function submitOrderFinal() {
         showOrderSuccess(orderId, phone, totalPrice);
         try { if (window.trackPurchase) window.trackPurchase({ transaction_id: orderId, value: totalPrice, products: cart }); } catch(e){}
         cart = []; saveCart();
-        bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
-        document.getElementById('orderForm').reset();
-    } catch(err) { showToast("حدث خطأ، حاول مجدداً", "error"); }
+        try { if (window.rbHideModal) rbHideModal('orderModal'); else { var __rbM = bootstrap.Modal.getInstance(document.getElementById('orderModal')); if (__rbM) __rbM.hide(); } } catch(e){}
+        try { document.getElementById('orderForm').reset(); } catch(e){}
+    } catch(err) { if(!(window.rbOrderProblem && window.rbOrderProblem(err))) showToast("حدث خطأ، حاول مجدداً", "error"); }
     finally { isSubmittingFinal = false; if(finalBtn){ finalBtn.disabled = false; finalBtn.innerHTML = finalBtnOrig; } }
 }
 
@@ -782,9 +784,9 @@ async function submitExpressOrder() {
     if(!name || !phone || !wilaya) { showToast("يرجى ملء البيانات", "error"); return; }
     var _nw = name.split(/\s+/).filter(function(w){ return w.length>=2; }).length;
     if(_nw<1 || _nw>5) { showToast("يرجى إدخال الاسم واللقب", "error"); return; }
-    if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم هاتف غير صحيح", "error"); return; }
+    if(!/^0[5-7][0-9]{8}$/.test(phone)) { showToast("رقم الهاتف لازم 10 أرقام يبدأ بـ 05 أو 06 أو 07", "error"); return; }
     if(!baladiya) { showToast("يرجى إدخال البلدية", "error"); return; }
-    if(!addressRaw || addressRaw.length<4) { showToast("يرجى إدخال العنوان بشكل واضح", "error"); return; }
+    if(!addressRaw) { showToast("يرجى إدخال العنوان", "error"); return; }
     const address = [baladiya, addressRaw].filter(Boolean).join("، ");
     const subtotal = currentProduct.price * qty;
     var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
@@ -799,12 +801,13 @@ async function submitExpressOrder() {
     try {
         const orderData = { products:[{ id:currentProduct.id, name:currentProduct.title, price:currentProduct.price, quantity:qty, image:currentProduct.images[0] }], customer:name, phone, wilaya, baladiya:baladiya, address:address, payment:"الدفع عند الاستلام", subtotal, deliveryFee, deliveryType:dType, totalPrice:total, timestamp:new Date().toISOString() };
         try { if (window.RobusteTracking) { orderData.meta = window.RobusteTracking.getOrderMeta(); orderData.risk = window.RobusteTracking.computeClientRisk(orderData.meta, orderData); } } catch(e){}
+        try { if (window.rbRememberOrder) rbRememberOrder(orderData); } catch(e){}
         try { if (typeof window.sendOrderToTelegram === 'function') { window.sendOrderToTelegram(orderData); } } catch (e) {}
         var orderId;
         if (window.ROBUSTE_WORKER_URL) {
-            const resp = await fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) });
-            if (!resp.ok) throw new Error('Worker ' + resp.status);
-            const data = await resp.json();
+            const resp = await (window.rbPostOrder ? rbPostOrder(window.ROBUSTE_WORKER_URL, { order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) : fetch(window.ROBUSTE_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: orderData, meta: orderData.meta || {}, risk: orderData.risk || { flags: [], level: 'green', score: 0 } }) }).then(function(r){ return r.text().then(function(t){ var d=null; try{ d=JSON.parse(t); }catch(_){} return { ok:r.ok, status:r.status, data:d }; }); }));
+            if (!resp.ok) throw (window.rbOrderHttpError ? rbOrderHttpError(resp) : new Error('Worker ' + resp.status));
+            const data = resp.data || {};
             orderId = data && data.id;
         } else {
             const docRef = await db.collection('orders').add(orderData);
@@ -814,8 +817,8 @@ async function submitExpressOrder() {
         markOrderSent(phone + '|' + total);
         showOrderSuccess(orderId, phone, total);
         try { if (window.trackPurchase) window.trackPurchase({ transaction_id: orderId, value: total, products: orderData.products }); } catch(e){}
-        document.getElementById('expressForm').reset();
-    } catch(e) { showToast("حدث خطأ", "error"); }
+        try { document.getElementById('expressForm').reset(); } catch(e){}
+    } catch(e) { if(!(window.rbOrderProblem && window.rbOrderProblem(e))) showToast("حدث خطأ", "error"); }
     finally { isSubmittingExpress = false; if(expressBtn){ expressBtn.disabled = false; expressBtn.innerHTML = expressBtnOrig; } }
 }
 function loadRelatedProducts(all, currentId) {
