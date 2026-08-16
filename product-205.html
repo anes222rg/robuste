@@ -288,7 +288,7 @@ gtag('config', 'G-GREM5BTR7T');
     </div>
 </div>
 
-<!-- مودا���� الطلب -->
+<!-- مودال الطلب -->
 <div class="modal fade" id="orderModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -315,7 +315,7 @@ gtag('config', 'G-GREM5BTR7T');
                     </div>
                     <div class="order-field"><label><i class="bi bi-house-door"></i> العنوان *</label><textarea id="address" class="order-input" rows="2" required placeholder="الحي، الشارع، رقم المنزل..."></textarea></div>
                     <div class="order-pay-option"><i class="bi bi-cash-coin"></i><input class="form-check-input m-0" type="radio" name="payMethod" value="الدفع عند الاستلام" checked id="payCod"> <label class="m-0" for="payCod">الدفع عند الاستلام</label></div>
-                    <div class="order-field"><label><i class="bi bi-truck"></i> طريقة التوصيل *</label><div class="delivery-type-group"><label class="dt-opt"><input type="radio" name="deliveryType" value="home" onchange="updateOrderSummary()"> 🏠 للمن��ل</label><label class="dt-opt"><input type="radio" name="deliveryType" value="office" checked onchange="updateOrderSummary()"> 🏢 للمكتب</label></div></div>
+                    <div class="order-field"><label><i class="bi bi-truck"></i> طريقة التوصيل *</label><div class="delivery-type-group"><label class="dt-opt"><input type="radio" name="deliveryType" value="home" onchange="updateOrderSummary()"> 🏠 للمنزل</label><label class="dt-opt"><input type="radio" name="deliveryType" value="office" checked onchange="updateOrderSummary()"> 🏢 للمكتب</label></div></div>
                     <div class="order-summary-box"><div class="osb-row"><span>المجموع الفرعي</span><span id="sumSubtotal">0 د.ج</span></div><div class="osb-row"><span><i class="bi bi-truck"></i> سعر التوصيل</span><span id="sumDelivery">اختر الولاية</span></div><div class="osb-row osb-total"><span>المجموع الإجمالي</span><span id="sumTotal">0 د.ج</span></div></div>
                     <div class="order-trust">
                         <span><i class="bi bi-shield-check"></i> دفع آمن عند الاستلام</span>
@@ -488,7 +488,7 @@ function renderCartItems() {
     var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t); if(_fee==null)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=_fee.toLocaleString()+' د.ج'; document.getElementById('cartTotalAmount').innerText=(total+_fee).toLocaleString()+' د.ج'; }
 }
 function updateQty(idx, newQty) { if(newQty<1) return removeCartItem(idx); cart[idx].quantity = newQty; saveCart(); }
-function removeCartItem(idx) { cart.splice(idx,1); saveCart(); showToast("تم إزالة المنت��", "success"); }
+function removeCartItem(idx) { cart.splice(idx,1); saveCart(); showToast("تم إزالة المنتج", "success"); }
 function addToCart(name, price, img, id) {
     const existing = cart.find(i => i.id === id);
     if(existing) existing.quantity++;
@@ -811,7 +811,7 @@ function loadRelatedProducts(all, currentId) {
 }
 function goToProduct(pid) { window.location.href = `product.html?pid=${pid}`; }
 
-// سلة قابلة ��لسحب
+// سلة قابلة للسحب
 const floatingCartElem = document.getElementById('floatingCart');
 let isDragging = false, dragOccurred = false, startX, startY, startLeft, startBottom;
 if (floatingCartElem) floatingCartElem.addEventListener('pointerdown', (e) => {

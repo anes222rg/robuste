@@ -6,6 +6,60 @@
 
   // [arabic source, english, french]
   var ROWS = [
+    // ---- added 2026-08-16 (batch 2) ----
+    [`(للمنزل)`, `(Home)`, `(À domicile)`],
+    [`اختر الولاية أولاً`, `Select your wilaya first`, `Choisissez d'abord votre wilaya`],
+    [`تم إرسال رسالتك بنجاح! سوف نتواصل معك قريباً.`, `Your message has been sent! We will contact you soon..`, `Votre message a été envoyé ! Nous vous contacterons bientôt..`],
+    [`جاري معالجة طلبك...`, `Processing your order...`, `Traitement de votre commande...`],
+    [`حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.`, `Unexpected error. Please try again.`, `Erreur inattendue. Veuillez réessayer.`],
+    [`شكراً لك! تم إرسال تقييمك بنجاح`, `Thank you! Your review has been sent`, `Merci ! Votre avis a bien été envoyé`],
+    [`صورة مصغرة للمنتج`, `Product thumbnail`, `Miniature du produit`],
+    [`لقد استلمنا هذا الطلب بالفعل، سنتواصل معك قريباً`, `We already received this order, we will contact you shortly`, `Nous avons déjà reçu cette commande, nous vous contacterons bientôt`],
+    [`لم يتم تقديمه`, `Not provided`, `Non renseigné`],
+    [`متجر متخصص في الأجهزة المنزلية عالية الجودة بأسعار تنافسية في الجزائر.`, `A store specialised in high-quality home appliances at competitive prices in Algeria..`, `Une boutique spécialisée en appareils ménagers de haute qualité à prix compétitifs en Algérie..`],
+    [`منتج في السلة`, `item in cart`, `article dans le panier`],
+    [`يرجى إدخال الاسم واللقب (كلمة أو كلمتان)`, `Please enter your name (one or two words)`, `Veuillez saisir votre nom (un ou deux mots)`],
+    [`يرجى إدخال العنوان بشكل واضح`, `Please enter a clear address`, `Veuillez saisir une adresse claire`],
+    [`يرجى اختيار البلدية`, `Please select your commune`, `Veuillez choisir votre commune`],
+    [`يرجى اختيار طريقة الدفع`, `Please choose a payment method`, `Veuillez choisir un mode de paiement`],
+    // ---- added 2026-08-16: strings that were still showing in Arabic ----
+    [`(مكتب)`, `(desk)`, `(bureau)`],
+    [`(منزل)`, `(home)`, `(domicile)`],
+    [`آراء حقيقية 100%`, `100% genuine reviews`, `Avis 100% authentiques`],
+    [`أضف رأيك`, `Add your review`, `Ajoutez votre avis`],
+    [`إرجاع خلال 7 أيام`, `7-day returns`, `Retour sous 7 jours`],
+    [`إرسال التقييم`, `Submit review`, `Envoyer l'avis`],
+    [`اجمعي الأجهزة التي تحتاجينها في باك واحد. اختاري الباك وأضيفيه مباشرة إلى السلة.`, `Bundle the appliances you need into one pack. Pick a pack and add it straight to your cart.`, `Réunissez les appareils dont vous avez besoin dans un seul pack. Choisissez un pack et ajoutez-le directement au panier.`],
+    [`اسحبي لاكتشاف الباكات`, `Swipe to explore the packs`, `Faites glisser pour découvrir les packs`],
+    [`اسم البلدية`, `Commune name`, `Nom de la commune`],
+    [`اضغط للتكبير`, `Tap to zoom`, `Cliquez pour agrandir`],
+    [`اطلب الآن`, `Order now`, `Commander maintenant`],
+    [`الاسم *`, `Name *`, `Nom *`],
+    [`البلدية`, `Commune`, `Commune`],
+    [`الدفع عند الاستلام • التوصيل لكل الولايات`, `Cash on delivery • delivery to all wilayas`, `Paiement à la livraison • livraison dans toutes les wilayas`],
+    [`العنوان *`, `Address *`, `Adresse *`],
+    [`باكات مختارة، في عرض واحد`, `Selected packs, one single offer`, `Packs sélectionnés, une seule offre`],
+    [`تأكيد توصيل الطلب مع شكر الزبونة`, `Delivery confirmed, with the customer's thanks`, `Livraison confirmée, avec les remerciements de la cliente`],
+    [`تقييمك *`, `Your rating *`, `Votre note *`],
+    [`جودة المنتجات`, `Product quality`, `Qualité des produits`],
+    [`رأيك في المنتج *`, `Your review *`, `Votre avis *`],
+    [`زبونة استلمت طلبها وشكرت المتجر`, `A customer received her order and thanked the store`, `Une cliente a reçu sa commande et a remercié la boutique`],
+    [`زبونة جرّبت الفريتوز: ولله أحسن ماركة والنتيجة روعة`, `A customer tried the air fryer: honestly the best brand, the result is amazing`, `Une cliente a essayé la friteuse : franchement la meilleure marque, résultat superbe`],
+    [`زبونة راضية وطلبت فريتوز إضافية للعائلة`, `A happy customer ordered another air fryer for her family`, `Une cliente satisfaite a commandé une autre friteuse pour sa famille`],
+    [`شعار ROBUSTE`, `ROBUSTE logo`, `Logo ROBUSTE`],
+    [`صور حقيقية من محادثات زبائننا بعد استلامهم وتجربتهم للفريتوز`, `Real screenshots from our customers' chats after they received and tried the air fryer`, `Captures réelles des conversations de nos clients après réception et essai de la friteuse`],
+    [`صورة المنتج`, `Product image`, `Image du produit`],
+    [`صورة روز`, `Photo of Rose`, `Photo de Rose`],
+    [`صورة روز بلانش`, `Photo of Rose Blanche`, `Photo de Rose Blanche`],
+    [`صورة عمر`, `Photo of Omar`, `Photo d'Omar`],
+    [`صورة محمد`, `Photo of Mohamed`, `Photo de Mohamed`],
+    [`ضمان المنتجات`, `Product warranty`, `Garantie des produits`],
+    [`طريقة التوصيل *`, `Delivery method *`, `Mode de livraison *`],
+    [`عرض المنتجات`, `View products`, `Voir les produits`],
+    [`عروض خاصة`, `Special offers`, `Offres spéciales`],
+    [`متوفر في المخزون`, `In stock`, `En stock`],
+    [`مجاني إلى المكتب`, `Free to pickup desk`, `Gratuit au bureau`],
+    [`يرجى إدخال البلدية`, `Please enter your commune`, `Veuillez saisir votre commune`],
     // ---- top bar promo + form messages (added) ----
     // ---- missing UI strings (added 2026-08-10) ----
     [`الدفع عند الاستلام — توصيل`, `Cash on delivery — shipping to`, `Paiement à la livraison — livraison dans`],
@@ -244,8 +298,8 @@
     // ---- Added: order tracking / delivery / totals / footer ----
     [`تتبع طلبي`, `Track my order`, `Suivre ma commande`],
     [`طريقة التوصيل`, `Delivery method`, `Mode de livraison`],
-    [`🏠 للمنزل`, `🏠 Home`, `🏠 Domicile`],
-    [`🏢 للمكتب`, `🏢 Office`, `🏢 Bureau`],
+    [`🏠 للمنزل`, `🏠 Home`, `🏠 À domicile`],
+    [`🏢 للمكتب`, `🏢 Pickup desk`, `🏢 Au bureau`],
     [`المجموع الفرعي`, `Subtotal`, `Sous-total`],
     [`المجموع الفرعي:`, `Subtotal:`, `Sous-total :`],
     [`سعر التوصيل`, `Delivery cost`, `Frais de livraison`],
@@ -260,10 +314,10 @@
   ];
 
   var T = {};
-  for (var i = 0; i < ROWS.length; i++) { T[ROWS[i][0]] = { en: ROWS[i][1], fr: ROWS[i][2] }; }
+  for (var i = 0; i < ROWS.length; i++) { T[normKey(ROWS[i][0])] = { en: ROWS[i][1], fr: ROWS[i][2] }; }
 
   var NAMES = { ar: "العربية", en: "English", fr: "Français" };
-  var ATTRS = ["placeholder", "title", "aria-label"];
+  var ATTRS = ["placeholder", "title", "aria-label", "alt"];
   var origText = new WeakMap();
   var origAttr = new WeakMap();
   var docTitleOrig = null;
@@ -273,10 +327,32 @@
   var bsLink = null, bsOrigHref = null;
 
   function detect() {
-    // Arabic-first: every new visitor opens in Arabic. Returning visitors who
-    // explicitly switched language keep their choice via the globe switcher.
+    // 1) an explicit choice made with the globe switcher always wins
     try { var s = localStorage.getItem("site_lang"); if (s === "ar" || s === "en" || s === "fr") return s; } catch (e) {}
+    // 2) otherwise follow the visitor's own browser / phone language
+    try {
+      var list = (navigator.languages && navigator.languages.length)
+        ? navigator.languages
+        : [navigator.language || navigator.userLanguage || ""];
+      for (var i = 0; i < list.length; i++) {
+        var c = String(list[i] || "").toLowerCase();
+        if (c.indexOf("ar") === 0) return "ar";
+        if (c.indexOf("fr") === 0) return "fr";
+        if (c.indexOf("en") === 0) return "en";
+      }
+    } catch (e) {}
+    // 3) unknown language -> Arabic
     return "ar";
+  }
+
+  function normKey(s) {
+    s = String(s);
+    try { s = s.normalize("NFKC"); } catch (e) {}
+    return s
+      .replace(/[\uFE00-\uFE0F\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+      .replace(/\u00A0/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   function tr(text, lang) {
@@ -285,7 +361,7 @@
     var lead = (text.match(/^\s*/) || [""])[0];
     var trail = (text.match(/\s*$/) || [""])[0];
     var out = key;
-    var e = T[key];
+    var e = T[normKey(text)];
     if (lang !== "ar" && e && e[lang] != null) out = e[lang];
     if (lang !== "ar") out = out.replace(/د\.ج/g, "DA").replace(/دج/g, "DA");
     return lead + out + trail;
@@ -314,8 +390,9 @@
   function findBootstrap() {
     var links = document.querySelectorAll('link[rel="stylesheet"]');
     for (var i = 0; i < links.length; i++) {
-      if (/bootstrap@[\d.]+\/dist\/css\/bootstrap(\.rtl)?\.min\.css/.test(links[i].href)) {
-        bsLink = links[i]; bsOrigHref = links[i].href; return;
+      var href = links[i].getAttribute("href") || "";
+      if (/bootstrap(\.rtl)?\.min\.css/.test(href)) {
+        bsLink = links[i]; bsOrigHref = href; return;
       }
     }
   }
@@ -325,12 +402,10 @@
     document.documentElement.setAttribute("lang", lang);
     document.documentElement.setAttribute("dir", rtl ? "rtl" : "ltr");
     if (bsLink && bsOrigHref) {
-      if (rtl) {
-        if (bsLink.getAttribute("href") !== bsOrigHref) bsLink.setAttribute("href", bsOrigHref);
-      } else {
-        var ltr = bsOrigHref.replace("bootstrap.rtl.min.css", "bootstrap.min.css");
-        if (bsLink.getAttribute("href") !== ltr) bsLink.setAttribute("href", ltr);
-      }
+      var want = rtl
+        ? bsOrigHref.replace("bootstrap.min.css", "bootstrap.rtl.min.css")
+        : bsOrigHref.replace("bootstrap.rtl.min.css", "bootstrap.min.css");
+      if (bsLink.getAttribute("href") !== want) bsLink.setAttribute("href", want);
     }
   }
 
@@ -363,7 +438,7 @@
       var nodes = [], cur;
       while ((cur = walker.nextNode())) nodes.push(cur);
       for (var i = 0; i < nodes.length; i++) translateNode(nodes[i], lang);
-      var els = document.querySelectorAll("[placeholder],[title],[aria-label]");
+      var els = document.querySelectorAll("[placeholder],[title],[aria-label],[alt]");
       for (var j = 0; j < els.length; j++) { if (!inSwitcher(els[j])) translateEl(els[j], lang); }
     } catch (e) { /* never break the page */ }
     updateSwitcherLabel(lang);

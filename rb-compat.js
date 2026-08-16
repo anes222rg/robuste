@@ -359,47 +359,9 @@
     return "background:" + bg + ";border:none;color:#fff;font-weight:700;border-radius:999px;padding:7px 14px;font-size:.8rem;white-space:nowrap;";
   }
 
-  // a) discreet reminder, dismissible, disappears on its own
-  function pill() {
-    try {
-      if (sessionStorage.getItem("rb_ext_pill") === "off") return;
-    } catch (e) {}
-    if (document.getElementById("rbExtPill")) return;
-    var d = document.createElement("div");
-    d.id = "rbExtPill";
-    d.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:19998;background:rgba(17,17,17,.94);color:#fff;border-radius:999px;padding:7px 8px 7px 14px;display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:94vw;";
-    d.innerHTML = '<span style="opacity:.9">' + L_INAPP + '</span>' +
-      '<button type="button" id="rbExtPillGo" style="' + btnStyle("#25d366") + '">' + L_OPEN + '</button>' +
-      '<button type="button" id="rbExtPillX" aria-label="' + L_CLOSE + '" style="background:transparent;border:none;color:#aaa;font-size:1.1rem;line-height:1;padding:0 4px;">\u00d7</button>';
-    document.body.appendChild(d);
-    var go = document.getElementById("rbExtPillGo");
-    if (go) go.addEventListener("click", function () { window.rbOpenExternal(); });
-    var x = document.getElementById("rbExtPillX");
-    if (x) x.addEventListener("click", function () {
-      try { sessionStorage.setItem("rb_ext_pill", "off"); } catch (e) {}
-      try { d.parentNode.removeChild(d); } catch (e) {}
-    });
-    setTimeout(function () { try { if (d.parentNode) d.parentNode.removeChild(d); } catch (e) {} }, 15000);
-  }
+  // Removed on request (2026-08-16): no bottom bar, no link inside the forms.
+  // "Open in browser" now shows ONLY inside the weak-connection message below.
 
-  // b) permanent, contextual link at the top of each order form
-  function formLinks() {
-    ["orderForm", "expressForm"].forEach(function (id) {
-      var f = document.getElementById(id);
-      if (!f || f.querySelector(".rb-ext-link")) return;
-      var w = document.createElement("div");
-      w.className = "rb-ext-link";
-      w.style.cssText = "text-align:center;margin:0 0 10px;";
-      w.innerHTML = '<button type="button" style="background:transparent;border:none;color:#0d6efd;text-decoration:underline;font-size:.8rem;font-weight:600;padding:2px;">' + L_TROUBLE + '</button>';
-      w.querySelector("button").addEventListener("click", function () { window.rbOpenExternal(); });
-      f.insertBefore(w, f.firstChild);
-    });
-  }
-
-  function init() { try { pill(); } catch (e) {} try { formLinks(); } catch (e) {} }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
-  setTimeout(init, 2500); // forms rendered later by scripts
 
   // c) offer the same exit inside the "weak connection" rescue popup
   var prev = window.rbOrderProblem;

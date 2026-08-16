@@ -232,6 +232,12 @@ gtag('config', 'G-GREM5BTR7T');
 .glass-navbar #cartCountFloat{position:absolute;top:-6px;right:-6px;min-inline-size:18px;block-size:18px;border-radius:999px;background:var(--rb-accent,#FF4F00);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px;line-height:1}
 [data-theme="dark"] .glass-navbar .cart-btn-drag{background:var(--rb-surface-2)}
 [data-theme="dark"] .glass-navbar #cartCountFloat{background:var(--rb-accent);color:#fff}
+
+/* cart pinned to the top-left corner of the screen, in every language (2026-08-16) */
+.glass-navbar .container{position:static!important;padding-left:56px!important}
+.glass-navbar #floatingCart,.glass-navbar .floating-cart{position:absolute!important;left:12px!important;right:auto!important;top:50%!important;bottom:auto!important;transform:translateY(-50%)!important;margin:0!important;z-index:1205!important}
+.glass-navbar #dragCartBtn,.glass-navbar .cart-btn-drag{cursor:pointer!important}
+@media (max-width:400px){.glass-navbar .container{padding-left:44px!important}.glass-navbar #floatingCart,.glass-navbar .floating-cart{left:6px!important}.glass-navbar .cart-btn-drag{inline-size:34px!important;block-size:34px!important;border-radius:10px!important}}
 </style>
 <header class="rb-hero">
   <div class="container">
@@ -362,7 +368,7 @@ gtag('config', 'G-GREM5BTR7T');
   </div>
 </section>
 
-<!-- قسم ال��روض الخاصة (أسماء المنتجات ��بقى كما هي) -->
+<!-- قسم العروض الخاصة (أسماء المنتجات تبقى كما هي) -->
 <section class="offers-section">
   <div class="container position-relative">
     <div class="text-center mb-5">
@@ -1057,7 +1063,7 @@ gtag('config', 'G-GREM5BTR7T');
     </div>
 </div>
 
-<!-- النصوص ال��رمجية الخارجية -->
+<!-- النصوص البرمجية الخارجية -->
 <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

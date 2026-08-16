@@ -41,7 +41,7 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 12px; }
 
-/* ========== ال��افبار الزجاجي (مثل index) ========== */
+/* ========== النافبار الزجاجي (مثل index) ========== */
 .glass-navbar {
     background: rgba(255, 255, 255, 0.75) !important;
     backdrop-filter: blur(12px) saturate(180%);
