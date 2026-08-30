@@ -918,5 +918,35 @@
     "stock": 10,
     "category": "cuisine",
     "badge": "Nouveau"
+  },
+  {
+    "id": 206,
+    "title": "ASPIRATEUR BALAI AVEC FIL 3EN1",
+    "price": 8900,
+    "old_price": null,
+    "images": [
+      "images/ASPIRATEUR BALAI AVEC FIL 3EN1.webp",
+      "images/ASPIRATEUR BALAI AVEC FIL 3EN1 2.webp",
+      "images/ASPIRATEUR BALAI AVEC FIL 3EN1 3.webp",
+      "images/ASPIRATEUR BALAI AVEC FIL 3EN1 4.webp",
+      "images/ASPIRATEUR BALAI AVEC FIL 3EN1 5.webp"
+    ],
+    "description_short": "مكنسة كهربائية سلكية 3 في 1 — 600 واط، فلتر HEPA، أنبوب تلسكوبي ألومنيوم، كبل 8 أمتار، قوة شفط 15 كيلو باسكال. | Aspirateur balai avec fil 3EN1 — 600W, filtre HEPA, tube télescopique aluminium, câble 8m, aspiration 15 Kpa.",
+    "description_long": "مكنسة ROBUSTE الكهربائية السلكية 3 في 1 (600 واط) مصممة لتنظيف عميق وفعّال لجميع أسطح منزلك. فلتر HEPA عالي الكفاءة يحبس 99.97% من الجسيمات الدقيقة. أنبوب الشفط التلسكوبي من الألومنيوم يتكيف مع طولك بسهولة. خزان 500 مل يفرغ بضغطة زر واحدة. الكبل الطويل (8 أمتار) يمنحك حرية الحركة في كل زاوية. مثالية للبلاط، السجاد، الوسائد، الستائر، والمفروشات. تأتي مع: فرشاة أرضية، فرشاة للوسائد والأقمشة والسقف، أنبوب شفط، حامل جداري وحامل ملحقات. — L'aspirateur balai ROBUSTE avec fil 3EN1 (600W) offre une aspiration professionnelle pour toutes les surfaces. Son filtre HEPA retient 99,97% des particules fines. Le tube télescopique en aluminium s'adapte à toutes les tailles. Le réservoir 500ml se vide d'une simple pression. Le câble 8m garantit une liberté de mouvement totale dans toute la maison. Compatible carrelage, tapis, coussins, rideaux et meubles. Livré avec : brosse de sol, brosse pour textiles/coussins/plafond, tube, support mural et support d'accessoires.",
+    "features": [
+      "Puissance 600W — قوة 600 واط",
+      "Filtre HEPA haute efficacité — فلتر HEPA عالي الكفاءة",
+      "Puissance d'aspiration 15 Kpa — قوة شفط 15 كيلو باسكال",
+      "Câble 8 mètres — كبل 8 أمتار",
+      "Réservoir 500 ml — خزان 500 مل",
+      "Tube télescopique en aluminium — أنبوب تلسكوبي ألومنيوم",
+      "Vidange par simple pression d'un bouton — تفريغ بضغطة زر",
+      "Convient à toutes les surfaces — مناسبة لجميع الأسطح",
+      "Poignée ergonomique — مقبض مريح",
+      "Inclus : brosse sol, brosse textiles, tube, support mural, support accessoires"
+    ],
+    "stock": 10,
+    "category": "maison",
+    "badge": "Nouveau"
   }
 ]
