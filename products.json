@@ -55,13 +55,13 @@
   {
     "id": 201,
     "title": "SUMMER PACK — GRILL 1000W + FRITEUSE DF 900W",
-    "price": 13000,
-    "old_price": 13400,
+    "price": 12600,
+    "old_price": 13000,
     "images": [
       "images/PANINEUSE ET GRILL 1000W.png",
       "images/FRITEUSE DF 900 W.png"
     ],
-    "description_short": "Summer Pack : grill 1000W + friteuse DF 900W à 13 000 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 13,000 دج.",
+    "description_short": "Summer Pack : grill 1000W + friteuse DF 900W à 12 600 DA. | باك الصيف: شواية 1000W + مقلاة DF 900W بـ 12,600 دج.",
     "description_long": "باك المطبخ المتكامل: بانينوز وغريل ROBUSTE 1000W مع مقلاة FRITEUSE DF 900W بسعر واحد مخفّض. — Le pack cuisine complet : paninieuse-grill ROBUSTE 1000W et friteuse DF 900W à prix réduit. Payez à la livraison.",
     "features": [
       "PANINEUSE ET GRILL 1000W",
@@ -734,10 +734,10 @@
   {
     "id": 28,
     "title": "PANINEUSE 2000W",
-    "price": 14500,
+    "price": 13500,
     "old_price": 15500,
     "images": [
-      "images/panineuse.jpg"
+      "images/PANINEUSE 2000W.jpg"
     ],
     "description_short": "Panini grill 2000W avec plaque de grill",
     "description_long": "Panini grill 2000W avec plaques de grill anti-adhésives pour des sandwichs grillés parfaits.",
@@ -823,7 +823,7 @@
   {
     "id": 103,
     "title": "ROBUSTE PANINEUSE ET GRILL 1000W",
-    "price": 6900,
+    "price": 6500,
     "old_price": 8000,
     "images": [
       "images/PANINEUSE ET GRILL 1000W.png",
