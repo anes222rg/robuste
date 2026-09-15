@@ -623,7 +623,7 @@
   {
     "id": 25,
     "title": "PETRIN PRO MAX 8L 1800W",
-    "price": 18200,
+    "price": 18500,
     "old_price": 24900,
     "images": [
       "images/petrin promax noir.jpg",
@@ -869,6 +869,35 @@
       "سهولة التفكيك والغسيل",
       "تعصر الخضروات والفواكه الطازجة",
       "تصميم احترافي أنيق"
+    ],
+    "stock": 10,
+    "category": "cuisine",
+    "badge": "Nouveau"
+  },
+  {
+    "id": 107,
+    "title": "FRITEUSE ELECTRIQUE INOX 3L 2000W",
+    "price": 8900,
+    "old_price": 9500,
+    "images": [
+      "images/FRITEUSE INOX 3L.webp",
+      "images/FRITEUSE INOX 3L 2.webp",
+      "images/FRITEUSE INOX 3L 3.webp"
+    ],
+    "description_short": "مقلاة كهربائية ROBUSTE إينوكس 3 لتر بقوة 2000 واط (الموديل FEI3L) — ترموستا من 130° إلى 190°، مؤقت 30 دقيقة، إطفاء تلقائي للأمان، فلتر ضد الروائح ونافذة مراقبة. | Friteuse électrique ROBUSTE INOX 3L 2000W (FEI3L) — thermostat 130°–190°, minuteur 30 min, arrêt automatique de sécurité, filtre anti-odeurs et hublot de contrôle.",
+    "description_long": "فريت مقرمشة، بوراك ذهبي، دجاج وحوت مقلي كيما في المطاعم — وفي دارك. مقلاة ROBUSTE من الإينوكس بقوة 2000 واط وسعة 3 لتر، تسخن بسرعة وتتحكمي في درجة الحرارة من 130 حتى 190 درجة حسب نوع الماكلة. مزودة بفلتر في الغطاء يقلل من ريحة الزيت في الدار، ونافذة تشوفي منها الأكل بلا ما تحلي الغطاء، ومؤقت حتى 30 دقيقة يخليك تطيبي وأنت مرتاحة. ومزودة بنظام أمان يطفيها وحدها كي تسخن زايد، باش تطيبي وأنت مطمّنة. الوحدة المتحكمة تتنحى باش التنظيف يولي ساهل، والهيكل والغطاء من الفولاذ المقاوم للصدأ. سلة قلي بمقبض طويل ومعلاق لتصفية الزيت، مقابض جانبية وأرجل ثابتة مضادة للانزلاق. مثالية للفريت، البوراك، الدجاج، الحوت والمأكولات المجمدة. الدفع عند الاستلام في كل الولايات. — Des frites croustillantes, des bourek dorés, du poulet et du poisson frits comme au restaurant, chez vous. La friteuse ROBUSTE en inox de 2000W et 3 litres chauffe vite et vous laisse régler la température de 130° à 190° selon le plat. Le filtre intégré au couvercle réduit les odeurs d'huile dans la maison, le hublot permet de surveiller la cuisson sans ouvrir, et le minuteur de 30 minutes vous laisse cuisiner tranquillement. Un système de sécurité coupe automatiquement l'appareil en cas de surchauffe. Le bloc de commande est amovible pour un nettoyage facile ; cuve et couvercle en acier inoxydable, panier à long manche avec crochet d'égouttage, poignées latérales et pieds antidérapants. Idéale pour frites, bourek, poulet, poisson et surgelés. Paiement à la livraison dans toutes les wilayas.",
+    "features": [
+      "قوة 2000 واط — تسخين سريع",
+      "سعة 3 لتر تكفي العائلة كاملة",
+      "هيكل وغطاء إينوكس مقاوم للصدأ",
+      "ترموستا قابل للتعديل من 130° إلى 190°",
+      "مؤقت حتى 30 دقيقة",
+      "إطفاء تلقائي عند الحرارة الزائدة",
+      "فلتر في الغطاء يقلّل الروائح والبخار",
+      "نافذة مراقبة في الغطاء",
+      "وحدة تحكم قابلة للنزع لتنظيف سهل",
+      "سلة بمقبض طويل ومعلاق لتصفية الزيت",
+      "الدفع عند الاستلام"
     ],
     "stock": 10,
     "category": "cuisine",
