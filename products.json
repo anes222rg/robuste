@@ -44,7 +44,7 @@
       "وفّر 200 دج مقارنة بالشراء المنفصل",
       "الدفع عند الاستلام"
     ],
-    "stock": 5,
+    "stock": 0,
     "category": "packs",
     "badge": "PACK وفر",
     "members": [
@@ -69,7 +69,7 @@
       "وفّر 400 دج",
       "الدفع عند الاستلام"
     ],
-    "stock": 10,
+    "stock": 0,
     "category": "packs",
     "badge": "SUMMER PACK",
     "members": [
@@ -245,7 +245,7 @@
       "Panier anti-adhésif",
       "Contrôle de température"
     ],
-    "stock": 10,
+    "stock": 0,
     "category": "cuisine",
     "badge": ""
   },
