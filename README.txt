@@ -14,7 +14,7 @@ FRITEUSE ELECTRIQUE INOX 3L 2000W (FEI3L)  —  المعرّف 107
   images/FRITEUSE INOX 3L 2.webp   لوحة التحكم
   images/FRITEUSE INOX 3L 3.webp   العلبة
 
-السعر: 8,900 دج  (قديم 9,500 — شارة -6%)
+السعر: 8,600 دج  (قديم 9,500 — شارة -9%)
 المخزون: 10   |   التصنيف: cuisine   |   الشارة: Nouveau
 
 تنبيه:
