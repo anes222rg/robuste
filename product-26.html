@@ -859,10 +859,18 @@ async function submitExpressOrder() {
     finally { isSubmittingExpress = false; if(expressBtn){ expressBtn.disabled = false; expressBtn.innerHTML = expressBtnOrig; } }
 }
 function loadRelatedProducts(all, currentId) {
+    /* Curated shortlist shown under every product. Anything sold out, or the
+     * product being viewed, is dropped and the row is topped up automatically. */
+    const RB_FEATURED = [102, 100, 101, 206];
     const cur = all.find(x => x.id === currentId) || {};
     const sellable = all.filter(p => p.id !== currentId && rbInStock(p));
-    const sameCat = sellable.filter(p => p.category === cur.category);
-    const related = (sameCat.length >= 4 ? sameCat : sameCat.concat(sellable.filter(p => p.category !== cur.category))).slice(0,4);
+    let related = RB_FEATURED.map(id => sellable.find(p => p.id === id)).filter(Boolean);
+    if (related.length < 4) {
+      const rest = sellable.filter(p => !related.some(r => r.id === p.id));
+      const sameCat = rest.filter(p => p.category === cur.category);
+      related = related.concat(sameCat, rest.filter(p => p.category !== cur.category));
+    }
+    related = related.slice(0,4);
     if(!related.length) return;
     let html = `<h3 class="mb-4">قد يعجبك أيضاً</h3><div class="row g-4">`;
     related.forEach(p => {

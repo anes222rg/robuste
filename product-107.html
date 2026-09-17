@@ -160,6 +160,18 @@ nav.glass-navbar .navbar-collapse{order:9!important}
 @media(max-width:991.98px){.whatsapp-float{display:none!important}}
 @media(min-width:992px){.rb-sticky-buy{display:none}}
 @media(max-width:991.98px){body{padding-bottom:78px}}
+/* آراء حقيقية بالصور */
+.real-reviews{margin-top:8px;}
+.rr-head{text-align:center;margin-bottom:18px;}
+.rr-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:800;padding:8px 18px;border-radius:999px;font-size:1rem;box-shadow:0 6px 18px rgba(22,163,74,.3);}
+.rr-sub{color:#6b7280;margin-top:10px;font-size:.95rem;}
+.rr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.rr-item{margin:0;position:relative;border-radius:14px;overflow:hidden;cursor:zoom-in;box-shadow:0 6px 20px rgba(0,0,0,.12);border:1px solid rgba(0,0,0,.06);background:#0b0b0b;transition:transform .25s ease,box-shadow .25s ease;}
+.rr-item:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.2);}
+.rr-item img{width:100%;height:340px;object-fit:cover;object-position:top center;display:block;}
+.rr-item figcaption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);color:#fff;font-size:.82rem;padding:18px 10px 8px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;}
+@media(max-width:992px){.rr-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:576px){.rr-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.rr-item img{height:270px;}}
 </style>
 <body class="has-cod-bar">
 
@@ -257,6 +269,18 @@ nav.glass-navbar .navbar-collapse{order:9!important}
 <section class="reviews-section py-5" data-aos="fade-up">
   <div class="container">
     <h2 class="section-title">آراء العملاء</h2>
+    <div class="real-reviews mb-5">
+      <div class="rr-head">
+        <span class="rr-badge"><i class="bi bi-patch-check-fill"></i> آراء حقيقية 100%</span>
+        <p class="rr-sub">صور حقيقية من محادثات زبائننا بعد استلامهم وتجربتهم للفريتوز</p>
+      </div>
+      <div class="rr-grid">
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-1.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-1.jpg" alt="زبونة جرّبت الفريتوز: ولله أحسن ماركة والنتيجة روعة"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-2.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-2.jpg" alt="تأكيد توصيل الطلب مع شكر الزبونة"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-3.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-3.jpg" alt="زبونة راضية وطلبت فريتوز إضافية للعائلة"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+        <figure class="rr-item" onclick="openLightbox('reviews/rev-4.jpg')"><img loading="lazy" decoding="async" src="reviews/rev-4.jpg" alt="زبونة استلمت طلبها وشكرت المتجر"><figcaption><i class="bi bi-zoom-in"></i> اضغط للتكبير</figcaption></figure>
+      </div>
+    </div>
     <div class="row" id="reviewsRow">
       <div class="col-md-4 mb-4">
         <div class="review-card">
@@ -917,10 +941,18 @@ async function submitExpressOrder() {
     finally { isSubmittingExpress = false; if(expressBtn){ expressBtn.disabled = false; expressBtn.innerHTML = expressBtnOrig; } }
 }
 function loadRelatedProducts(all, currentId) {
+    /* Curated shortlist shown under every product. Anything sold out, or the
+     * product being viewed, is dropped and the row is topped up automatically. */
+    const RB_FEATURED = [102, 100, 101, 206];
     const cur = all.find(x => x.id === currentId) || {};
     const sellable = all.filter(p => p.id !== currentId && rbInStock(p));
-    const sameCat = sellable.filter(p => p.category === cur.category);
-    const related = (sameCat.length >= 4 ? sameCat : sameCat.concat(sellable.filter(p => p.category !== cur.category))).slice(0,4);
+    let related = RB_FEATURED.map(id => sellable.find(p => p.id === id)).filter(Boolean);
+    if (related.length < 4) {
+      const rest = sellable.filter(p => !related.some(r => r.id === p.id));
+      const sameCat = rest.filter(p => p.category === cur.category);
+      related = related.concat(sameCat, rest.filter(p => p.category !== cur.category));
+    }
+    related = related.slice(0,4);
     if(!related.length) return;
     let html = `<h3 class="mb-4">قد يعجبك أيضاً</h3><div class="row g-4">`;
     related.forEach(p => {
