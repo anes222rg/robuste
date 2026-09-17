@@ -50,7 +50,8 @@
     "members": [
       "2× FRITEUSE DF 900W"
     ],
-    "devices": 2
+    "devices": 2,
+    "alternative_id": 107
   },
   {
     "id": 201,
@@ -76,7 +77,8 @@
       "PANINEUSE ET GRILL 1000W",
       "FRITEUSE DF 900W"
     ],
-    "devices": 2
+    "devices": 2,
+    "alternative_id": 107
   },
   {
     "id": 202,
@@ -247,7 +249,8 @@
     ],
     "stock": 0,
     "category": "cuisine",
-    "badge": ""
+    "badge": "",
+    "alternative_id": 107
   },
   {
     "id": 5,
@@ -574,9 +577,10 @@
       "Minuterie numérique",
       "Contrôle température"
     ],
-    "stock": 8,
+    "stock": 0,
     "category": "cuisine",
-    "badge": ""
+    "badge": "",
+    "alternative_id": 107
   },
   {
     "id": 24,

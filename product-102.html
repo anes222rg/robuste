@@ -769,7 +769,7 @@ function applyProductSEO(p){
 async function loadProduct() {
     if(!productId) { document.getElementById('productDetailRow').innerHTML = '<div class="col-12 text-center py-5"><i class="bi bi-exclamation-triangle fs-1"></i><h3>المنتج غير موجود</h3></div>'; return; }
     try {
-        const res = await fetch('products.json');
+        const res = await fetch('products.json', { cache: 'no-cache' });
         const products = await res.json();
         window.RB_ALL = products;
         currentProduct = products.find(p => p.id === productId);
@@ -787,6 +787,12 @@ async function loadProduct() {
  * in-stock product of the same family so the visit still converts. */
 function rbInStock(p){ return !!p && (p.stock==null || Number(p.stock)>0); }
 function rbPickAlternative(all, p){
+  // An explicit alternative_id in products.json always wins, as long as that
+  // product is itself sellable. The price heuristic below is only a fallback.
+  if(p.alternative_id){
+    const picked=(all||[]).find(x=>x.id===p.alternative_id);
+    if(rbInStock(picked)) return picked;
+  }
   const pool=(all||[]).filter(x=>x.id!==p.id && rbInStock(x) && !Array.isArray(x.members));
   if(!pool.length) return null;
   // Shared long word (FRITEUSE, HACHOIR, CAFETIERE...) means same product family.
@@ -1120,7 +1126,7 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
   var id = (location.pathname.match(/product-(\d+)\.html/) || [])[1];
   if (!id) return;
   function da(n){ return Number(n).toLocaleString('en-US') + ' DA'; }
-  fetch('products.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(all){
+  fetch('products.json', { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(all){
     if (!all) return;
     var p = null;
     for (var i = 0; i < all.length; i++){ if (String(all[i].id) === id){ p = all[i]; break; } }

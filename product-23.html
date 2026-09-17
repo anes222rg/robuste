@@ -130,7 +130,7 @@ gtag('config', 'G-GREM5BTR7T');
   document.addEventListener('DOMContentLoaded', function(){ scan(document); });
 })();
 </script>
-<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"FRITEUSE ELECTRIQUE SANS HUILE 3.2L","image":["https://www.robustedz.store/images/air%20fryer%203.2L.jpg"],"description":"Friteuse à air chaud sans huile d'une capacité de 3.2L. Cuisine saine et croustillante sans ajout d'huile.","sku":"23","mpn":"23","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-23.html","priceCurrency":"DZD","price":"13000.00","priceValidUntil":"2027-12-31","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"},"priceSpecification":{"@type":"UnitPriceSpecification","priceType":"https://schema.org/ListPrice","price":"16500.00","priceCurrency":"DZD"},"shippingDetails":{"@type":"OfferShippingDetails","shippingDestination":{"@type":"DefinedRegion","addressCountry":"DZ"},"deliveryTime":{"@type":"ShippingDeliveryTime","handlingTime":{"@type":"QuantitativeValue","minValue":0,"maxValue":1,"unitCode":"DAY"},"transitTime":{"@type":"QuantitativeValue","minValue":1,"maxValue":3,"unitCode":"DAY"}}},"hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","applicableCountry":"DZ","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","merchantReturnDays":7,"returnMethod":"https://schema.org/ReturnByMail"}}}</script>
+<script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"FRITEUSE ELECTRIQUE SANS HUILE 3.2L","image":["https://www.robustedz.store/images/air%20fryer%203.2L.jpg"],"description":"Friteuse à air chaud sans huile d'une capacité de 3.2L. Cuisine saine et croustillante sans ajout d'huile.","sku":"23","mpn":"23","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-23.html","priceCurrency":"DZD","price":"13000.00","priceValidUntil":"2027-12-31","availability":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"},"priceSpecification":{"@type":"UnitPriceSpecification","priceType":"https://schema.org/ListPrice","price":"16500.00","priceCurrency":"DZD"},"shippingDetails":{"@type":"OfferShippingDetails","shippingDestination":{"@type":"DefinedRegion","addressCountry":"DZ"},"deliveryTime":{"@type":"ShippingDeliveryTime","handlingTime":{"@type":"QuantitativeValue","minValue":0,"maxValue":1,"unitCode":"DAY"},"transitTime":{"@type":"QuantitativeValue","minValue":1,"maxValue":3,"unitCode":"DAY"}}},"hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","applicableCountry":"DZ","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","merchantReturnDays":7,"returnMethod":"https://schema.org/ReturnByMail"}}}</script>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
@@ -184,7 +184,7 @@ gtag('config', 'G-GREM5BTR7T');
         <div class="price-section my-3">
           <span class="current-price fw-bold fs-3" dir="ltr">13,000 DA</span><del class="old-price text-muted ms-2" dir="ltr">16,500 DA</del><span class="discount-badge ms-2">-21%</span>
         </div>
-        <p class="product-availability">متوفر في المخزون</p>
+        <p class="product-availability">غير متوفر حالياً</p>
         <p class="product-description">Friteuse à air chaud sans huile d'une capacité de 3.2L. Cuisine saine et croustillante sans ajout d'huile.</p>
         <ul class="product-features list-unstyled"><li><i class="bi bi-check-circle-fill"></i> Capacité 3.2L</li><li><i class="bi bi-check-circle-fill"></i> Cuisson sans huile</li><li><i class="bi bi-check-circle-fill"></i> Minuterie numérique</li><li><i class="bi bi-check-circle-fill"></i> Contrôle température</li></ul>
         <p class="text-muted">الدفع عند الاستلام • التوصيل لكل الولايات</p>
@@ -666,7 +666,7 @@ function applyProductSEO(p){
 async function loadProduct() {
     if(!productId) { document.getElementById('productDetailRow').innerHTML = '<div class="col-12 text-center py-5"><i class="bi bi-exclamation-triangle fs-1"></i><h3>المنتج غير موجود</h3></div>'; return; }
     try {
-        const res = await fetch('products.json');
+        const res = await fetch('products.json', { cache: 'no-cache' });
         const products = await res.json();
         window.RB_ALL = products;
         currentProduct = products.find(p => p.id === productId);
@@ -684,6 +684,12 @@ async function loadProduct() {
  * in-stock product of the same family so the visit still converts. */
 function rbInStock(p){ return !!p && (p.stock==null || Number(p.stock)>0); }
 function rbPickAlternative(all, p){
+  // An explicit alternative_id in products.json always wins, as long as that
+  // product is itself sellable. The price heuristic below is only a fallback.
+  if(p.alternative_id){
+    const picked=(all||[]).find(x=>x.id===p.alternative_id);
+    if(rbInStock(picked)) return picked;
+  }
   const pool=(all||[]).filter(x=>x.id!==p.id && rbInStock(x) && !Array.isArray(x.members));
   if(!pool.length) return null;
   // Shared long word (FRITEUSE, HACHOIR, CAFETIERE...) means same product family.
@@ -1017,7 +1023,7 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
   var id = (location.pathname.match(/product-(\d+)\.html/) || [])[1];
   if (!id) return;
   function da(n){ return Number(n).toLocaleString('en-US') + ' DA'; }
-  fetch('products.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(all){
+  fetch('products.json', { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(all){
     if (!all) return;
     var p = null;
     for (var i = 0; i < all.length; i++){ if (String(all[i].id) === id){ p = all[i]; break; } }

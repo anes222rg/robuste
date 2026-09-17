@@ -38,7 +38,7 @@
   function render() {
     var root = document.getElementById('packsShowcase');
     if (!root) return;
-    fetch('products.json').then(function (r) { if (!r.ok) throw new Error('products'); return r.json(); })
+    fetch('products.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('products'); return r.json(); })
       .then(function (all) {
         var packs = all.filter(function (p) { return p.category === 'packs'; });
         if (!packs.length) { root.hidden = true; return; }

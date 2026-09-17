@@ -80,7 +80,7 @@
   function catalogue() {
     if (_cat) return Promise.resolve(_cat);
     if (_catP) return _catP;
-    _catP = fetch("products.json")
+    _catP = fetch("products.json", { cache: "no-cache" })
       .then(function (r) { return r.ok ? r.json() : []; })
       .then(function (a) { _cat = a || []; return _cat; })
       .catch(function () { _cat = []; return _cat; });
