@@ -12,11 +12,87 @@
  *   ALLOWED_ORIGIN   e.g. https://www.robustedz.store   (NEVER leave as "*" in prod)
  *   ECOTRACK_API_URL e.g. https://assildelivery.ecotrack.dz
  *   ECOTRACK_TOKEN   the API STANDARD token from the EcoTrack dashboard
- *   ADMIN_KEY        long random string; gate for the /admin/* routes (you only)
+ *   ADMIN_EMAIL      the owner's Google account, e.g. anescareer@gmail.com.
+ *                    Firebase ID tokens are only accepted for this address —
+ *                    same rule as firestore.rules. REQUIRED for the panel.
+ *   ADMIN_KEY        legacy shared secret for /admin/*. Optional: delete it
+ *                    once ADMIN_EMAIL works, and the old gate closes for good.
  */
 
 const PHONE_RE = /^0[5-7][0-9]{8}$/;
 const COOLDOWN_SECONDS = 120;
+
+/* Anything the browser says about price or quantity is a suggestion an
+ * attacker can forge, and a forged total does not stay in one place: it
+ * becomes the conversion value Meta optimises on, the amount the courier
+ * collects at the door, and the revenue in your reports. products.json is
+ * therefore the price authority, and quantities are clamped. */
+const MAX_LINE_QTY = 20;      // hard ceiling per product line
+const BULK_QTY_FLAG = 5;      // above this, let the order through but flag it
+const MAX_DELIVERY_FEE = 3000;
+const MAX_CART_LINES = 20;
+
+let _catalog = null, _catalogExp = 0;
+async function catalogById(env) {
+  const now = Date.now();
+  if (_catalog && now < _catalogExp) return _catalog;
+  const host = env.SITE_HOST || "www.robustedz.store";
+  try {
+    const res = await fetch("https://" + host + "/products.json", { cf: { cacheTtl: 600 } });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const arr = await res.json();
+    const map = {};
+    (Array.isArray(arr) ? arr : []).forEach(p => { if (p && p.id != null) map[String(p.id)] = p; });
+    _catalog = map;
+    _catalogExp = now + 600000;
+  } catch (e) {
+    // Fail open: a catalogue hiccup must never block a real customer.
+    if (!_catalog) _catalog = {};
+    _catalogExp = now + 60000;
+  }
+  return _catalog;
+}
+
+/* Rewrites order.products / deliveryFee / totalPrice from trusted values.
+ * Returns what had to be corrected so the order can be flagged for review. */
+async function repriceOrder(env, order) {
+  const catalog = await catalogById(env);
+  const notes = [];
+  let subtotal = 0, bulk = false;
+
+  const lines = order.products.slice(0, MAX_CART_LINES);
+  if (order.products.length > MAX_CART_LINES) notes.push("سلة مقتطعة إلى " + MAX_CART_LINES + " سطراً");
+
+  order.products = lines.map(line => {
+    const l = Object.assign({}, line);
+    let qty = Math.floor(Number(l.quantity));
+    if (!isFinite(qty) || qty < 1) qty = 1;
+    if (qty > MAX_LINE_QTY) { notes.push("كمية " + qty + " خُفّضت إلى " + MAX_LINE_QTY); qty = MAX_LINE_QTY; }
+    if (qty > BULK_QTY_FLAG) bulk = true;
+    l.quantity = qty;
+
+    const known = catalog[String(l.id)];
+    if (known && Number(known.price) > 0) {
+      if (Number(l.price) !== Number(known.price)) notes.push("سعر " + (known.title || l.id) + " صُحّح إلى " + known.price);
+      l.price = Number(known.price);
+    } else {
+      l.price = Math.max(0, Number(l.price) || 0);
+    }
+    subtotal += l.price * qty;
+    return l;
+  });
+
+  let fee = Math.max(0, Number(order.deliveryFee) || 0);
+  if (fee > MAX_DELIVERY_FEE) { notes.push("سعر توصيل غير معقول (" + fee + ") أُلغي"); fee = 0; }
+  order.deliveryFee = fee;
+
+  const claimed = Number(order.totalPrice) || 0;
+  order.totalPrice = subtotal + fee;
+  if (Math.abs(claimed - order.totalPrice) > 1) {
+    notes.push("المجموع من المتصفح " + claimed + " ← الصحيح " + order.totalPrice);
+  }
+  return { notes, bulk };
+}
 
 // Rejects placeholder / troll names. Requires exactly two words, each with >=2 letters.
 function isRealName(name) {
@@ -75,6 +151,25 @@ export default {
       return handleAdminConfirmPurchase(request, env, cors);
     }
 
+    // ---------- EcoTrack: dispatch, labels, reference data ----------
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/validate")) {
+      return handleEcotrackValidate(request, env, cors);
+    }
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/label")) {
+      return handleEcotrackLabel(url, request, env, cors);
+    }
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/reference")) {
+      return handleEcotrackReference(url, request, env, ctx, cors);
+    }
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/ping")) {
+      return handleEcotrackPing(request, env, cors);
+    }
+
+    // ---------- Conversions API coverage for browser funnel events ----------
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/events")) {
+      return handleBrowserEvents(request, env, ctx, cors);
+    }
+
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
     return handleIntake(request, env, ctx, cors);
   }
@@ -131,12 +226,83 @@ async function handleTrack(url, env, cors) {
    GET  /admin/orders?phone=...   full (unsanitized) orders for a phone
    POST /admin/set-tracking       { id, tracking, status? } -> patch the order
    ========================================================================= */
-function adminOk(request, env) {
+/* Admin identity.
+ * Primary:  Authorization: Bearer <Firebase ID token>, verified against
+ *           Google's public JWKS and matched to ADMIN_EMAIL. Same identity
+ *           firestore.rules trusts, so panel and database agree on "admin".
+ * Legacy:   X-Admin-Key === ADMIN_KEY, accepted only while that secret exists.
+ *           Delete the ADMIN_KEY secret to switch it off for good. */
+const GOOGLE_JWK_URL = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
+let _jwksCache = { keys: null, expires: 0 };
+
+function b64urlToBytes(s) {
+  const pad = s.replace(/-/g, "+").replace(/_/g, "/");
+  const bin = atob(pad + "=".repeat((4 - (pad.length % 4)) % 4));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function googleJwks() {
+  const now = Date.now();
+  if (_jwksCache.keys && now < _jwksCache.expires) return _jwksCache.keys;
+  const res = await fetch(GOOGLE_JWK_URL);
+  if (!res.ok) throw new Error("jwks_fetch_failed_" + res.status);
+  const body = await res.json();
+  const m = (res.headers.get("cache-control") || "").match(/max-age=(\d+)/);
+  _jwksCache = { keys: body.keys || [], expires: now + (m ? Number(m[1]) : 3600) * 1000 };
+  return _jwksCache.keys;
+}
+
+async function verifyFirebaseIdToken(token, env) {
+  try {
+    const projectId = env.FIREBASE_PROJECT_ID;
+    if (!projectId) return null;
+    const parts = String(token || "").split(".");
+    if (parts.length !== 3) return null;
+
+    const header = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[0])));
+    const payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[1])));
+    if (header.alg !== "RS256" || !header.kid) return null;
+
+    // Cheap claim checks before the costly signature check.
+    const now = Math.floor(Date.now() / 1000);
+    const SKEW = 60;
+    if (!(Number(payload.exp) > now - SKEW)) return null;
+    if (!(Number(payload.iat) < now + SKEW)) return null;
+    if (payload.aud !== projectId) return null;
+    if (payload.iss !== "https://securetoken.google.com/" + projectId) return null;
+    if (!payload.sub) return null;
+
+    const jwk = (await googleJwks()).find(k => k.kid === header.kid);
+    if (!jwk) return null;
+    const key = await crypto.subtle.importKey(
+      "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]
+    );
+    const ok = await crypto.subtle.verify(
+      "RSASSA-PKCS1-v1_5", key,
+      b64urlToBytes(parts[2]),
+      new TextEncoder().encode(parts[0] + "." + parts[1])
+    );
+    return ok ? payload : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function adminOk(request, env) {
+  const auth = request.headers.get("Authorization") || "";
+  const bearer = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  if (bearer) {
+    const payload = await verifyFirebaseIdToken(bearer, env);
+    const allowed = String(env.ADMIN_EMAIL || "").trim().toLowerCase();
+    if (payload && allowed && String(payload.email || "").toLowerCase() === allowed) return true;
+  }
   return !!env.ADMIN_KEY && request.headers.get("X-Admin-Key") === env.ADMIN_KEY;
 }
 
 async function handleAdminOrders(url, request, env, cors) {
-  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
   const phone = (url.searchParams.get("phone") || "").trim();
   if (!PHONE_RE.test(phone)) return json({ error: "invalid_phone" }, 400, cors);
   let docs = [];
@@ -153,7 +319,7 @@ async function handleAdminOrders(url, request, env, cors) {
 }
 
 async function handleAdminSetTracking(request, env, cors) {
-  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
   let body;
   try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
   const id = String(body.id || "").trim();
@@ -180,7 +346,7 @@ async function handleAdminSetTracking(request, env, cors) {
  * manual paste, no guessing. Creating a parcel = a REAL shipment, so this is gated by
  * ADMIN_KEY and is idempotent (refuses if the order already has a tracking number). */
 async function handleAdminConfirmShip(request, env, cors) {
-  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
   let body;
   try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
   const id = String(body.id || "").trim();
@@ -240,7 +406,7 @@ async function fireConfirmedPurchase(env, id, request) {
  * Sends the Meta Purchase using the fbc/fbp saved at order time. Safe to
  * call more than once — the event is only ever sent a single time. */
 async function handleAdminConfirmPurchase(request, env, cors) {
-  if (!adminOk(request, env)) return json({ error: "unauthorized" }, 401, cors);
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
   let body;
   try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
   const id = String(body.id || "").trim();
@@ -419,31 +585,35 @@ async function ordersByPhone(env, phone) {
 async function ecotrackTrackings(env, codes, diag) {
   if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) { if (diag) diag.error = "ecotrack_not_configured"; return {}; }
   const base = env.ECOTRACK_API_URL.replace(/\/+$/, "");
-  // Try the common path first, then the Noest-style public path as a fallback.
+  codes = codes.slice(0, 100); // API caps a batch at 100 trackings
+  const qs = codes.map(c => "trackings[]=" + encodeURIComponent(c)).join("&");
+  /* Documented shape is GET .../get/trackings/info?trackings[]=A&trackings[]=B.
+   * The older POST form stays as a fallback for tenants that still accept it. */
   const candidates = [
-    base + "/api/v1/get/trackings/info",
-    base + "/api/public/get/trackings/info"
+    { method: "GET",  endpoint: base + "/api/v1/get/trackings/info?" + qs },
+    { method: "POST", endpoint: base + "/api/v1/get/trackings/info" },
+    { method: "POST", endpoint: base + "/api/public/get/trackings/info" }
   ];
   let data = null;
-  for (const endpoint of candidates) {
+  for (const cand of candidates) {
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + env.ECOTRACK_TOKEN,
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ trackings: codes, api_token: env.ECOTRACK_TOKEN })
-      });
+      const init = {
+        method: cand.method,
+        headers: { "Authorization": "Bearer " + env.ECOTRACK_TOKEN, "Accept": "application/json" }
+      };
+      if (cand.method === "POST") {
+        init.headers["Content-Type"] = "application/json";
+        init.body = JSON.stringify({ trackings: codes, api_token: env.ECOTRACK_TOKEN });
+      }
+      const res = await fetch(cand.endpoint, init);
       const text = await res.text();
-      const attempt = { endpoint, status: res.status, body: String(text).slice(0, 1000) };
+      const attempt = { endpoint: cand.endpoint, method: cand.method, status: res.status, body: String(text).slice(0, 1000) };
       if (diag) diag.attempts.push(attempt);
       if (!res.ok) continue;
       try { data = JSON.parse(text); } catch (e) { if (diag) attempt.parseError = String(e); data = null; continue; }
       if (data) break;
     } catch (e) {
-      if (diag) diag.attempts.push({ endpoint, error: String(e) });
+      if (diag) diag.attempts.push({ endpoint: cand.endpoint, method: cand.method, error: String(e) });
     }
   }
   if (!data) return {};
@@ -458,23 +628,197 @@ async function ecotrackTrackings(env, codes, diag) {
     const acts = node.activity || node.activites || node.events || (node.OrderInfo && node.OrderInfo.activity) || [];
     const timeline = (Array.isArray(acts) ? acts : []).map(a => ({
       date: a.date || a.created_at || a.event_date || "",
-      status: a.event || a.status || a.activity || a.libelle || ""
-    })).filter(t => t.status);
-    const lastRaw = timeline.length ? timeline[0].status : (node.status || node.last_status || "");
-    const mapped = mapEcotrackStatus(lastRaw);
+      status: a.event || a.status || a.libelle || a.activity || "",
+      // Machine code kept separate so mapping never depends on wording.
+      activity: a.activity || a.activity_code || ""
+    })).filter(t => t.status || t.activity);
+    const last = timeline.length ? timeline[0] : null;
+    const lastRaw = last ? last.status : (node.status || node.last_status || "");
+    const mapped = mapEcotrackStatus(lastRaw, last ? last.activity : (node.activity_code || ""));
     out[code] = { stage: mapped.stage, label: mapped.label, timeline };
   }
   return out;
 }
 
-/* Map raw EcoTrack status text (FR/AR) to a customer-facing stage + Arabic label. */
-function mapEcotrackStatus(raw) {
+/* =========================================================================
+   ECOTRACK — dispatch, labels and reference data
+   Docs: https://documenter.getpostman.com/view/14517169/Tz5je15g
+   Rate limits: 50/min, 1 500/hour, 15 000/day. Bulk helpers below pace
+   themselves so a daily batch never trips the per-minute ceiling.
+   ========================================================================= */
+function ecoUrl(env, path, params) {
+  const base = env.ECOTRACK_API_URL.replace(/\/+$/, "");
+  const qs = params ? "?" + new URLSearchParams(params).toString() : "";
+  return base + "/api/v1/" + path.replace(/^\/+/, "") + qs;
+}
+
+async function ecoCall(env, path, { method = "GET", params, raw = false } = {}) {
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) throw new Error("ecotrack non configure");
+  const res = await fetch(ecoUrl(env, path, params), {
+    method,
+    headers: {
+      "Authorization": "Bearer " + env.ECOTRACK_TOKEN,
+      "Accept": raw ? "*/*" : "application/json"
+    }
+  });
+  if (res.status === 429) throw new Error("rate_limited");
+  if (raw) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res;
+  }
+  const text = await res.text();
+  let data = null;
+  try { data = JSON.parse(text); } catch {}
+  if (!res.ok) throw new Error("HTTP " + res.status + " " + text.slice(0, 200));
+  if (data && data.success === false) throw new Error(data.message || "refuse");
+  return data;
+}
+
+/* POST /admin/ecotrack/validate  { trackings: ["A","B"], ask_collection? }
+ * This is the "Expédier" step. create/order only drafts a parcel; until it is
+ * validated the courier never collects it. Irreversible: once validated the
+ * parcel can no longer be updated or deleted. */
+async function handleEcotrackValidate(request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+
+  const list = Array.isArray(body.trackings) ? body.trackings : (body.tracking ? [body.tracking] : []);
+  const codes = list.map(c => String(c || "").trim()).filter(c => /^[A-Za-z0-9_-]+$/.test(c));
+  if (!codes.length) return json({ error: "no_tracking" }, 400, cors);
+  /* Each parcel costs 2 subrequests here (valid/order + the Firestore patch),
+   * and a Worker gets 50 subrequests per request on the free plan. 15 keeps a
+   * comfortable margin; the panel splits larger batches into chunks. */
+  if (codes.length > 15) return json({ error: "too_many", max: 15 }, 400, cors);
+
+  const results = [];
+  for (const tracking of codes) {
+    const params = { tracking };
+    if (body.ask_collection) params.ask_collection = "1";
+    try {
+      const data = await ecoCall(env, "valid/order", { method: "POST", params });
+      results.push({ tracking, ok: true, message: (data && data.message) || "" });
+    } catch (e) {
+      results.push({ tracking, ok: false, error: String(e.message || e) });
+    }
+    // EcoTrack allows 50 requests/minute; a 15-parcel chunk paced at 250ms
+    // finishes in ~4s and leaves room for the panel's next chunk.
+    if (codes.length > 1) await new Promise(r => setTimeout(r, 250));
+  }
+
+  const okCodes = results.filter(r => r.ok).map(r => r.tracking);
+  // Record the dispatch so the panel can tell "parcel made" from "handed over".
+  const stamp = new Date().toISOString();
+  if (okCodes.length && Array.isArray(body.ids) && body.ids.length === codes.length) {
+    for (let i = 0; i < codes.length; i++) {
+      if (!results[i].ok) continue;
+      const id = String(body.ids[i] || "").trim();
+      if (!/^[A-Za-z0-9_-]+$/.test(id)) continue;
+      try { await updateOrderFields(env, id, { ecotrackValidated: true, ecotrackValidatedAt: stamp }); } catch (e) {}
+    }
+  }
+  return json({ ok: results.every(r => r.ok), validated: okCodes.length, results }, 200, cors);
+}
+
+/* GET /admin/ecotrack/label?tracking=XXX
+ * Streams the courier's official PDF through the Worker so the API token
+ * never reaches the browser. */
+async function handleEcotrackLabel(url, request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  const tracking = String(url.searchParams.get("tracking") || "").trim();
+  if (!/^[A-Za-z0-9_-]+$/.test(tracking)) return json({ error: "invalid_tracking" }, 400, cors);
+  let res;
+  try { res = await ecoCall(env, "get/order/label", { params: { tracking }, raw: true }); }
+  catch (e) { return json({ error: "label_failed", detail: String(e.message || e) }, 502, cors); }
+  const headers = Object.assign({}, cors, {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": 'inline; filename="' + tracking + '.pdf"',
+    "Cache-Control": "no-store"
+  });
+  return new Response(res.body, { status: 200, headers });
+}
+
+/* GET /admin/ecotrack/reference
+ * Wilayas, communes, stop desks and YOUR tariff table, in one cached call.
+ * Cached at the edge for an hour: this data changes rarely and every page of
+ * the panel would otherwise burn requests against the rate limit. */
+async function handleEcotrackReference(url, request, env, ctx, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+
+  const cache = caches.default;
+  const cacheKey = new Request(new URL("/__eco_ref", url.origin).toString(), { method: "GET" });
+  if (url.searchParams.get("fresh") !== "1") {
+    const hit = await cache.match(cacheKey);
+    if (hit) {
+      const body = await hit.json();
+      return json(Object.assign({ cached: true }, body), 200, cors);
+    }
+  }
+
+  const out = { cached: false, fetchedAt: new Date().toISOString() };
+  const grab = async (key, path, params) => {
+    try { out[key] = await ecoCall(env, path, { params }); }
+    catch (e) { out[key] = null; out[key + "_error"] = String(e.message || e); }
+  };
+  await grab("wilayas", "get/wilayas");
+  await grab("communes", "get/communes");
+  await grab("desks", "get/desks");
+  await grab("fees", "get/fees");
+
+  const payload = JSON.stringify(out);
+  ctx.waitUntil(cache.put(cacheKey, new Response(payload, {
+    headers: { "Content-Type": "application/json", "Cache-Control": "max-age=3600" }
+  })));
+  return json(out, 200, cors);
+}
+
+/* GET /admin/ecotrack/ping — is the token still valid? */
+async function handleEcotrackPing(request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  try {
+    const data = await ecoCall(env, "validate/token");
+    return json({ ok: true, data }, 200, cors);
+  } catch (e) {
+    return json({ ok: false, error: String(e.message || e) }, 502, cors);
+  }
+}
+
+/* Map an EcoTrack event to a customer-facing stage + Arabic label.
+ *
+ * `activity` codes are stable machine identifiers, so they are checked FIRST.
+ * `status` is human text each courier may reword, and it is ORDER-SENSITIVE:
+ * "En livraison" (out for delivery) and "Retours chez livreur" (return held by
+ * the driver) both contain "livr", so the delivered test must run last.
+ * Lists come from the EcoTrack API docs, "Suivi ... plusieurs commandes". */
+const ECOTRACK_ACTIVITY_STAGES = {
+  order_information_received_by_carrier: { stage: "preparing",        label: "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631" },
+  picked:                                { stage: "in_transit",       label: "\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642" },
+  accepted_by_carrier:                   { stage: "in_transit",       label: "\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642" },
+  dispatched_to_driver:                  { stage: "out_for_delivery", label: "\u062e\u0631\u062c \u0644\u0644\u062a\u0648\u0635\u064a\u0644" },
+  attempt_delivery:                      { stage: "out_for_delivery", label: "\u0645\u062d\u0627\u0648\u0644\u0629 \u062a\u0633\u0644\u064a\u0645" },
+  return_asked:                          { stage: "returned",         label: "\u0642\u064a\u062f \u0627\u0644\u0625\u0631\u062c\u0627\u0639" },
+  return_in_transit:                     { stage: "returned",         label: "\u0642\u064a\u062f \u0627\u0644\u0625\u0631\u062c\u0627\u0639" },
+  return_received:                       { stage: "returned",         label: "\u0645\u0631\u062a\u062c\u0639" },
+  livred:                                { stage: "delivered",        label: "\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645" },
+  encaissed:                             { stage: "delivered",        label: "\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645" },
+  payed:                                 { stage: "delivered",        label: "\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645" }
+};
+
+function mapEcotrackStatus(raw, activity) {
+  const act = String(activity || "").trim().toLowerCase();
+  if (act && ECOTRACK_ACTIVITY_STAGES[act]) return ECOTRACK_ACTIVITY_STAGES[act];
+
   const s = String(raw || "").toLowerCase();
-  if (/livr|livr\u00e9|delivered|\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645/.test(s)) return { stage: "delivered", label: "\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645" };
-  if (/retour|returned|\u0625\u0631\u062c\u0627\u0639|\u0631\u0627\u062c\u0639/.test(s)) return { stage: "returned", label: "\u0645\u0631\u062a\u062c\u0639" };
-  if (/sortie|out for|en livraison|\u062e\u0631\u062c|\u0644\u0644\u062a\u0648\u0635\u064a\u0644/.test(s)) return { stage: "out_for_delivery", label: "\u062e\u0631\u062c \u0644\u0644\u062a\u0648\u0635\u064a\u0644" };
-  if (/transit|achemin|exp\u00e9di|ramass|collect|\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642/.test(s)) return { stage: "in_transit", label: "\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642" };
-  if (/pr\u00eat|ready|prepar|\u062c\u0627\u0647\u0632/.test(s)) return { stage: "preparing", label: "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631" };
+  // Returns first: several return statuses contain "livr" ("Retours chez livreur").
+  if (/retour|returned|\u0625\u0631\u062c\u0627\u0639|\u0631\u0627\u062c\u0639|\u0645\u0631\u062a\u062c\u0639/.test(s)) return { stage: "returned", label: "\u0645\u0631\u062a\u062c\u0639" };
+  // Then out-for-delivery: "En livraison" also contains "livr".
+  if (/en livraison|sortie|out for|\u062e\u0631\u062c|\u0644\u0644\u062a\u0648\u0635\u064a\u0644/.test(s)) return { stage: "out_for_delivery", label: "\u062e\u0631\u062c \u0644\u0644\u062a\u0648\u0635\u064a\u0644" };
+  if (/suspend|\u0645\u0639\u0644\u0651\u0642|\u0645\u0639\u0644\u0642/.test(s)) return { stage: "in_transit", label: "\u0645\u0639\u0644\u0651\u0642 \u0645\u0624\u0642\u062a\u0627\u064b" };
+  // Only now is a bare "livr"/"livre" safe to read as delivered.
+  if (/livr|delivered|encaiss|paiement|\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645/.test(s)) return { stage: "delivered", label: "\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645" };
+  // "Pr\u00eat \u00e0 exp\u00e9dier" must read as preparing, so this beats the transit test.
+  if (/pr\u00eat|pret|ready|pr\u00e9par|prepar|stock|\u062c\u0627\u0647\u0632/.test(s)) return { stage: "preparing", label: "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631" };
+  if (/hub|wilaya|transit|achemin|exp\u00e9di|ramass|collect|\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642/.test(s)) return { stage: "in_transit", label: "\u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642" };
   return { stage: "in_transit", label: raw || "\u0642\u064a\u062f \u0627\u0644\u0645\u0639\u0627\u0644\u062c\u0629" };
 }
 
@@ -506,6 +850,120 @@ function shortRef(id) { return id ? String(id).slice(-6).toUpperCase() : ""; }
 /* =========================================================================
    ORDER INTAKE  —  POST /
    ========================================================================= */
+/* =========================================================================
+   POST /events  —  Conversions API coverage for the browser funnel
+   The pixel alone loses events to ad blockers, ITP and iOS. Mirroring the
+   same events server-side is exactly what Meta's "Conversions API event
+   coverage" metric measures, and the server always has IP + User-Agent, so
+   match quality is higher than the browser can manage on its own.
+   Dedup relies on the browser sending the SAME event_id it gave fbq().
+   This endpoint is public, so it validates hard and trusts nothing:
+   only known event names, a small batch, and money recomputed from the
+   catalogue rather than taken from the caller.
+   ========================================================================= */
+const CAPI_ALLOWED_EVENTS = {
+  ViewContent: 1, AddToCart: 1, InitiateCheckout: 1, Lead: 1, PlaceOrder: 1
+};
+const CAPI_MAX_BATCH = 10;
+
+async function handleBrowserEvents(request, env, ctx, cors) {
+  const PIXEL = env.META_PIXEL_ID, TOKEN = env.META_CAPI_TOKEN;
+  if (!PIXEL || !TOKEN) return json({ ok: true, skipped: "not_configured" }, 200, cors);
+
+  let payload;
+  try { payload = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  try { if (JSON.stringify(payload).length > 20000) return json({ error: "payload_too_large" }, 413, cors); } catch {}
+
+  const list = Array.isArray(payload.events) ? payload.events.slice(0, CAPI_MAX_BATCH) : [];
+  if (!list.length) return json({ ok: true, sent: 0 }, 200, cors);
+
+  const u = payload.user || {}, fb = payload.fb || {};
+  const ip = request.headers.get("CF-Connecting-IP") || "";
+  const ua = request.headers.get("User-Agent") || "";
+  const cf = request.cf || {};
+
+  const user_data = {};
+  const e164 = normPhoneE164(u.phone);
+  if (e164 && e164.length >= 11) {
+    const ph = await hashField(e164); if (ph) user_data.ph = [ph];
+    const ext = await hashField(e164); if (ext) user_data.external_id = [ext];
+  }
+  const email = String(u.email || "").trim().toLowerCase();
+  if (email.includes("@")) { const em = await hashField(email); if (em) user_data.em = [em]; }
+  const fn = await hashField(u.fn); if (fn) user_data.fn = [fn];
+  const ln = await hashField(u.ln); if (ln) user_data.ln = [ln];
+  const ct = await hashField(u.ct || cf.city); if (ct) user_data.ct = [ct];
+  const st = await hashField(u.st || cf.region); if (st) user_data.st = [st];
+  const co = await hashField(u.country || cf.country || "dz"); if (co) user_data.country = [co];
+  if (ip) user_data.client_ip_address = ip;
+  if (ua) user_data.client_user_agent = ua;
+  if (fb.fbp) user_data.fbp = String(fb.fbp).slice(0, 120);
+  if (fb.fbc) user_data.fbc = String(fb.fbc).slice(0, 200);
+
+  // Without fbp/fbc or any identifier Meta cannot match the event to anyone;
+  // sending it would only drag the match-quality average down.
+  if (!user_data.fbp && !user_data.fbc && !user_data.ph && !user_data.em) {
+    return json({ ok: true, sent: 0, skipped: "no_identifiers" }, 200, cors);
+  }
+
+  const catalog = await catalogById(env);
+  const now = Math.floor(Date.now() / 1000);
+  const data = [];
+
+  for (const raw of list) {
+    const name = String(raw && raw.event_name || "");
+    if (!CAPI_ALLOWED_EVENTS[name]) continue;
+    const eid = String(raw.event_id || "").slice(0, 100);
+    if (!eid) continue; // no event_id means the pixel copy could not be deduped
+
+    let t = Math.floor(Number(raw.event_time) || 0);
+    if (!(t > now - 6 * 86400 && t <= now + 60)) t = now;
+
+    // Money comes from the catalogue, never from the caller.
+    const ids = Array.isArray(raw.content_ids) ? raw.content_ids.slice(0, 20).map(String) : [];
+    const qtyById = {};
+    (Array.isArray(raw.contents) ? raw.contents : []).forEach(c => {
+      if (!c) return;
+      const q = Math.min(MAX_LINE_QTY, Math.max(1, Math.floor(Number(c.quantity) || 1)));
+      qtyById[String(c.id)] = q;
+    });
+    let value = 0;
+    const contents = ids.map(id => {
+      const p = catalog[id];
+      const q = qtyById[id] || 1;
+      const price = p && Number(p.price) > 0 ? Number(p.price) : 0;
+      value += price * q;
+      return { id: id, quantity: q, item_price: price };
+    });
+
+    const custom_data = { currency: "DZD", content_type: "product" };
+    if (contents.length) { custom_data.contents = contents; custom_data.content_ids = ids; custom_data.num_items = contents.reduce((a, c) => a + c.quantity, 0); }
+    if (value > 0) custom_data.value = value;
+    else if (name === "Lead") custom_data.value = Number(env.LEAD_VALUE || 0) || undefined;
+
+    data.push({
+      event_name: name,
+      event_time: t,
+      event_id: eid,
+      action_source: "website",
+      event_source_url: String(raw.event_source_url || "").slice(0, 500) || ("https://" + (env.SITE_HOST || "www.robustedz.store") + "/"),
+      user_data,
+      custom_data
+    });
+  }
+
+  if (!data.length) return json({ ok: true, sent: 0 }, 200, cors);
+
+  const send = fetch("https://graph.facebook.com/v21.0/" + PIXEL + "/events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data, access_token: TOKEN })
+  }).catch(() => {});
+  if (ctx && ctx.waitUntil) ctx.waitUntil(send); else await send;
+
+  return json({ ok: true, sent: data.length }, 200, cors);
+}
+
 async function handleIntake(request, env, ctx, cors) {
   let payload;
   try { payload = await request.json(); } catch { return json({ error: "Bad JSON" }, 400, cors); }
@@ -548,6 +1006,10 @@ async function handleIntake(request, env, ctx, cors) {
   if (!order.address || String(order.address).trim().length < 8) return json({ error: "missing_address", message: "\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0628\u0634\u0643\u0644 \u0648\u0627\u0636\u062d" }, 400, cors);
   if (!Array.isArray(order.products) || order.products.length === 0) return json({ error: "empty_cart", message: "\u0627\u0644\u0633\u0644\u0629 \u0641\u0627\u0631\u063a\u0629" }, 400, cors);
 
+  // Trust the catalogue, not the browser, for every number that leaves here.
+  let priceAudit = { notes: [], bulk: false };
+  try { priceAudit = await repriceOrder(env, order); } catch (e) {}
+
   meta.ip = request.headers.get("CF-Connecting-IP") || "";
   const cf = request.cf || {};
   meta.country = cf.country || ""; meta.city = cf.city || ""; meta.region = cf.region || ""; meta.isp = cf.asOrganization || "";
@@ -564,6 +1026,13 @@ async function handleIntake(request, env, ctx, cors) {
   let watch = { phones: [], ips: [] };
   try { watch = await readWatchlist(env); } catch {}
   const flags = Array.isArray(payload.risk && payload.risk.flags) ? payload.risk.flags.slice() : [];
+  // A forged cart is a strong abuse signal — surface it instead of silently fixing it.
+  if (priceAudit.notes.length) {
+    flags.push({ key: "price_mismatch", level: "red", label: "بيانات سلة معدّلة: " + priceAudit.notes.join(" · ") });
+  }
+  if (priceAudit.bulk) {
+    flags.push({ key: "bulk_qty", level: "yellow", label: "كمية كبيرة — راجعها قبل الشحن" });
+  }
   if (order.phone && watch.phones.includes(order.phone)) flags.push({ key: "watchlisted_phone", level: "red", label: "Phone on watchlist" });
   if (meta.ip && watch.ips.includes(meta.ip)) flags.push({ key: "watchlisted_ip", level: "red", label: "IP on watchlist" });
 
@@ -641,7 +1110,13 @@ async function sendMetaCapi(env, order, id, fb, request) {
     const last = parts.join(" ");
 
     const user_data = {};
-    const ph = await hashField(normPhoneE164(order.phone)); if (ph) user_data.ph = [ph];
+    const e164 = normPhoneE164(order.phone);
+    const ph = await hashField(e164); if (ph) user_data.ph = [ph];
+    /* The browser pixel sends external_id = the same E.164 phone (analytics.js
+     * phoneE164), so sending it here too gives Meta a strong shared key: it
+     * lifts Event Match Quality and makes pixel/CAPI dedup more reliable.
+     * Both sides must normalise identically or the identity will not match. */
+    const ext = await hashField(e164); if (ext) user_data.external_id = [ext];
     const email = String(order.email || "").trim().toLowerCase();
     if (email.includes("@")) { const em = await hashField(email); if (em) user_data.em = [em]; }
     const fn = await hashField(first); if (fn) user_data.fn = [fn];

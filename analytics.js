@@ -26,11 +26,96 @@
   function gt(name, params) {
     try { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); } catch (e) {}
   }
+  /* ---- Conversions API mirror -------------------------------------------
+   * Every pixel event also goes to the Worker, which forwards it to Meta
+   * server-side. Ad blockers, ITP and iOS silently drop a large share of
+   * browser events; the server copy survives them and carries IP +
+   * User-Agent, so match quality is higher too.
+   * Meta merges the two copies on a shared event_id — so every mirrored
+   * event MUST have one, otherwise the same action is counted twice. */
+  var CAPI_MIRROR = { ViewContent: 1, AddToCart: 1, InitiateCheckout: 1, Lead: 1, PlaceOrder: 1 };
+  var _eq = [], _eqTimer = null;
+
+  function workerUrl() {
+    try { return (window.ROBUSTE_WORKER_URL || "https://robuste.aneslaidaoui06.workers.dev").replace(/\/+$/, ""); }
+    catch (e) { return ""; }
+  }
+  function amIdentity() {
+    try {
+      var o = JSON.parse(localStorage.getItem("robuste_am_v1") || "null") || {};
+      var parts = clean(o.customer).split(/\s+/).filter(Boolean);
+      return {
+        phone: o.phone || "",
+        email: o.email || "",
+        fn: parts.length ? latin(parts[0]) : "",
+        ln: parts.length > 1 ? latin(parts[parts.length - 1]) : "",
+        ct: o.baladiya ? latin(o.baladiya) : "",
+        st: o.wilaya ? latin(o.wilaya) : "",
+        country: "dz"
+      };
+    } catch (e) { return { country: "dz" }; }
+  }
+  function fbCookies() {
+    try {
+      function ck(n) { var m = document.cookie.match("(^|;)\\s*" + n + "\\s*=\\s*([^;]+)"); return m ? decodeURIComponent(m[2]) : ""; }
+      var out = {};
+      var fbp = ck("_fbp"); if (fbp) out.fbp = fbp;
+      var fbc = ck("_fbc") || (function () { try { return localStorage.getItem("robuste_fbc") || ""; } catch (e) { return ""; } })();
+      if (fbc) out.fbc = fbc;
+      return out;
+    } catch (e) { return {}; }
+  }
+  function flushEvents() {
+    if (!_eq.length) return;
+    var batch = _eq.splice(0, 10);
+    var body = JSON.stringify({ events: batch, user: amIdentity(), fb: fbCookies() });
+    var url = workerUrl() + "/events";
+    try {
+      // keepalive so the batch still leaves when the page is being closed.
+      fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: body, keepalive: true }).catch(function () {});
+    } catch (e) {}
+  }
+  function queueServerEvent(name, params, eventId) {
+    if (!CAPI_MIRROR[name] || !eventId) return;
+    try {
+      _eq.push({
+        event_name: name,
+        event_id: eventId,
+        event_time: Math.floor(Date.now() / 1000),
+        event_source_url: location.href,
+        content_ids: params && params.content_ids,
+        contents: params && params.contents
+      });
+      if (_eqTimer) clearTimeout(_eqTimer);
+      _eqTimer = setTimeout(flushEvents, 1200);   // small debounce, then send
+    } catch (e) {}
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") flushEvents();
+  });
+
+  /* Every mirrored event needs a stable id shared with the server copy. */
+  var _eidSeq = 0;
+  function newEventId(name) {
+    _eidSeq++;
+    return name.toLowerCase() + "_" + Date.now().toString(36) + "_" + _eidSeq + "_" + Math.random().toString(36).slice(2, 8);
+  }
+
   function fb(name, params, opts) {
-    try { if (typeof window.fbq === "function") window.fbq("track", name, params || {}, opts || {}); } catch (e) {}
+    try {
+      opts = opts || {};
+      if (CAPI_MIRROR[name] && !opts.eventID) opts.eventID = newEventId(name);
+      if (typeof window.fbq === "function") window.fbq("track", name, params || {}, opts);
+      queueServerEvent(name, params, opts.eventID);
+    } catch (e) {}
   }
   function fbc(name, params, opts) {
-    try { if (typeof window.fbq === "function") window.fbq("trackCustom", name, params || {}, opts || {}); } catch (e) {}
+    try {
+      opts = opts || {};
+      if (CAPI_MIRROR[name] && !opts.eventID) opts.eventID = newEventId(name);
+      if (typeof window.fbq === "function") window.fbq("trackCustom", name, params || {}, opts);
+      queueServerEvent(name, params, opts.eventID);
+    } catch (e) {}
   }
   function ready(fn) {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
@@ -48,12 +133,17 @@
   function latin(s) {
     return clean(s).toLowerCase().replace(/\s+/g, "");
   }
+  /* Must produce byte-for-byte the same string as normPhoneE164() in the
+   * Worker: the pixel sends this as external_id and the Conversions API sends
+   * its SHA-256, so any difference breaks the match instead of improving it. */
   function phoneE164(p) {
     var d = clean(p).replace(/[^0-9]/g, "");
     if (!d) return "";
+    if (d.indexOf("00") === 0) d = d.slice(2);      // 00213... international prefix
     if (d.indexOf("213") === 0) return d;
-    if (d.charAt(0) === "0") d = d.slice(1);
-    return "213" + d;
+    if (d.charAt(0) === "0") return "213" + d.slice(1);
+    if (d.length === 9) return "213" + d;
+    return d;
   }
   function setUserData(o) {
     try {
@@ -236,7 +326,16 @@
           fb("ViewContent", pack(pid, name, price, 1));
         });
       } else if (/product/i.test(location.pathname)) {
-        fb("ViewContent", { content_type: "product", currency: CUR });
+        /* Fallback for a product page whose id could not be read. Meta flags
+         * ViewContent without content_ids/value as low quality, so derive the
+         * id from the filename (product-107.html) and price it from the
+         * catalogue rather than sending a bare, unmatchable event. */
+        var m = String(location.pathname).match(/product-(\d+)\.html/);
+        if (m) {
+          findProduct(m[1]).then(function (p) {
+            fb("ViewContent", pack(m[1], p ? (p.title || p.name || "") : "", p ? p.price : undefined, 1));
+          });
+        }
       }
     } catch (e) {}
 
@@ -247,7 +346,21 @@
         var a = t && t.closest ? t.closest('a[href*="wa.me"],a[href*="whatsapp"]') : null;
         if (!a) return;
         gt("contact", { method: "whatsapp" });
-        fb("Lead", { content_category: "whatsapp", currency: CUR, value: 0 });
+        /* A zero-value Lead tells Meta the lead is worth nothing, so it cannot
+         * rank leads or optimise for the valuable ones. Price the lead off the
+         * product being viewed: a WhatsApp click on an 8,200 DA page is worth
+         * more than one on a 2,400 DA page. */
+        var lpid = currentPid() || (String(location.pathname).match(/product-(\d+)\.html/) || [])[1];
+        if (lpid) {
+          findProduct(lpid).then(function (p) {
+            var pr = num(p && p.price) || 0;
+            var lead = { content_category: "whatsapp", currency: CUR, content_type: "product", content_ids: [String(lpid)], contents: [{ id: String(lpid), quantity: 1, item_price: pr }] };
+            if (pr > 0) lead.value = pr;
+            fb("Lead", lead);
+          });
+        } else {
+          fb("Lead", { content_category: "whatsapp", currency: CUR });
+        }
       } catch (er) {}
     }, true);
 

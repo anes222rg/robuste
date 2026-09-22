@@ -763,7 +763,7 @@ function renderProductLayout(p) {
                     <select id="expressWilaya" class="form-select-premium mb-2" onchange="updateExpressSummary()"><option value="" disabled selected>اختر الولاية</option>${wilayas.map(w=>`<option value="${w}">${w}</option>`).join('')}</select>
                     <input type="text" id="expressBaladiya" class="form-control-premium mb-2" placeholder="البلدية *" required>
                     <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع) *" required>
-                    <input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" oninput="updateExpressSummary()">
+                    <input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" max="20" oninput="updateExpressSummary()">
                     <div class="exp-delivery"><label class="exp-dt"><input type="radio" name="expDeliveryType" value="home" onchange="updateExpressSummary()"> 🏠 للمنزل</label><label class="exp-dt"><input type="radio" name="expDeliveryType" value="office" checked onchange="updateExpressSummary()"> 🏢 للمكتب</label></div>
                     <div class="exp-summary"><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
                     <button type="button" class="btn-submit-express" ${rbOut?'disabled style="opacity:.55;cursor:not-allowed"':''} onclick="submitExpressOrder()">تأكيد الطلب</button>
