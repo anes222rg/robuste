@@ -504,18 +504,20 @@
   {
     "id": 20,
     "title": "CAFETIERE ELECTRIQUE C850",
-    "price": 14300,
-    "old_price": 17900,
+    "price": 11800,
+    "old_price": 14900,
     "images": [
       "images/cafetière a bras c850.jpg"
     ],
-    "description_short": "Cafetière filtre 850W avec arrêt automatique",
-    "description_long": "Cafetière filtre C850 avec puissance 850W et arrêt automatique. Simple d'utilisation et efficace.",
+    "description_short": "ماكينة قهوة إكسبريس بالذراع على الطراز الإيطالي بقوة 850 واط وضغط 15 بار | Cafetière à bras italienne style 850W, 15 bar, bras amovible et finition acier.",
+    "description_long": "ماكينة قهوة إكسبريس ROBUSTE C850 بالذراع على الطراز الإيطالي — قوة 850 واط · ضغط 15 بار · ذراع قابل للإزالة · هيكل وتشطيب من الفولاذ · تصميم أنيق وأداء مثالي. الدفع عند الاستلام مع ضمان وتوصيل لجميع الولايات (58 ولاية). — Cafetière à bras italienne style ROBUSTE C850 — Puissance 850W · Pression 15 bar · Bras amovible · Finition acier · Design élégant et performance optimale. Paiement à la livraison dans toutes les wilayas.",
     "features": [
-      "Puissance 850W",
-      "Arrêt automatique",
-      "Indicateur niveau d'eau",
-      "Carafe en verre"
+      "Cafetière à bras italienne style — ماكينة قهوة بالذراع على الطراز الإيطالي",
+      "Puissance 850W — قوة 850 واط",
+      "15 bar — ضغط 15 بار",
+      "Bras amovible — ذراع قابل للإزالة",
+      "Finition acier — هيكل وتشطيب من الفولاذ",
+      "Design élégant et performance optimale — تصميم أنيق وأداء مثالي"
     ],
     "stock": 11,
     "category": "café",

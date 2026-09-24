@@ -185,7 +185,7 @@ var PRODUCTS = [
   {id:16,title:"ASPIRATEUR SOUFFLEUR A MAIN AM80",sell:5100,cat:"jardin",stock:14,code:"ASP-SOUF-MAIN",dad:3500},
   {id:17,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22900,cat:"maison",stock:3,code:"A00000455",dad:19200},
   {id:19,title:"CAFETIERE ELECTRIQUE CBL15B",sell:15300,cat:"café",stock:9,code:"CFTRE",dad:11800},
-  {id:20,title:"CAFETIERE ELECTRIQUE C850",sell:14300,cat:"café",stock:11,code:"CFE1.8",dad:11000},
+  {id:20,title:"CAFETIERE ELECTRIQUE C850",sell:11800,cat:"café",stock:11,code:"CFE1.8",dad:11000},
   {id:21,title:"CAFETIERE ELECTRIQUE A BRAS MOKA 850 W",sell:13200,cat:"café",stock:6,code:"A00000362",dad:11000},
   {id:22,title:"CAFETIERE ELECTRIQUE A BRAS ROMA 1000 W",sell:16600,cat:"café",stock:4,code:"A00000363",dad:12800},
   {id:23,title:"FRITEUSE ELECTRIQUE SANS HUILE 3.2L",sell:13000,cat:"cuisine",stock:8,code:"",dad:null},
@@ -381,6 +381,93 @@ function renderOrdersTable(){
 /* ============ SHIPPING / ECOTRACK ============ */
 function shipChecks(d,communeOv){var name=customerName(d);var commune=(communeOv||orderCommune(d)||'').trim();var w=orderWilaya(d);var items=[{label:'الاسم',ok:!!name&&name!=='—',req:true},{label:'الهاتف',ok:PHONE_RE.test(String(orderPhone(d))),req:true},{label:'الولاية',ok:!!w&&deliveryFeeFor(w,'office')!=null,req:true},{label:'البلدية',ok:!!commune,req:true},{label:'العنوان',ok:!!String(d.address||'').trim(),req:false},{label:'المبلغ',ok:orderTotal(d)>0,req:true}];var missing=items.filter(function(x){return x.req&&!x.ok;});return {items:items,ok:missing.length===0,missing:missing};}
 function checklistHtml(c){return c.items.map(function(x){var col=x.ok?'#16a34a':(x.req?'#dc2626':'#d97706');var ic=x.ok?'bi-check-circle-fill':(x.req?'bi-x-circle-fill':'bi-exclamation-circle-fill');return '<span style="display:inline-flex;align-items:center;gap:3px;margin:0 4px 3px 0;font-size:.72rem;color:'+col+'"><i class="bi '+ic+'"></i>'+x.label+'</span>';}).join('');}
+/* ---- Worker auth -------------------------------------------------------
+ * Admin calls identify themselves with the signed-in Firebase user — the same
+ * identity firestore.rules trusts. The old ADMIN_KEY is only a fallback while
+ * that secret is being retired. */
+function rbSignedIn(){try{return !!(auth&&auth.currentUser);}catch(e){return false;}}
+function rbLegacyKeyInto(h){var k=robusteAdminKey();if(k)h["X-Admin-Key"]=k;return h;}
+function rbAdminHeaders(){
+  var h={"Content-Type":"application/json"};
+  if(rbSignedIn()){
+    return auth.currentUser.getIdToken()
+      .then(function(t){h["Authorization"]="Bearer "+t;return h;})
+      .catch(function(){return rbLegacyKeyInto(h);});
+  }
+  return Promise.resolve(rbLegacyKeyInto(h));
+}
+function rbAdminPost(path,body){
+  return rbAdminHeaders().then(function(h){
+    return fetch(WORKER_URL+path,{method:"POST",headers:h,body:JSON.stringify(body||{})});
+  });
+}
+function rbAdminGet(path){
+  return rbAdminHeaders().then(function(h){
+    delete h["Content-Type"];
+    return fetch(WORKER_URL+path,{headers:h});
+  });
+}
+
+/* ---- EcoTrack: dispatch + labels ---------------------------------------
+ * create/order only drafts the parcel. valid/order ("Expédier") is what hands
+ * it to the courier, and it cannot be undone — after it the parcel can no
+ * longer be edited or deleted. So it stays a separate, explicit action taken
+ * once the parcels are physically at the desk. */
+function rbEcoValidated(d){ return !!(d && d.ecotrackValidated); }
+
+/* Labels are fetched through the Worker (the API token never reaches the
+ * browser), which means a plain window.open cannot carry the auth header —
+ * hence fetch -> blob -> open. */
+function rbPrintLabel(tracking,btn){
+  var old=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner-border spinner-border-sm"></span>';}
+  return rbAdminGet("/admin/ecotrack/label?tracking="+encodeURIComponent(tracking))
+    .then(function(res){
+      if(!res.ok) return res.json().catch(function(){return{};}).then(function(e){throw new Error(e.detail||e.error||("HTTP "+res.status));});
+      return res.blob();
+    })
+    .then(function(blob){
+      var u=URL.createObjectURL(blob);
+      var w=window.open(u,"_blank");
+      if(!w) rbToast("🚫 المتصفح منع النافذة — اسمح بالنوافذ المنبثقة لطباعة الملصق.","err",9000);
+      setTimeout(function(){URL.revokeObjectURL(u);},60000);
+    })
+    .catch(function(e){ rbToast("❌ تعذّر جلب الملصق: "+e.message,"err",9000); })
+    .then(function(){ if(btn){btn.disabled=false;btn.innerHTML=old;} });
+}
+
+/* Worker caps a call at 15 parcels (Cloudflare subrequest budget), so a bigger
+ * selection is sent in chunks with a pause between them. */
+function rbValidateParcels(rows){
+  if(!rows.length) return Promise.resolve({ok:0,fail:0,errors:[]});
+  var chunks=[]; for(var i=0;i<rows.length;i+=15) chunks.push(rows.slice(i,i+15));
+  var done={ok:0,fail:0,errors:[]};
+  var wait=rbToast("⏳ جارٍ تأكيد الشحن لـ "+rows.length+" طرد…","wait",0);
+  return chunks.reduce(function(chain,chunk,idx){
+    return chain.then(function(){
+      return rbAdminPost("/admin/ecotrack/validate",{
+        trackings:chunk.map(function(r){return r.tracking;}),
+        ids:chunk.map(function(r){return r.id;})
+      })
+      .then(function(res){return res.json().catch(function(){return{};});})
+      .then(function(j){
+        (j.results||[]).forEach(function(r){
+          if(r.ok)done.ok++; else {done.fail++;done.errors.push(r.tracking+": "+(r.error||"?"));}
+        });
+        if(!j.results) { done.fail+=chunk.length; done.errors.push(j.error||"لا استجابة"); }
+      })
+      .catch(function(e){ done.fail+=chunk.length; done.errors.push(String(e.message||e)); })
+      .then(function(){ if(idx<chunks.length-1) return new Promise(function(r){setTimeout(r,2000);}); });
+    });
+  },Promise.resolve()).then(function(){
+    rbRemoveToast(wait);
+    if(done.ok) rbToast("✅ تم تأكيد شحن "+done.ok+" طرد.","ok",7000);
+    if(done.fail) rbToast("❌ فشل "+done.fail+":\n"+done.errors.slice(0,4).join("\n"),"err",0);
+    renderAll();
+    return done;
+  });
+}
+
 window.__renderRegistry.shipping=function(){
   var host=$("sec-shipping");
   var queue=businessOrders().filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;});
@@ -405,11 +492,77 @@ window.__renderRegistry.shipping=function(){
   html+='</div>';
   html+='<div class="panel"><h6><i class="bi bi-truck"></i> طلبات تم شحنها ('+fmtNum(shipped.length)+')</h6>';
   if(!shipped.length)html+='<div class="empty"><i class="bi bi-box"></i><div class="mt-2">لا شيء بعد.</div></div>';
-  else{html+='<div class="table-wrap"><table class="tbl"><thead><tr><th>العميل</th><th>الولاية</th><th>رقم التتبع</th><th>الحالة</th></tr></thead><tbody>';
-    shipped.forEach(function(o){var d=o.data;html+='<tr><td>'+esc(customerName(d))+'</td><td>'+esc(orderWilaya(d))+'</td><td dir="ltr"><span class="chip">'+esc(d.ecotrackTracking)+'</span></td><td>'+badge(d)+'</td></tr>';});
+  else{
+    var pending=shipped.filter(function(o){return !rbEcoValidated(o.data);});
+    html+='<div class="alert alert-warning py-2 mb-3" style="font-size:.83rem;"><i class="bi bi-exclamation-triangle"></i> '
+        +'الطرد يبقى <b>مسودّة</b> عند شركة التوصيل حتى تضغط <b>تأكيد الشحن</b>. اطبع الملصقات، أوصل الطرود للمكتب، ثم أكّد. '
+        +'<b>بعد التأكيد لا يمكن تعديل الطرد ولا حذفه.</b></div>';
+    if(pending.length){
+      html+='<div class="d-flex gap-2 align-items-center flex-wrap mb-2">'
+        +'<button class="btn btn-sm btn-outline-secondary" id="ecoSelAll"><i class="bi bi-check2-square"></i> تحديد غير المؤكَّدة ('+fmtNum(pending.length)+')</button>'
+        +'<button class="btn btn-sm btn-outline-primary" id="ecoPrintSel"><i class="bi bi-printer"></i> طباعة ملصقات المحدد</button>'
+        +'<button class="btn btn-sm btn-brand" id="ecoValidateSel"><i class="bi bi-send-check"></i> تأكيد شحن المحدد</button>'
+        +'</div>';
+    }
+    html+='<div class="table-wrap"><table class="tbl"><thead><tr><th style="width:34px;"></th><th>العميل</th><th>الولاية</th><th>رقم التتبع</th><th>الحالة</th><th>التسليم للمكتب</th><th>الملصق</th></tr></thead><tbody>';
+    shipped.forEach(function(o){var d=o.data;var v=rbEcoValidated(d);var tr=d.ecotrackTracking;
+      html+='<tr data-id="'+esc(o.id)+'" data-tracking="'+esc(tr)+'">'
+        +'<td>'+(v?'':'<input type="checkbox" class="eco-pick">')+'</td>'
+        +'<td>'+esc(customerName(d))+'</td>'
+        +'<td>'+esc(orderWilaya(d))+'</td>'
+        +'<td dir="ltr"><span class="chip">'+esc(tr)+'</span></td>'
+        +'<td>'+badge(d)+'</td>'
+        +'<td>'+(v
+            ? '<span class="val-ok" style="font-size:.78rem;"><i class="bi bi-check-circle-fill"></i> مؤكَّد'+(d.ecotrackValidatedAt?' · '+esc(fmtDate(parseDate(d.ecotrackValidatedAt))):'')+'</span>'
+            : '<button class="btn btn-sm btn-brand eco-validate"><i class="bi bi-send-check"></i> تأكيد</button>')+'</td>'
+        +'<td><button class="btn btn-sm btn-outline-secondary eco-label"><i class="bi bi-printer"></i></button></td>'
+        +'</tr>';});
     html+='</tbody></table></div>';}
   html+='</div>';
   host.innerHTML=html;
+
+  /* --- EcoTrack dispatch + label wiring --- */
+  function ecoPicked(){
+    return Array.prototype.slice.call(host.querySelectorAll('.eco-pick:checked')).map(function(cb){
+      var row=cb.closest('tr');
+      return { id: row.getAttribute('data-id'), tracking: row.getAttribute('data-tracking') };
+    });
+  }
+  var selAll=$("ecoSelAll");
+  if(selAll) selAll.addEventListener('click',function(){
+    var boxes=host.querySelectorAll('.eco-pick');
+    var turnOn=Array.prototype.some.call(boxes,function(b){return !b.checked;});
+    for(var i=0;i<boxes.length;i++)boxes[i].checked=turnOn;
+  });
+  var vSel=$("ecoValidateSel");
+  if(vSel) vSel.addEventListener('click',function(){
+    var picked=ecoPicked();
+    if(!picked.length){rbToast("حدّد طرداً واحداً على الأقل.","info",5000);return;}
+    if(!confirm("تأكيد شحن "+picked.length+" طرد؟\n\nبعد التأكيد لا يمكن تعديل الطرد ولا حذفه من الـ API."))return;
+    rbValidateParcels(picked);
+  });
+  var pSel=$("ecoPrintSel");
+  if(pSel) pSel.addEventListener('click',function(){
+    var picked=ecoPicked();
+    if(!picked.length){rbToast("حدّد طرداً واحداً على الأقل.","info",5000);return;}
+    var btn=this;
+    // Sequential: browsers block a burst of window.open calls.
+    picked.reduce(function(chain,r){
+      return chain.then(function(){ return rbPrintLabel(r.tracking,null); })
+                  .then(function(){ return new Promise(function(res){setTimeout(res,600);}); });
+    },Promise.resolve()).then(function(){ btn.disabled=false; });
+  });
+  var vBtns=host.querySelectorAll('.eco-validate');
+  for(var vi=0;vi<vBtns.length;vi++)vBtns[vi].addEventListener('click',function(){
+    var row=this.closest('tr');
+    if(!confirm("تأكيد شحن هذا الطرد؟\n\nبعد التأكيد لا يمكن تعديله ولا حذفه."))return;
+    rbValidateParcels([{ id: row.getAttribute('data-id'), tracking: row.getAttribute('data-tracking') }]);
+  });
+  var lBtns=host.querySelectorAll('.eco-label');
+  for(var li=0;li<lBtns.length;li++)lBtns[li].addEventListener('click',function(){
+    rbPrintLabel(this.closest('tr').getAttribute('data-tracking'),this);
+  });
+
   function refreshShipRow(row){var id=row.getAttribute('data-id');var d=getRec(id).data;var sel=row.querySelector('.ship-dt');var dt=sel?sel.value:'office';var ci=row.querySelector('.ship-commune');var commune=ci?(ci.value||'').trim():'';var feeCell=row.querySelector('.ship-fee');var fee=deliveryOf(d);if(feeCell)feeCell.innerHTML=(fee==null?'<span class="text-muted">؟</span>':esc(fmtMoney(fee)));var chk=row.querySelector('.ship-check');if(chk)chk.innerHTML=checklistHtml(shipChecks(d,commune));}
   var dts=host.querySelectorAll('.ship-dt');for(var k=0;k<dts.length;k++)dts[k].addEventListener('change',function(){refreshShipRow(this.closest('tr'));});
   var cms=host.querySelectorAll('.ship-commune');for(var m=0;m<cms.length;m++)cms[m].addEventListener('input',function(){refreshShipRow(this.closest('tr'));});
