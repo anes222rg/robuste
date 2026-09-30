@@ -1,0 +1,73 @@
+/* Product 100: clothing care copy within the shared ROBUSTE product layout. */
+.df-page .product-title { display: block; -webkit-line-clamp: unset; max-height: none; height: auto; overflow: visible; font-size: clamp(1.3rem, 2.1vw, 1.7rem); line-height: 1.45; }
+.df-intro { margin-bottom: 28px; max-width: 760px; margin-inline-start: auto; }
+.df-eyebrow { color: var(--primary); font-size: .8rem; font-weight: 700; letter-spacing: .08em; }
+.df-intro h2 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.35; font-weight: 700; margin: 8px 0 12px; }
+.df-intro p { color: var(--gray); font-size: 1.05rem; line-height: 1.9; }
+.df-section { margin-top: 36px; padding: clamp(20px, 4vw, 36px); border: 1px solid var(--border-color); border-radius: 20px; background: var(--light); }
+.df-section h2 { font-size: clamp(1.35rem, 3vw, 1.9rem); font-weight: 700; line-height: 1.5; margin-bottom: 18px; }
+.df-section p { line-height: 1.9; color: var(--gray); }
+.df-benefits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.df-benefit { padding: 22px; border: 1px solid var(--border-color); border-radius: 16px; }
+.df-benefit > span { display: inline-grid; place-items: center; width: 38px; height: 38px; background: var(--primary); color: #fff; border-radius: 12px; font-weight: 700; margin-bottom: 14px; }
+.df-benefit h3 { font-size: 1.1rem; font-weight: 700; line-height: 1.6; }
+.df-benefit p { margin: 0; font-size: .93rem; }
+.df-proof { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30px; align-items: center; }
+.df-proof figure { margin: 0; }
+.df-proof img { display: block; width: 100%; max-height: 540px; object-fit: contain; border-radius: 16px; background: #fff; }
+.df-proof figcaption { color: var(--gray); font-size: .8rem; margin-top: 10px; text-align: center; }
+.df-specs { width: 100%; margin: 18px 0; }
+.df-specs th, .df-specs td { text-align: start; padding: 13px 8px; border-bottom: 1px solid var(--border-color); line-height: 1.6; }
+.df-specs th { font-weight: 500; color: var(--gray); width: 40%; }
+.df-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; list-style: none; padding: 0; counter-reset: df-step; }
+.df-steps li { counter-increment: df-step; line-height: 1.9; }
+.df-steps li::before { content: "0" counter(df-step); display: block; color: var(--primary); font-size: 1.7rem; font-weight: 700; margin-bottom: 8px; }
+.df-steps strong { display: block; margin-bottom: 6px; }
+.df-steps span { color: var(--gray); }
+.df-faq details { border-bottom: 1px solid var(--border-color); padding: 17px 0; }
+.df-faq summary { cursor: pointer; font-weight: 600; line-height: 1.8; }
+.df-faq details p { margin: 12px 0 0; }
+.df-final { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 18px; background: var(--secondary); }
+.df-final h2 { margin-bottom: 6px; }
+.df-final p { margin: 0; }
+.df-section a.btn, .df-section button { min-height: 48px; }
+.df-section, #expressForm { scroll-margin-top: 135px; }
+.df-empty-reviews { color: var(--gray); text-align: center; margin-bottom: 18px; }
+@media (max-width: 767px) {
+  .df-benefits, .df-proof, .df-steps { grid-template-columns: 1fr; }
+  .df-intro { margin-bottom: 20px; }
+  .df-proof { gap: 22px; }
+  .df-final .btn { width: 100%; }
+  .df-specs th { width: 38%; }
+}
+
+/* Conversion UI shared with product 107. */
+
+.rb-promo{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;background:linear-gradient(90deg,#fff1f0,#ffe8e0);border:1px solid #ffc9bd;border-radius:12px;padding:.55rem .85rem;margin:.6rem 0 .2rem;font-weight:700;font-size:.95rem;color:#c0392b}
+.rb-promo .rb-save{background:#e74c3c;color:#fff;border-radius:999px;padding:.15rem .6rem;font-size:.85rem}
+.rb-stock{display:flex;align-items:center;gap:.45rem;font-size:.9rem;color:#b9770e;font-weight:600;margin:.45rem 0}
+.rb-stock b{color:#c0392b}
+.rb-steps{display:flex;gap:.35rem;margin:.2rem 0 .7rem}
+.rb-steps span{flex:1;height:4px;border-radius:99px;background:#e5e7eb}
+.rb-steps span.on{background:#f97316}
+.btn-submit-express{font-size:1.05rem!important;font-weight:800!important;padding:.85rem 1rem!important;line-height:1.35;box-shadow:0 8px 20px rgba(249,115,22,.28)}
+.rb-cta-sub{display:block;font-size:.8rem;font-weight:600;opacity:.92;margin-top:.15rem}
+.rb-noprepay{display:flex;align-items:center;gap:.4rem;justify-content:center;font-size:.85rem;color:#15803d;font-weight:700;margin-top:.55rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:.45rem .6rem}
+.rb-wa{display:block;text-align:center;margin-top:.5rem;font-size:.88rem;font-weight:700;color:#128c7e;text-decoration:none}
+.rb-wa:hover{text-decoration:underline}
+.rb-trust-mini{display:flex;justify-content:space-between;gap:.3rem;margin-top:.6rem;font-size:.72rem;color:#475569;text-align:center}
+.rb-trust-mini div{flex:1}
+.rb-trust-mini i{display:block;font-size:1.05rem;color:#f97316;margin-bottom:.1rem}
+.rb-sticky-buy{position:fixed;left:0;right:0;bottom:0;z-index:1040;display:flex;align-items:center;gap:.6rem;padding:.55rem .75rem;background:#fff;border-top:1px solid #e5e7eb;box-shadow:0 -6px 20px rgba(0,0,0,.12)}
+.rb-sb-price{display:flex;flex-direction:column;line-height:1.15;white-space:nowrap}
+.rb-sb-now{font-weight:800;color:#111827;font-size:1.02rem}
+.rb-sb-old{font-size:.78rem;color:#9ca3af;text-decoration:line-through}
+.rb-sb-btn{flex:1;border:0;border-radius:12px;padding:.75rem .5rem;font-weight:800;color:#fff;background:linear-gradient(90deg,#f97316,#ea580c);font-size:.98rem}
+nav.glass-navbar #floatingCart,nav.glass-navbar .floating-cart{order:7!important;margin:0!important;margin-inline-start:auto!important}
+nav.glass-navbar .navbar-toggler{order:8!important;margin-inline-start:8px!important}
+nav.glass-navbar .navbar-collapse{order:9!important}
+.rb-sb-wa{flex:0 0 auto;width:46px;height:46px;border-radius:12px;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;text-decoration:none;box-shadow:0 2px 8px rgba(37,211,102,.35)}
+.rb-sb-wa:hover,.rb-sb-wa:focus{color:#fff;background:#1eb959}
+@media(max-width:991.98px){.whatsapp-float{display:none!important}}
+@media(min-width:992px){.rb-sticky-buy{display:none}}
+@media(max-width:991.98px){body{padding-bottom:78px}}

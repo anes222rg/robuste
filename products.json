@@ -629,7 +629,7 @@
   {
     "id": 25,
     "title": "PETRIN PRO MAX 8L 1800W",
-    "price": 18500,
+    "price": 19900,
     "old_price": 24900,
     "images": [
       "images/petrin promax noir.jpg",
@@ -695,7 +695,7 @@
   {
     "id": 28,
     "title": "PANINEUSE 2000W",
-    "price": 14500,
+    "price": 13900,
     "old_price": 15500,
     "images": [
       "images/PANINEUSE 2000W.jpg"
@@ -714,22 +714,22 @@
   },
   {
     "id": 100,
-    "title": "Defroisseur Vapeur",
-    "price": 6600,
+    "title": "Défroisseur vapeur ROBUSTE PRO STYLE 1630W",
+    "price": 6300,
     "old_price": 7000,
     "images": [
       "images/Robuste Defroisseur 1.jpg",
       "images/Robuste Defroisseur 2.jpg",
       "images/Robuste Defroisseur.jpg"
     ],
-    "description_short": "Défroisseur vapeur professionnel pour un repassage rapide et efficace",
-    "description_long": "Le défroisseur vapeur Robuste est l'outil parfait pour éliminer les plis de vos vêtements rapidement et sans effort. Avec sa puissance vapeur optimale et sa conception ergonomique, il vous garantit un repassage parfait en un temps record. Idéal pour les tissus délicats et les vêtements du quotidien.",
+    "description_short": "لباس مرتب قبل ما تخرجي: دفرويسور بخاري يدوي ROBUSTE PRO STYLE بقوة 1630 واط. | Défroisseur vapeur à main ROBUSTE PRO STYLE 1630W pour les retouches du quotidien.",
+    "description_long": "رتّبي مظهر ملابسك بالبخار وهي معلّقة، مع الدفرويسور اليدوي ROBUSTE PRO STYLE. بقوة 1630 واط، ومقبض يدوي ورأس بخار عريض لرتوش الملابس قبل الخروج. مناسب لرتوش الملابس اليومية حسب تعليمات العناية بالقماش ودليل الجهاز. الدفع عند الاستلام والتوصيل لكل الولايات؛ تكلفة التوصيل تظهر بعد اختيار الولاية. — Retouchez vos vêtements suspendus avec le défroisseur vapeur à main ROBUSTE PRO STYLE. Avec sa puissance de 1630W, sa poignée et sa tête vapeur large, il accompagne les retouches avant de sortir. Respectez les consignes du fabricant et l’étiquette d’entretien du vêtement. Paiement à la livraison ; frais de livraison affichés après le choix de la wilaya.",
     "features": [
-      "Puissance vapeur ajustable",
-      "Chauffage rapide en 60 secondes",
-      "Réservoir d'eau amovible 300ml",
-      "Sécurité anti-gouttes",
-      "Pratique et léger"
+      "قوة 1630 واط",
+      "دفرويسور بخاري يدوي لرتوش الملابس المعلّقة",
+      "رأس بخار عريض",
+      "تصميم أسود ورمادي مع أزرار بنفسجية",
+      "الدفع عند الاستلام · مصاريف التوصيل حسب الولاية"
     ],
     "stock": 15,
     "category": "maison",
