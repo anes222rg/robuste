@@ -8,8 +8,8 @@
    - Every funnel event now carries value + currency "DZD" + content_ids +
      contents + content_name + num_items. Meta can finally tell WHICH product
      was viewed / added / checked out, and at WHAT price.
-   - InitiateCheckout fires ONLY for #orderModal (the review modal used to
-     fire a fake InitiateCheckout on every review popup).
+   - InitiateCheckout fires for the order modal or the first express-form input,
+     not for the review modal.
    - Advanced Matching (phone, name, city, state, external_id) is pushed to the
      pixel at order time -> much higher Event Match Quality.
    - The Arabic-text MutationObserver "purchase detector" is REMOVED. It was
@@ -117,6 +117,15 @@
       queueServerEvent(name, params, opts.eventID);
     } catch (e) {}
   }
+  // The express form starts checkout directly; it does not add an item to the cart.
+  // Route this event through the normal Pixel/CAPI pair so both copies share an ID.
+  window.RBTrackExpressCheckout = function (params) {
+    try {
+      if (!params || !params.content_ids || !params.content_ids.length || !(params.value > 0)) return;
+      gt("begin_checkout", { currency: CUR, value: params.value });
+      fb("InitiateCheckout", params);
+    } catch (e) {}
+  };
   function ready(fn) {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
     else fn();
@@ -391,7 +400,7 @@
       }
     } catch (e) {}
 
-    // 4) InitiateCheckout - ONLY the real order modal (never the review modal)
+    // 4) InitiateCheckout from the real order modal (express form uses the helper above)
     try {
       document.addEventListener("shown.bs.modal", function (ev) {
         try {

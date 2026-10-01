@@ -802,8 +802,11 @@ document.addEventListener('input', function (e) {
       value: p.price * q,
       currency: 'DZD'
     };
-    if (window.fbq) { fbq('track', 'AddToCart', payload); fbq('track', 'InitiateCheckout', payload); }
-    if (window.gtag) { gtag('event', 'begin_checkout', { currency: 'DZD', value: p.price * q }); }
+    if (window.RBTrackExpressCheckout) window.RBTrackExpressCheckout(payload);
+    else {
+      if (window.fbq) fbq('track', 'InitiateCheckout', payload);
+      if (window.gtag) gtag('event', 'begin_checkout', { currency: 'DZD', value: p.price * q });
+    }
   } catch (err) {}
 }, true);
 
