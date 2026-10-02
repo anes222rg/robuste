@@ -14,7 +14,7 @@
     var f = deliveryFees[w];
     if (!f) return null;
     var home = f[0], office = f[1];
-    if (t === "office") return (office == null ? home : office);
+    if (t === "office") return office==null ? null : office;
     return home;
   }
   window.deliveryFeeFor = deliveryFeeFor; // used by the order-submit hook in main.js
@@ -44,7 +44,7 @@
     if (!w) { if (delEl) delEl.textContent = "اختر الولاية"; if (totEl) totEl.textContent = fmt(sub) + " د.ج"; return; }
     var na = (t === "office" && deliveryFees[w] && deliveryFees[w][1] == null);
     var fee = deliveryFeeFor(w, t); if (fee == null) fee = 0;
-    if (delEl) delEl.textContent = fmt(fee) + " د.ج" + (na ? " (للمنزل)" : "");
+    if (delEl) delEl.textContent = fmt(fee) + " د.ج" ;
     if (totEl) totEl.textContent = fmt(sub + fee) + " د.ج";
   }
   function onCartWilayaChange() { try { var w = (document.getElementById("cartWilaya") || {}).value; if (w) localStorage.setItem("robuste_wilaya", w); } catch (e) {} recalcCart(); }
@@ -62,7 +62,7 @@
     if (!w) { if (d) d.textContent = "اختر الولاية"; if (tt) tt.textContent = fmt(sub) + " د.ج"; return; }
     var na = (t === "office" && deliveryFees[w] && deliveryFees[w][1] == null);
     var fee = deliveryFeeFor(w, t); if (fee == null) fee = 0;
-    if (d) d.textContent = fmt(fee) + " د.ج" + (na ? " (للمنزل)" : "");
+    if (d) d.textContent = fmt(fee) + " د.ج" ;
     if (tt) tt.textContent = fmt(sub + fee) + " د.ج";
   }
   window.recalcModalDelivery = recalcModal;

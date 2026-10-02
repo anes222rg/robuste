@@ -240,8 +240,9 @@
       ref.wilayas.forEach(function (w) {
         var row = ref.fees[w.code] || {};
         var officePrice = money(row.delivery && row.delivery.office);
-        var desksKnown = ref.available && ref.available.desks;
-        var hasDesk = ref.desks.some(function (d) { return Number(d.wilaya) === Number(w.code); });
+        var desksKnown = ref.available && (ref.available.desks || ref.available.communes);
+        var hasDesk = ref.desks.some(function (d) { return Number(d.wilaya) === Number(w.code); }) ||
+          ref.communes.some(function (c) { return Number(c.wilaya) === Number(w.code) && c.stopDesk === true; });
         var office = desksKnown ? (hasDesk ? officePrice : "غير متاح — لا مكتب مؤكّد") :
           "التوفر غير مؤكّد" + (officePrice === "—" ? "" : " · " + officePrice);
         html += "<tr><td>" + esc(w.arabic || w.name) + "</td><td>" + esc(money(row.delivery && row.delivery.home)) +
@@ -411,9 +412,18 @@
       function fill() {
         var ref = state.reference, n = Number(wilaya.value), office = stop.value === "1";
         var previous = commune.value || commune.dataset.initial || "";
-        var rows = ref ? (office ? ref.desks.filter(function (d) { return d.wilaya === n; })
-          .map(function (d) { return { name: d.commune, label: d.name + " — " + d.commune, address: d.address }; }) :
-          ref.communes.filter(function (c) { return c.wilaya === n; }).map(function (c) { return { name: c.name, label: c.name }; })) : [];
+        var rows = ref ? ref.communes.filter(function (c) {
+          return c.wilaya === n && (!office || c.stopDesk === true ||
+            ref.desks.some(function (d) { return d.wilaya === n && key(d.commune) === key(c.name); }));
+        }).map(function (c) {
+          var desk = office && ref.desks.find(function (d) { return d.wilaya === n && key(d.commune) === key(c.name); });
+          return { name: c.name, label: desk ? desk.name + " — " + c.name : c.name,
+            address: desk && desk.address || "" };
+        }) : [];
+        if (office && ref) ref.desks.filter(function (d) { return d.wilaya === n; }).forEach(function (d) {
+          if (!rows.some(function (r) { return key(r.name) === key(d.commune); }))
+            rows.push({ name: d.commune, label: d.name + " — " + d.commune, address: d.address });
+        });
         commune.innerHTML = '<option value="">اختر موقعاً متاحاً لدى Assil</option>';
         rows.forEach(function (r) {
           var option = document.createElement("option"); option.value = r.name; option.textContent = r.label; option.dataset.address = r.address || "";

@@ -1,0 +1,28 @@
+.rb-eco-commune,.rb-eco-desk-select{width:100%;min-height:44px;font:inherit;font-size:16px;box-sizing:border-box;appearance:auto}
+.rb-eco-commune:disabled{opacity:.75;cursor:not-allowed}
+.rb-eco-commune:focus-visible,.rb-eco-desk-select:focus-visible{outline:3px solid #7aa8d8;outline-offset:2px}
+.rb-eco-availability{font-size:14px;line-height:1.6;padding:10px 12px;margin:8px 0 0;border:1px solid #d9e0e8;border-radius:8px;background:#f4f6f8;color:#3f4d5b}
+.rb-eco-availability.is-available{background:#edf8f1;border-color:#b9dcc8;color:#235a3d}
+.rb-eco-availability.is-error{background:#fff2ef;border-color:#e5bab1;color:#8e3324}
+.rb-eco-delivery-choice{display:flex!important;flex-wrap:wrap;gap:4px 8px;align-content:center;min-height:64px}
+.rb-eco-delivery-choice input{flex:none}
+.rb-eco-choice-note{display:block;flex-basis:100%;font-size:14px;line-height:1.5;text-align:start;padding-inline-start:24px}
+.rb-eco-choice-unavailable{cursor:not-allowed!important}
+.rb-eco-desk{box-sizing:border-box;margin:12px 0;padding:14px 16px;border:1px solid #d9e2eb;border-radius:8px;background:#f8fafc;color:#263b4d;max-width:100%;font-size:14px;line-height:1.6}
+.rb-eco-desk[hidden],.rb-eco-desk [hidden]{display:none!important}
+.rb-eco-desk-heading{font-size:16px;font-weight:700;margin:0 0 6px}
+.rb-eco-desk-address{font-size:14px;line-height:1.7;margin:6px 0 0;overflow-wrap:anywhere}
+.rb-eco-desk label{display:block;font-weight:600;margin:8px 0 6px}
+.rb-eco-desk-select{border:1px solid #cbd6e2;border-radius:8px;background:#fff;color:#263b4d;padding:10px 12px}
+.rb-eco-rate-hint{font-size:14px;line-height:1.6;margin:12px 0;padding:10px 12px;border:1px solid #e3d3b6;border-radius:8px;background:#fff8ed;color:#75511e}
+@media(max-width:520px){.rb-eco-choice-note{padding-inline-start:0}.rb-eco-desk{padding:12px}.rb-eco-availability{padding:10px}.rb-eco-delivery-choice{min-height:76px}}
+@media(prefers-reduced-motion:reduce){.rb-eco-availability,.rb-eco-desk{scroll-behavior:auto}}
+
+/* Keep quick-buy legible; the customer's selected site language is preserved. */
+.rb-eco-field-label{display:block;margin:8px 0 6px;font-size:14px;font-weight:600;line-height:1.5;color:inherit}
+#expressForm .exp-delivery .exp-dt{font-size:14px;padding:10px 8px;min-height:76px}
+#expressForm .exp-summary{font-size:14px;line-height:1.6;padding:10px 12px}
+#expressForm .btn-submit-express{font-size:16px;line-height:1.5;padding:12px 16px;min-height:44px}
+#expressForm .btn-submit-express .rb-cta-sub{display:block;font-size:14px;font-weight:500;line-height:1.6;margin-top:6px}
+#expressForm .rb-eco-availability{margin-bottom:12px}
+#expressForm .btn-submit-express{margin-bottom:12px}

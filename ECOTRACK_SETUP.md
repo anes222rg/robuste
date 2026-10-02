@@ -31,7 +31,7 @@ The package preserves the original Firestore admin identity. **Do not replace it
 
 Optional flags:
 
-- `ECOTRACK_LIVE_DELIVERY_PRICES=false`: retain the storefront's original customer-facing delivery prices. Staff can still view Assil reference tariffs. Leave unset to use live Assil delivery tariffs for new checkouts.
+- `ECOTRACK_LIVE_DELIVERY_PRICES=false`: retain the storefront's original customer-facing delivery prices. The customer commune dropdown and desk availability stay active; staff can still view Assil reference tariffs. Leave unset to use live Assil delivery tariffs for new checkouts.
 - `ECOTRACK_SYNC_ENABLED=false`: disable scheduled synchronization. This does not disable staff-triggered refreshes.
 
 ### 2. Add background synchronization
@@ -104,6 +104,16 @@ Duplicate prevention uses server-side action reservations. Never bypass an uncer
 3. Do not clear server-side reservations or courier fields blindly. Confirm whether a parcel exists before repairing the link or permitting a new creation.
 4. Explicit courier rejections are distinguished from ambiguous transport errors; only the safe rejected cases are automatically retryable.
 5. On authentication/quota errors, repair the settings or wait for quota reset rather than dispatching repeated calls. Telegram failures are retried; successful status alerts are deduplicated.
+
+## Cloudflare editor and Preview troubleshooting
+
+The Worker source includes JSDoc declarations for optional API request settings, Cloudflare cache properties and dynamic Firestore/courier records. Use the latest `cloudflare-worker.js` if an earlier copy shows red `params`, `body` or record-property type errors. Replace the entire editor file, not just the appended extension; do not add a second `export default`.
+
+**GET `/` returns HTTP 405 with `{"error":"Method not allowed"}` by design.** The root is an order-submission endpoint, not a hosted website or general health page. Opening it in Cloudflare Preview is a GET request. Do not send a POST merely to hide this message: that can submit an actual order.
+
+For a read-only reference test, change the preview path to **`/delivery/reference`** after deploying. It retrieves public delivery prices/locations without creating a parcel. Check its `available` flags and `errors` rather than treating any JSON response as a fully working account connection. Then use the authenticated admin-panel connection check for the actual courier setup.
+
+If the editor still shows errors after full replacement, open its Problems panel and capture the exact remaining message. Keep tokens/private keys out of screenshots.
 
 ## Local validation and rollback
 

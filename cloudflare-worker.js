@@ -106,10 +106,11 @@ async function repriceOrder(env, order) {
     const ref = await ecoReference(env);
     const code = resolveWilayaCode(order.wilaya);
     const stopDesk = ecoStatusKey(order.deliveryType || order.delivery_type) === "home" ? 0 : 1;
-    if (ref.available.wilayas && !ref.wilayas.some(w => w.code === code))
-      throw new Error("wilaya_not_served");
-    if (stopDesk && ref.available.desks && !ref.desks.some(d => d.wilaya === code))
-      throw new Error("stop_desk_not_available");
+    ecoValidateDestination(ref, {
+      code_wilaya: code,
+      commune: ecoPlain(order.commune || order.baladiya || order.municipality || ""),
+      stop_desk: stopDesk
+    });
     const quote = ecoQuote(ref, code, 1, stopDesk);
     if (ref.available.fees && quote.service == null) throw new Error("delivery_fee_unavailable");
     if (quote.service != null) {
