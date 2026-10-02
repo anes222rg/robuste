@@ -198,7 +198,7 @@ var PRODUCTS = [
   {id:100,title:"Defroisseur Vapeur",sell:6600,cat:"maison",stock:15,code:"A00000323",dad:5200},
   {id:101,title:"ASPIRATEUR SOUFFLEUR A MAIN",sell:4100,cat:"maison",stock:8,code:"ASP-SOUF-MAIN",dad:3500},
   {id:102,title:"NETTOYEUR DE TACHES 4 EN 1",sell:22900,cat:"maison",stock:5,code:"A00000455",dad:19200},
-  {id:103,title:"ROBUSTE PANINEUSE ET GRILL 1000W",sell:6500,cat:"cuisine",stock:10,code:"",dad:null},
+  {id:103,title:"ROBUSTE PANINEUSE ET GRILL 1000W",sell:6200,cat:"cuisine",stock:10,code:"",dad:null},
   {id:104,title:"Autocuiseur & Marmite 2 en 1 – 6 litres",sell:12500,cat:"cuisine",stock:8,code:"A00000336",dad:10600},
   {id:105,title:"ROBO 26F",sell:15900,cat:"cuisine",stock:5,code:"R26",dad:10900},
   {id:106,title:"EXTRACTEUR DE JUS",sell:12900,cat:"cuisine",stock:10,code:"EXT-JUS",dad:8500}
@@ -473,6 +473,7 @@ window.__renderRegistry.shipping=function(){
   var queue=businessOrders().filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;});
   var shipped=businessOrders().filter(function(o){return !!o.data.ecotrackTracking;});
   var html='<div class="alert alert-info py-2 mb-3" style="font-size:.85rem;"><i class="bi bi-info-circle"></i> اختر <b>مكتب</b> (Stop Desk) أو <b>منزل</b> لكل طلب — يحدّد سعر التوصيل وطريقة التسليم في Ecotrack. قبل الإرسال يتحقق النظام من كل الحقول المطلوبة (✓/✗) ويمنع الإرسال إذا نقص حقل. لا يمكن شحن نفس الطلب مرتين.</div>';
+  html+='<div class="mb-3"><button class="btn btn-sm btn-outline-secondary" id="ecoTestConnection" type="button"><i class="bi bi-plug"></i> تحقق من اتصال Ecotrack</button></div>';
   html+='<div class="panel mb-3"><h6><i class="bi bi-box-arrow-up"></i> قائمة الشحن ('+fmtNum(queue.length)+')</h6>';
   if(!queue.length)html+='<div class="empty"><i class="bi bi-check2-circle"></i><div class="mt-2">لا توجد طلبات جاهزة للشحن.</div></div>';
   else{html+='<div class="table-wrap"><table class="tbl"><thead><tr><th>العميل</th><th>الهاتف</th><th>الولاية</th><th>البلدية</th><th>التوصيل</th><th>سعر التوصيل</th><th>المبلغ (المُحصّل)</th><th>التحقق من الحقول</th><th>إرسال</th></tr></thead><tbody>';
@@ -520,6 +521,16 @@ window.__renderRegistry.shipping=function(){
     html+='</tbody></table></div>';}
   html+='</div>';
   host.innerHTML=html;
+
+  var testConnection=$("ecoTestConnection");
+  if(testConnection)testConnection.addEventListener('click',function(){
+    var button=this;button.disabled=true;
+    rbAdminGet("/admin/ecotrack/ping")
+      .then(function(res){return res.json().catch(function(){return{};}).then(function(data){if(!res.ok||!data.ok)throw new Error(data.error||("HTTP "+res.status));return data;});})
+      .then(function(){rbToast("✅ اتصال Ecotrack يعمل.","ok",6000);})
+      .catch(function(err){rbToast("❌ تعذّر الاتصال بـ Ecotrack: "+String(err.message||err),"err",9000);})
+      .then(function(){button.disabled=false;});
+  });
 
   /* --- EcoTrack dispatch + label wiring --- */
   function ecoPicked(){
@@ -573,7 +584,7 @@ window.__renderRegistry.shipping=function(){
     var msg=row.querySelector('.ship-msg');var b=this;var d=getRec(id).data;var c=shipChecks(d,commune);
     if(!c.ok){msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}
     b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span>';
-    var ov={stop_desk:stopDeskFor(dt)};if(commune)ov.commune=commune;
+    var ov={stop_desk:stopDeskFor(dt),commune:commune||orderCommune(d)};
     autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}msg.innerHTML='<span class="text-success">تم ✓ '+esc(data.tracking||'')+'</span>';setTimeout(renderAll,900);}).catch(function(err){b.disabled=false;b.innerHTML='<i class="bi bi-truck"></i> أرسل';msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message,err&&err.detail))+'</span>';});
   });
 };
@@ -748,7 +759,7 @@ function openOrder(id){var rec=getRec(id);if(!rec)return;var d=rec.data;var ec=o
   var blockBtn=$("mBlock");if(blockBtn)blockBtn.onclick=function(){if(!confirm('حظر هذا الزبون؟ سيتم وضع رقمه و IP في القائمة السوداء وتعليم الطلب كوهمي.'))return;blockBtn.disabled=true;var bip=(d.meta&&d.meta.ip)||'';blockCustomer(phone,bip).then(function(){return patchOrder(id,{status:'وهمي'});}).then(function(){orderModal.hide();renderAll();}).catch(function(){blockBtn.disabled=false;alert('تعذر الحظر');});};
   var addBtn=$("mNoteAdd");if(addBtn)addBtn.onclick=function(){var inp=$("mNoteInput");var t=(inp.value||'').trim();if(!t)return;var cur=Array.isArray(d.adminNotes)?d.adminNotes.slice():[];cur.push({text:t,at:new Date().toISOString(),by:(auth.currentUser&&auth.currentUser.email)||''});addBtn.disabled=true;patchOrder(id,{adminNotes:cur}).then(function(){openOrder(id);}).catch(function(){addBtn.disabled=false;alert('تعذر حفظ الملاحظة');});};
   var mdtSel=$("mShipDt");function updModalFee(){var el=$("mShipFee");if(el)el.textContent=('توصيل مدفوع: '+fmtMoney(deliveryOf(d)));}if(mdtSel){updModalFee();}
-  var sb=$("mShip");if(sb)sb.onclick=function(){var msg=$("mShipMsg");var dt=mdtSel?mdtSel.value:'office';var commune=orderCommune(d);if(!commune){commune=(prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:')||'').trim();if(!commune)return;}var c=shipChecks(d,commune);if(!c.ok){if(msg)msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}sb.disabled=true;sb.innerHTML='<span class="spinner-border spinner-border-sm"></span>';var ov={stop_desk:stopDeskFor(dt)};if(commune&&!orderCommune(d))ov.commune=commune;autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}renderAll();openOrder(id);}).catch(function(err){sb.disabled=false;sb.innerHTML='<i class="bi bi-truck"></i> أرسل إلى Ecotrack';if(msg)msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message,err&&err.detail))+'</span>';});};
+  var sb=$("mShip");if(sb)sb.onclick=function(){var msg=$("mShipMsg");var dt=mdtSel?mdtSel.value:'office';var commune=orderCommune(d);if(!commune){commune=(prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:')||'').trim();if(!commune)return;}var c=shipChecks(d,commune);if(!c.ok){if(msg)msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}sb.disabled=true;sb.innerHTML='<span class="spinner-border spinner-border-sm"></span>';var ov={stop_desk:stopDeskFor(dt),commune:commune};autoShipEcotrack(id,ov).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}renderAll();openOrder(id);}).catch(function(err){sb.disabled=false;sb.innerHTML='<i class="bi bi-truck"></i> أرسل إلى Ecotrack';if(msg)msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message,err&&err.detail))+'</span>';});};
 }
 
 /* ============ shared write ============ */
