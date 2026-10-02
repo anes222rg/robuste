@@ -146,6 +146,156 @@ gtag('config', 'G-GREM5BTR7T');
 </script>
 <script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"FRITEUSE DF 900 W","image":["https://www.robustedz.store/images/FRITEUSE%20DF%20900%20W.png"],"description":"Friteuse électrique Robuste d'une capacité de 1.5 litre avec minuterie automatique et contrôle de température. Parfaite pour des frites croustillantes et saines.","sku":"4","mpn":"4","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-4.html","priceCurrency":"DZD","price":6500,"priceValidUntil":"2027-07-12","availability":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"}}}</script>
 <link rel="stylesheet" href="robuste-ecotrack-delivery.css?v=3">
+<script id="rb-simple-checkout">
+/* ROBUSTE: simple checkout. Free delivery is only for orders containing SKU 108. */
+(function () {
+  "use strict";
+
+  window.rbFreeDeliveryFor = function (items) {
+    return Array.isArray(items) && items.length > 0 && items.every(function (item) {
+      return item && String(item.id) === "108";
+    });
+  };
+
+  window.rbNormalizeCustomerPhone = function (value) {
+    var phone = String(value == null ? "" : value).trim()
+      .replace(/[٠-٩]/g, function (n) { return String(n.charCodeAt(0) - 1632); })
+      .replace(/[۰-۹]/g, function (n) { return String(n.charCodeAt(0) - 1776); })
+      .replace(/[\s().-]/g, "");
+    if (/^(?:\+213|00213|213)[5-7][0-9]{8}$/.test(phone)) {
+      phone = "0" + phone.replace(/^(?:\+213|00213|213)/, "");
+    }
+    return phone;
+  };
+
+  function language() {
+    var lang = document.documentElement.lang;
+    if (lang === "fr" || lang === "en") return lang;
+    return "ar";
+  }
+
+  window.rbFreeDeliveryText = function () {
+    return language() === "fr" ? "Gratuit" : language() === "en" ? "Free" : "مجاناً";
+  };
+
+  window.rbFreeDeliveryHeading = function () {
+    return language() === "fr" ? "Livraison gratuite" :
+      language() === "en" ? "Free delivery" : "توصيل مجاني";
+  };
+
+  window.rbProductCheckoutCopy = function (product) {
+    if (!product || String(product.id) !== "108") return product;
+    var copy = Object.assign({}, product);
+    function freeCopy(text) {
+      return String(text || "")
+        .replace(/مصاريف التوصيل تظهر بعد اختيار الولاية/g, "التوصيل مجاني")
+        .replace(/التوصيل حسب الولاية/g, "توصيل مجاني");
+    }
+    copy.description_long = freeCopy(copy.description_long);
+    copy.description_short = freeCopy(copy.description_short);
+    if (Array.isArray(copy.features)) copy.features = copy.features.map(freeCopy);
+    return copy;
+  };
+
+  var css = document.createElement("style");
+  css.id = "rb-simple-checkout-style";
+  css.textContent =
+    ".rb-free-delivery-title{font-size:20px;line-height:1.5;font-weight:700;" +
+      "color:#187244;margin:12px 0}" +
+    "body.dark-mode .rb-free-delivery-title,.dark-mode .rb-free-delivery-title{" +
+      "color:#8cdeb2}" +
+    '[data-rb-free-delivery="true"] .delivery-type-group,' +
+    '[data-rb-free-delivery="true"] .exp-delivery,' +
+    '[data-rb-free-delivery="true"] .rb-eco-desk,' +
+    '[data-rb-free-delivery="true"] .rb-eco-rate-hint,' +
+    '[data-rb-free-delivery="true"] .rb-eco-availability:not(.is-error),' +
+    '[data-rb-hide-method="true"]{display:none!important}';
+  document.head.appendChild(css);
+
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el && el.textContent !== text) el.textContent = text;
+  }
+
+  function syncScope(scope, name, free) {
+    if (!scope) return;
+    var flag = free ? "true" : "false";
+    if (scope.dataset.rbFreeDelivery !== flag) scope.dataset.rbFreeDelivery = flag;
+    var home = scope.querySelector('input[name="' + name + '"][value="home"]');
+    var group = scope.querySelector('input[name="' + name + '"]');
+    if (group) {
+      var row = group.closest(".order-field");
+      if (row && row.dataset.rbHideMethod !== flag) row.dataset.rbHideMethod = flag;
+    }
+    if (free && home && !home.checked && home.type === "radio") {
+      home.checked = true;
+      home.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    var commune = scope.querySelector("#baladiyaInput,#expressBaladiya");
+    if (commune && commune.tagName === "SELECT") {
+      Array.from(commune.options).forEach(function (option) {
+        if (!option.dataset.rbOriginalLabel) option.dataset.rbOriginalLabel = option.textContent;
+        var label = free && option.value ? option.value : option.dataset.rbOriginalLabel;
+        if (option.textContent !== label) option.textContent = label;
+      });
+    }
+  }
+
+  window.rbSyncSimpleCheckout = function () {
+    var items = [];
+    var product = null;
+    try { if (typeof cart !== "undefined") items = cart; } catch (_) {}
+    try { if (typeof currentProduct !== "undefined") product = currentProduct; } catch (_) {}
+    var cartFree = window.rbFreeDeliveryFor(items);
+    var expressFree = window.rbFreeDeliveryFor(product ? [product] : []);
+    syncScope(document.querySelector("#cartOffcanvas .cart-summary"), "cartDeliveryType", cartFree);
+    syncScope(document.getElementById("orderForm"), "deliveryType", cartFree);
+    syncScope(document.getElementById("expressForm"), "expDeliveryType", expressFree);
+    if (cartFree) {
+      setText("sumDelivery", window.rbFreeDeliveryText());
+      setText("cartDelivery", window.rbFreeDeliveryText());
+    }
+    if (expressFree) setText("expDelivery", window.rbFreeDeliveryText());
+    document.querySelectorAll(".rb-free-delivery-title").forEach(function (el) {
+      var text = window.rbFreeDeliveryHeading();
+      if (el.textContent !== text) el.textContent = text;
+    });
+  };
+
+  function init() {
+    // Retain the native cart, modals, listeners, stock checks and submission code.
+    ["updateOrderSummary", "updateExpressSummary", "renderCartItems", "renderProductLayout",
+      "checkoutFromCart"].forEach(function (name) {
+      var original = window[name];
+      if (typeof original !== "function" || original.rbSimpleWrapped) return;
+      var wrapped = function () {
+        window.rbSyncSimpleCheckout();
+        var result = original.apply(this, arguments);
+        window.rbSyncSimpleCheckout();
+        return result;
+      };
+      wrapped.rbSimpleWrapped = true;
+      window[name] = wrapped;
+    });
+    window.rbSyncSimpleCheckout();
+  }
+  document.addEventListener("DOMContentLoaded", init);
+  window.addEventListener("robuste:languagechange", function () {
+    ["updateOrderSummary", "updateExpressSummary", "renderCartItems"].forEach(function (name) {
+      if (typeof window[name] === "function") window[name]();
+    });
+    window.rbSyncSimpleCheckout();
+  });
+  document.addEventListener("robuste:ecotrack-reference", function () {
+    window.rbSyncSimpleCheckout();
+  });
+  document.addEventListener("change", function (event) {
+    if (/wilaya|baladiya|commune|DeliveryType|deliveryType/i.test(event.target.id + " " + event.target.name)) {
+      setTimeout(window.rbSyncSimpleCheckout, 60);
+    }
+  });
+})();
+</script>
 <body class="has-cod-bar">
 
 <!-- نافبار زجاجي مطابق لـ index -->
@@ -346,7 +496,7 @@ gtag('config', 'G-GREM5BTR7T');
                     <input type="hidden" id="orderProductPrice">
                     <input type="text" id="orderHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="اتركه فارغاً">
                     <div class="row">
-                        <div class="col-md-6 order-field"><label><i class="bi bi-person"></i> الاسم الكامل *</label><input type="text" id="fullName" class="order-input" required></div>
+                        <div class="col-md-6 order-field"><label><i class="bi bi-person"></i> الاسم *</label><input type="text" id="fullName" class="order-input" required></div>
                         <div class="col-md-6 order-field"><label><i class="bi bi-telephone"></i> رقم الهاتف *</label><input type="tel" id="phone" class="order-input" inputmode="numeric" required></div>
                     </div>
                     <div class="row">
@@ -443,10 +593,10 @@ function rbFreeDelivery(qty, type){ try{ return (String(type)==='office' && Numb
 function rbQtyDiscount(qty, type){ try{ if(rbFreeDelivery(qty,type)) return 0; return (Number(qty)>=RB_QTY_MIN ? RB_QTY_OFF : 0); }catch(e){ return 0; } }
 function rbCartQty(){ try{ return cart.reduce(function(s,i){ return s+i.quantity; },0); }catch(e){ return 0; } }
 window.rbFreeDelivery=rbFreeDelivery; window.rbQtyDiscount=rbQtyDiscount; window.rbCartQty=rbCartQty;
-function deliveryFeeFor(wilaya, type){ if(window.RBEcoDelivery&&window.RBEcoDelivery.ready()) return window.RBEcoDelivery.feeFor(wilaya,type);  var f=deliveryFees[wilaya]; if(!f) return null; var home=f[0], office=f[1]; if(type==='office'){ return office==null ? null : office; } return home; }
+function deliveryFeeFor(wilaya, type, items){ if(window.rbFreeDeliveryFor(items)) return 0; if(window.RBEcoDelivery&&window.RBEcoDelivery.ready()) return window.RBEcoDelivery.feeFor(wilaya,type);  var f=deliveryFees[wilaya]; if(!f) return null; var home=f[0], office=f[1]; if(type==='office'){ return office==null ? null : office; } return home; }
 function fmtDzd(n){ try{ return Number(n||0).toLocaleString(); }catch(e){ return String(n); } }
-function updateOrderSummary(){ try{ var subEl=document.getElementById('orderProductPrice'); var sub=subEl? (parseFloat(subEl.value)||0):0; var ws=document.getElementById('wilayaSelect'); var wilaya=ws? ws.value:''; var tEl=document.querySelector('input[name="deliveryType"]:checked'); var type=tEl? tEl.value:'home'; var sSub=document.getElementById('sumSubtotal'), sDel=document.getElementById('sumDelivery'), sTot=document.getElementById('sumTotal'); if(sSub) sSub.innerText=fmtDzd(sub)+' د.ج'; if(!wilaya){ if(sDel) sDel.innerText='اختر الولاية'; if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } var fee=deliveryFeeFor(wilaya,type); var na=(type==='office' && deliveryFees[wilaya] && deliveryFees[wilaya][1]==null); if(fee==null) fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,type); var _disc=rbQtyDiscount(_q,type); if(_free) fee=0; if(sDel) sDel.innerText=(_free?'مجاني إلى المكتب':(fmtDzd(fee)+' د.ج'+(na?' (للمنزل)':(type==='office'?' (مكتب)':' (منزل)')))); if(sTot) sTot.innerText=fmtDzd(sub+fee-_disc)+' د.ج'; }catch(e){} }
-function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); var free=rbFreeDelivery(qty,type); var disc=rbQtyDiscount(qty,type); var dr=document.getElementById('expDiscountRow'), dv=document.getElementById('expDiscount'); if(dr) dr.style.display=(disc>0?'':'none'); if(dv) dv.innerText='-'+fmtDzd(disc)+' دج'; var sr=document.getElementById('expSubRow'), sv=document.getElementById('expSubtotal'); if(sr) sr.style.display=''; if(sv) sv.innerText=fmtDzd(sub)+' دج'; if(!wilaya){ if(de) de.innerText=(free?'مجاني إلى المكتب':'اختر الولاية'); if(te) te.innerText=fmtDzd(sub-disc)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type); if(fee==null) fee=0; if(free) fee=0; if(de) de.innerText=(free?'مجاني إلى المكتب':(fmtDzd(fee)+' دج'+(type==='office'?' (مكتب)':' (منزل)'))); if(te) te.innerText=fmtDzd(sub+fee-disc)+' دج'; }catch(e){} }
+function updateOrderSummary(){ try{ var subEl=document.getElementById('orderProductPrice'); var sub=subEl? (parseFloat(subEl.value)||0):0; var ws=document.getElementById('wilayaSelect'); var wilaya=ws? ws.value:''; var tEl=document.querySelector('input[name="deliveryType"]:checked'); var type=tEl? tEl.value:'home'; var sSub=document.getElementById('sumSubtotal'), sDel=document.getElementById('sumDelivery'), sTot=document.getElementById('sumTotal'); if(sSub) sSub.innerText=fmtDzd(sub)+' د.ج'; if(window.rbFreeDeliveryFor(cart)){ if(sDel) sDel.innerText=window.rbFreeDeliveryText(); if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } if(!wilaya){ if(sDel) sDel.innerText='اختر الولاية'; if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } var fee=deliveryFeeFor(wilaya,type,cart); var na=(type==='office' && deliveryFees[wilaya] && deliveryFees[wilaya][1]==null); if(fee==null) fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,type); var _disc=rbQtyDiscount(_q,type); if(_free) fee=0; if(sDel) sDel.innerText=(_free?'مجاني إلى المكتب':(fmtDzd(fee)+' د.ج'+(na?' (للمنزل)':(type==='office'?' (مكتب)':' (منزل)')))); if(sTot) sTot.innerText=fmtDzd(sub+fee-_disc)+' د.ج'; }catch(e){} }
+function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); var free=rbFreeDelivery(qty,type); var disc=rbQtyDiscount(qty,type); var dr=document.getElementById('expDiscountRow'), dv=document.getElementById('expDiscount'); if(dr) dr.style.display=(disc>0?'':'none'); if(dv) dv.innerText='-'+fmtDzd(disc)+' دج'; var sr=document.getElementById('expSubRow'), sv=document.getElementById('expSubtotal'); if(sr) sr.style.display=''; if(sv) sv.innerText=fmtDzd(sub)+' دج'; if(window.rbFreeDeliveryFor([currentProduct])){ if(de) de.innerText=window.rbFreeDeliveryText(); if(te) te.innerText=fmtDzd(sub)+' دج'; return; } if(!wilaya){ if(de) de.innerText=(free?'مجاني إلى المكتب':'اختر الولاية'); if(te) te.innerText=fmtDzd(sub-disc)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type,[currentProduct]); if(fee==null) fee=0; if(free) fee=0; if(de) de.innerText=(free?'مجاني إلى المكتب':(fmtDzd(fee)+' دج'+(type==='office'?' (مكتب)':' (منزل)'))); if(te) te.innerText=fmtDzd(sub+fee-disc)+' دج'; }catch(e){} }
 function onCartWilayaChange(){ try{ var w=(document.getElementById('cartWilaya')||{}).value; if(w) localStorage.setItem('robuste_wilaya', w); }catch(e){} renderCartItems(); }
 function onCartDtChange(){ renderCartItems(); }
 window.updateOrderSummary=updateOrderSummary; window.updateExpressSummary=updateExpressSummary; window.onCartWilayaChange=onCartWilayaChange; window.onCartDtChange=onCartDtChange; window.deliveryFeeFor=deliveryFeeFor;
@@ -530,7 +680,7 @@ function renderCartItems() {
         </div>`;
     });
     container.innerHTML = html;
-    var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t); if(_fee==null)_fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,_t); var _dc=rbQtyDiscount(_q,_t); if(_free)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=(_free?'مجاني إلى المكتب':(_fee.toLocaleString()+' د.ج'+(_t==='office'?' (مكتب)':' (منزل)'))); document.getElementById('cartTotalAmount').innerText=(total+_fee-_dc).toLocaleString()+' د.ج'; }
+    var _w=(document.getElementById('cartWilaya')||{}).value||''; var _t=(document.querySelector('input[name="cartDeliveryType"]:checked')||{}).value||'home'; var _cs2=document.getElementById('cartSubtotal'); if(_cs2)_cs2.innerText=total.toLocaleString()+' د.ج'; if(window.rbFreeDeliveryFor(cart)){ var _freeD=document.getElementById('cartDelivery'); if(_freeD) _freeD.innerText=window.rbFreeDeliveryText(); document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else if(!_w){ var _cd2=document.getElementById('cartDelivery'); if(_cd2)_cd2.innerText='اختر الولاية'; document.getElementById('cartTotalAmount').innerText=total.toLocaleString()+' د.ج'; } else { var _fee=deliveryFeeFor(_w,_t,cart); if(_fee==null)_fee=0; var _q=rbCartQty(); var _free=rbFreeDelivery(_q,_t); var _dc=rbQtyDiscount(_q,_t); if(_free)_fee=0; var _cd3=document.getElementById('cartDelivery'); if(_cd3)_cd3.innerText=(_free?'مجاني إلى المكتب':(_fee.toLocaleString()+' د.ج'+(_t==='office'?' (مكتب)':' (منزل)'))); document.getElementById('cartTotalAmount').innerText=(total+_fee-_dc).toLocaleString()+' د.ج'; }
 }
 function updateQty(idx, newQty) { if(newQty<1) return removeCartItem(idx); cart[idx].quantity = newQty; saveCart(); }
 function removeCartItem(idx) { cart.splice(idx,1); saveCart(); showToast("تم إزالة المنتج", "success"); }
@@ -633,13 +783,12 @@ async function submitOrderFinal() {
     const address = document.getElementById('address').value.trim();
     const subtotal = parseFloat(document.getElementById('orderProductPrice').value) || 0;
     var dType = (document.querySelector('input[name="deliveryType"]:checked')||{}).value || 'home';
-    var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
+    var deliveryFee = deliveryFeeFor(wilaya, dType, cart); if(deliveryFee==null) deliveryFee = 0;
     var _cq = rbCartQty(); if(rbFreeDelivery(_cq, dType)) deliveryFee = 0;
     var discount = rbQtyDiscount(_cq, dType);
     var deliveryLabel = (dType==='office' ? 'مكتب' : 'منزل');
     const totalPrice = subtotal + deliveryFee - discount;
     if(!fullName || !phone || !wilaya) { rbBlocked("missing_fields"); showToast("يرجى ملء جميع الحقول المطلوبة", "error"); return; }
-    if(fullName.split(/\s+/).filter(function(w){return w.length>=2;}).length > 5) { rbBlocked("name"); showToast("يرجى إدخال الاسم واللقب", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { rbBlocked("phone"); showToast("رقم الهاتف لازم 10 أرقام يبدأ بـ 05 أو 06 أو 07", "error"); return; }
     if(!baladiya) { showToast("يرجى اختيار البلدية", "error"); return; }
     if(!address) { showToast("يرجى إدخال العنوان", "error"); return; }
@@ -718,7 +867,7 @@ async function loadProduct() {
         const res = await fetch('products.json', { cache: 'no-cache' });
         const products = await res.json();
         window.RB_ALL = products;
-        currentProduct = products.find(p => p.id === productId);
+        currentProduct = window.rbProductCheckoutCopy(products.find(p => p.id === productId));
         if(!currentProduct) throw new Error();
         renderProductLayout(currentProduct);
         applyProductSEO(currentProduct);
@@ -781,6 +930,7 @@ function renderProductLayout(p) {
             <div class="product-info-card">
                 <span class="badge bg-primary mb-2 px-3 py-2 rounded-pill">${p.badge || 'جديد'}</span>
                 <h1 class="product-title">${p.title}</h1>
+                ${window.rbFreeDeliveryFor([p]) ? '<p class="rb-free-delivery-title">' + window.rbFreeDeliveryHeading() + '</p>' : ''}
                 <div class="price-block d-flex align-items-center justify-content-between">
                     <div><span class="current-price">${p.price.toLocaleString()} د.ج</span>${p.old_price ? `<span class="old-price me-2">${p.old_price.toLocaleString()} د.ج</span>` : ''}</div>
                     ${discountHtml}
@@ -807,13 +957,13 @@ function renderProductLayout(p) {
                 <div class="product-mini"><img loading="lazy" decoding="async" src="${p.images[0]}" width="50" alt="${p.title}"><div><strong>${p.title.substring(0,35)}</strong><div class="text-primary fw-bold">${p.price} د.ج</div></div></div>
                 <form id="expressForm">
                     <input type="text" id="expressHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="اتركه فارغاً">
-                    <input type="text" id="expressName" class="form-control-premium mb-2" placeholder="الاسم الكامل *">
+                    <input type="text" id="expressName" class="form-control-premium mb-2" placeholder="الاسم *">
                     <input type="tel" id="expressPhone" class="form-control-premium mb-2" placeholder="رقم الهاتف *">
                     <select id="expressWilaya" class="form-select-premium mb-2" onchange="updateExpressSummary()"><option value="" disabled selected>اختر الولاية</option>${wilayas.map(w=>`<option value="${w}">${w}</option>`).join('')}</select>
                     <select id="expressBaladiya" class="form-control-premium mb-2" required disabled><option value="">اختر الولاية أولاً</option></select>
                     <input type="text" id="expressAddress" class="form-control-premium mb-2" placeholder="العنوان (الحي/الشارع) *" required>
                     <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;border-radius:10px;padding:.5rem .7rem;margin-bottom:.5rem;font-weight:700;font-size:.9rem;line-height:1.6"><div><i class="bi bi-gift-fill"></i> <span>قطعتان: خصم 200 د.ج</span></div><div><i class="bi bi-truck"></i> <span>4 قطع فما فوق: التوصيل للمكتب مجاني</span></div></div><input type="number" id="expressQty" class="form-control-premium mb-2" value="1" min="1" max="20" oninput="updateExpressSummary()">
-                    <div class="exp-delivery"><label class="exp-dt"><input type="radio" name="expDeliveryType" value="home" onchange="updateExpressSummary()" checked> 🏠 للمنزل</label><label class="exp-dt"><input type="radio" name="expDeliveryType" value="office" onchange="updateExpressSummary()"> 🏢 للمكتب</label></div>
+                    ${window.rbFreeDeliveryFor([p]) ? '<input type="hidden" name="expDeliveryType" value="home">' : `<div class="exp-delivery"><label class="exp-dt"><input type="radio" name="expDeliveryType" value="home" onchange="updateExpressSummary()" checked> 🏠 للمنزل</label><label class="exp-dt"><input type="radio" name="expDeliveryType" value="office" onchange="updateExpressSummary()"> 🏢 للمكتب</label></div>`}
                     <div class="exp-summary"><div id="expSubRow"><span>المجموع الفرعي:</span> <span id="expSubtotal">-</span></div><div><span>التوصيل:</span> <span id="expDelivery">اختر الولاية</span></div><div id="expDiscountRow" style="display:none;color:#16a34a;font-weight:700"><span>الخصم:</span> <span id="expDiscount">-200 دج</span></div><div class="exp-total"><span>الإجمالي:</span> <span id="expTotal">${p.price.toLocaleString()} دج</span></div></div>
                     <button type="button" class="btn-submit-express" ${rbOut?'disabled style="opacity:.55;cursor:not-allowed"':''} onclick="submitExpressOrder()">تأكيد الطلب</button>
                 </form>
@@ -842,15 +992,13 @@ async function submitExpressOrder() {
     const addressRaw = (document.getElementById('expressAddress') ? document.getElementById('expressAddress').value.trim() : "");
     const qty = parseInt(document.getElementById('expressQty').value) || 1;
     if(!name || !phone || !wilaya) { rbBlocked("missing_fields"); showToast("يرجى ملء البيانات", "error"); return; }
-    var _nw = name.split(/\s+/).filter(function(w){ return w.length>=2; }).length;
-    if(_nw<1 || _nw>5) { rbBlocked("name"); showToast("يرجى إدخال الاسم واللقب", "error"); return; }
     if(!/^0[5-7][0-9]{8}$/.test(phone)) { rbBlocked("phone"); showToast("رقم الهاتف لازم 10 أرقام يبدأ بـ 05 أو 06 أو 07", "error"); return; }
     if(!baladiya) { rbBlocked("baladiya"); showToast("يرجى إدخال البلدية", "error"); return; }
     if(!addressRaw) { rbBlocked("address"); showToast("يرجى إدخال العنوان", "error"); return; }
     const address = [baladiya, addressRaw].filter(Boolean).join("، ");
     const subtotal = currentProduct.price * qty;
     var dType = (document.querySelector('input[name="expDeliveryType"]:checked')||{}).value || 'home';
-    var deliveryFee = deliveryFeeFor(wilaya, dType); if(deliveryFee==null) deliveryFee = 0;
+    var deliveryFee = deliveryFeeFor(wilaya, dType, [currentProduct]); if(deliveryFee==null) deliveryFee = 0;
     if(rbFreeDelivery(qty, dType)) deliveryFee = 0;
     var discount = rbQtyDiscount(qty, dType);
     var deliveryLabel = (dType==='office' ? 'مكتب' : 'منزل');
@@ -1104,5 +1252,6 @@ window.goToOrder=goToOrder;
 })();
 </script>
 <script defer src="robuste-ecotrack-delivery.js?v=3"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"5f70ee79eb6c4543918acb7115a325f6","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
