@@ -10,7 +10,7 @@
 
   function fmt(n) { try { return Number(n).toLocaleString("en-US"); } catch (e) { return "" + n; } }
 
-  function deliveryFeeFor(w, t) {
+  function deliveryFeeFor(w, t) { if(window.RBEcoDelivery&&window.RBEcoDelivery.ready()) return window.RBEcoDelivery.feeFor(w,t); 
     var f = deliveryFees[w];
     if (!f) return null;
     var home = f[0], office = f[1];

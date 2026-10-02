@@ -37,6 +37,7 @@
   .pill.in_transit,.pill.out_for_delivery{ background:#fff7e0; color:var(--warn); }
   .pill.delivered{ background:#e9f6ea; color:var(--ok); }
   .pill.returned,.pill.cancelled{ background:#fdecec; color:var(--bad); }
+  .pill.returning,.pill.delayed,.pill.refused{ background:#fff3de; color:#80521b; }
   .meta{ display:flex; gap:16px; flex-wrap:wrap; margin:12px 0 4px; font-size:.9rem; color:var(--muted); }
   .meta b{ color:var(--ink); font-weight:700; }
   .steps{ display:flex; justify-content:space-between; margin:18px 4px 6px; position:relative; }
@@ -171,7 +172,7 @@
 
   function card(o){
     var idx = STAGES.indexOf(o.stage); if (idx < 0) idx = 0;
-    var cancelled = (o.stage === "cancelled" || o.stage === "returned");
+    var cancelled = ["cancelled","returned","returning","delayed","refused"].indexOf(o.stage) !== -1;
     var steps = STAGES.map(function(s, i){
       return '<div class="step ' + (i <= idx && !cancelled ? "done" : "") + '"><div class="dot"></div>' + STAGE_AR[s] + '</div>';
     }).join("");

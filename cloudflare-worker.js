@@ -19,6 +19,20 @@
  *                    once ADMIN_EMAIL works, and the old gate closes for good.
  */
 
+/**
+ * Firestore documents and courier JSON are dynamic records. Route handlers
+ * validate required fields before using them; these declarations also let the
+ * Cloudflare JavaScript editor check the optional request fields correctly.
+ * @typedef {Record<string, any>} RobusteRecord
+ */
+/**
+ * @typedef {Object} EcoCallOptions
+ * @property {string} [method]
+ * @property {RobusteRecord} [params]
+ * @property {unknown} [body]
+ * @property {boolean} [raw]
+ */
+
 const PHONE_RE = /^0[5-7][0-9]{8}$/;
 const COOLDOWN_SECONDS = 120;
 
@@ -38,7 +52,10 @@ async function catalogById(env) {
   if (_catalog && now < _catalogExp) return _catalog;
   const host = env.SITE_HOST || "www.robustedz.store";
   try {
-    const res = await fetch("https://" + host + "/products.json", { cf: { cacheTtl: 600 } });
+    const options = /** @type {RequestInit & { cf?: { cacheTtl?: number } }} */ ({
+      cf: { cacheTtl: 600 }
+    });
+    const res = await fetch("https://" + host + "/products.json", options);
     if (!res.ok) throw new Error("HTTP " + res.status);
     const arr = await res.json();
     const map = {};
@@ -82,13 +99,33 @@ async function repriceOrder(env, order) {
     return l;
   });
 
-  let fee = Math.max(0, Number(order.deliveryFee) || 0);
+  const clientFee = Math.max(0, Number(order.deliveryFee) || 0);
+  let fee = clientFee;
   if (fee > MAX_DELIVERY_FEE) { notes.push("سعر توصيل غير معقول (" + fee + ") أُلغي"); fee = 0; }
+  if (env.ECOTRACK_API_URL && env.ECOTRACK_TOKEN && env.ECOTRACK_LIVE_DELIVERY_PRICES !== "false") {
+    const ref = await ecoReference(env);
+    const code = resolveWilayaCode(order.wilaya);
+    const stopDesk = ecoStatusKey(order.deliveryType || order.delivery_type) === "home" ? 0 : 1;
+    if (ref.available.wilayas && !ref.wilayas.some(w => w.code === code))
+      throw new Error("wilaya_not_served");
+    if (stopDesk && ref.available.desks && !ref.desks.some(d => d.wilaya === code))
+      throw new Error("stop_desk_not_available");
+    const quote = ecoQuote(ref, code, 1, stopDesk);
+    if (ref.available.fees && quote.service == null) throw new Error("delivery_fee_unavailable");
+    if (quote.service != null) {
+      fee = quote.service;
+      order.ecotrackRateSource = "live_account_tariff";
+      order.ecotrackTariffFetchedAt = ref.fetchedAt;
+    } else {
+      order.ecotrackRateSource = "legacy_fallback";
+    }
+  }
   order.deliveryFee = fee;
 
   const claimed = Number(order.totalPrice) || 0;
   order.totalPrice = subtotal + fee;
-  if (Math.abs(claimed - order.totalPrice) > 1) {
+  const tariffDifference = order.ecotrackRateSource === "live_account_tariff" ? fee - clientFee : 0;
+  if (Math.abs(claimed + tariffDifference - order.totalPrice) > 1) {
     notes.push("المجموع من المتصفح " + claimed + " ← الصحيح " + order.totalPrice);
   }
   return { notes, bulk };
@@ -134,7 +171,7 @@ export default {
 
     // ---------- Customer order tracking (read-only, phone lookup) ----------
     if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/track")) {
-      return handleTrack(url, env, cors);
+      return handleTrack(url, env, cors, request);
     }
 
     // ---------- Admin (protected by X-Admin-Key) ----------
@@ -170,8 +207,35 @@ export default {
       return handleBrowserEvents(request, env, ctx, cors);
     }
 
-    if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/delivery/reference")) {
+      return ecoPublicReference(env, cors);
+    }
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/sync")) {
+      return ecoHandleSync(request, env, cors);
+    }
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/parcel")) {
+      return ecoHandleParcelAction(request, env, cors);
+    }
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/history")) {
+      return ecoHandleHistory(url, request, env, cors);
+    }
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "").endsWith("/admin/ecotrack/health")) {
+      return ecoHandleHealth(request, env, cors);
+    }
+    if (request.method !== "POST" || !["", "/", "/order", "/api/order"].includes(url.pathname.replace(/\/+$/, ""))) {
+      return json({ error: "Method not allowed" }, 405, cors);
+    }
     return handleIntake(request, env, ctx, cors);
+  },
+  async scheduled(event, env, ctx) {
+    const task = ecoScheduledSync(env).catch(async e => {
+      console.error("EcoTrack scheduled sync:", String(e.message || e));
+      try { await ecoPatchDocument(env, "config", "ecotrackSync", {
+        lastAttemptAt: new Date().toISOString(), lastError: ecoPlain(e.message || e, 180)
+      }); } catch {}
+    });
+    if (ctx && ctx.waitUntil) ctx.waitUntil(task);
+    else await task;
   }
 };
 
@@ -181,7 +245,7 @@ export default {
    that order. We therefore return MINIMAL, sanitized data (no full address,
    no email, first name only) and the front-end is rate-limited at the edge.
    ========================================================================= */
-async function handleTrack(url, env, cors) {
+async function handleTrack(url, env, cors, request = null) {
   const phone = (url.searchParams.get("phone") || "").trim();
   if (!PHONE_RE.test(phone)) return json({ error: "invalid_phone" }, 400, cors);
 
@@ -193,7 +257,7 @@ async function handleTrack(url, env, cors) {
 
   // Collect tracking numbers that exist, fetch their live EcoTrack status in one call.
   const codes = docs.map(d => d.ecotrackTracking).filter(Boolean);
-  const wantDebug = url.searchParams.get("debug") === "1";
+  const wantDebug = url.searchParams.get("debug") === "1" && request && await adminOk(request, env);
   const diag = wantDebug ? { attempts: [] } : null;
   let live = {};
   if (codes.length) { try { live = await ecotrackTrackings(env, codes, diag); } catch (e) { if (diag) diag.fatal = String(e); live = {}; } }
@@ -209,10 +273,11 @@ async function handleTrack(url, env, cors) {
       wilaya: d.wilaya || "",
       customerFirst: firstName(d.customer),
       internalStatus: d.status || "",
-      stage: liveOne ? liveOne.stage : internalStage(d.status),
-      stageLabel: liveOne ? liveOne.label : internalLabel(d.status),
+      stage: liveOne && liveOne.stage !== "unknown" ? liveOne.stage : d.ecotrackStage || internalStage(d.status),
+      stageLabel: liveOne && liveOne.stage !== "unknown" ? liveOne.label : d.ecotrackStageLabel || internalLabel(d.status),
       tracking: code,
-      timeline: liveOne ? liveOne.timeline : internalTimeline(d)
+      timeline: (liveOne ? liveOne.timeline : d.ecotrackTimeline || internalTimeline(d))
+        .map(t => ({ date: t.date, status: t.status, activity: t.activity || "" }))
     };
   });
 
@@ -351,30 +416,61 @@ async function handleAdminConfirmShip(request, env, cors) {
   try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
   const id = String(body.id || "").trim();
   if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
-
   let order;
   try { order = await getOrderById(env, id); }
-  catch (e) { return json({ error: "lookup_failed", detail: String(e) }, 500, cors); }
+  catch { return json({ error: "lookup_failed" }, 500, cors); }
   if (!order) return json({ error: "order_not_found" }, 404, cors);
   if (order.ecotrackTracking) return json({ error: "already_shipped", tracking: order.ecotrackTracking }, 409, cors);
-
-  let payload;
-  try { payload = buildEcotrackPayload(order, body); }
-  catch (e) { return json({ error: "invalid_parcel", detail: String(e.message || e) }, 400, cors); }
-
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) return json({ error: "ecotrack_not_configured" }, 503, cors);
+  let payload, quote;
+  try {
+    payload = buildEcotrackPayload(order, body);
+    const ref = await ecoReference(env);
+    ecoValidateDestination(ref, payload);
+    quote = ecoQuote(ref, payload.code_wilaya, payload.type, payload.stop_desk);
+  } catch (e) { return json({ error: "invalid_parcel", detail: ecoPlain(e.message) }, 400, cors); }
+  const actionId = "primary_" + (await sha256Hex(id + "|" + (order.ecotrackDeletedDraftTracking || "initial"))).slice(0, 40);
+  let prior;
+  try { prior = await ecoReserveAction(env, actionId, id, 1); }
+  catch (e) { return json({ error: "shipment_reservation_failed", detail: ecoPlain(e.message) }, 409, cors); }
+  if (prior) {
+    if (!prior.tracking || !prior.parcel) return json({ error: "shipment_pending_reconciliation",
+      detail: "A previous create request has an unknown outcome. Check Assil before retrying.", reference: payload.reference }, 409, cors);
+    try { await updateOrderFields(env, id, prior.parcel, order._firestoreUpdateTime); }
+    catch { return json({ error: "saved_parcel_but_db_update_failed", tracking: prior.tracking }, 502, cors); }
+    let capi = null;
+    try { capi = await fireConfirmedPurchase(env, id, request); } catch {}
+    return json({ ok: true, already: true, id, tracking: prior.tracking, status: prior.parcel.status, capi }, 200, cors);
+  }
   let created;
   try { created = await ecotrackCreateOrder(env, payload); }
-  catch (e) { return json({ error: "ecotrack_create_failed", detail: String(e.message || e) }, 502, cors); }
-
+  catch (e) {
+    if (e.safeToRetry) {
+      try { await ecoPatchDocument(env, "ecotrackActions", actionId, { state: "rejected", failure: ecoPlain(e.message, 180) }); } catch {}
+    }
+    return json({ error: "ecotrack_create_failed", detail: ecoPlain(e.message, 220),
+      requiresReconciliation: !e.safeToRetry, reference: payload.reference }, 502, cors);
+  }
   const tracking = created.tracking;
-  const fields = { ecotrackTracking: tracking, status: (body.status && String(body.status).trim()) || "\u062a\u0645 \u0627\u0644\u062a\u0623\u0643\u064a\u062f" };
-  try { await updateOrderFields(env, id, fields); }
-  catch (e) { return json({ error: "saved_parcel_but_db_update_failed", tracking, detail: String(e) }, 500, cors); }
-
-  // Shipping a parcel = definitely a REAL order -> make sure the Meta Purchase went out.
+  const fields = { ecotrackTracking: tracking, status: "مؤكد", ecotrackPayload: payload,
+    ecotrackType: payload.type, ecotrackCodAmount: payload.montant,
+    ecotrackValidated: false, ecotrackValidatedAt: null,
+    ecotrackStage: "preparing", ecotrackStageLabel: "قيد التحضير",
+    ecotrackRawStatus: "prete_a_expedier", ecotrackCreatedAt: new Date().toISOString(), ecotrackTimeline: [],
+    ecotrackPaymentState: "unknown", ecotrackLastSyncedAt: null,
+    ecotrackActualServiceFee: null, ecotrackActualReturnFee: null,
+    ecotrackPaymentReference: null, ecotrackReturnReference: null,
+    ecotrackReturnRequestedAt: null, ecotrackReturnReceivedAt: null,
+    ecotrackServiceFeeEstimate: quote.service, ecotrackReturnFeeEstimate: quote.returnFee,
+    ecotrackTariffFetchedAt: quote.fetchedAt, ecotrackNeedsAttention: "", ecotrackAlertSignature: null };
+  try { await ecoPatchDocument(env, "ecotrackActions", actionId, { state: "created", tracking, parcel: fields }); }
+  catch { return json({ error: "saved_parcel_but_action_update_failed", tracking,
+    detail: "Parcel exists at Assil. Reconcile before another creation request." }, 502, cors); }
+  try { await updateOrderFields(env, id, fields, order._firestoreUpdateTime); }
+  catch { return json({ error: "saved_parcel_but_db_update_failed", tracking,
+    detail: "Retry the same order to link the already-created parcel; do not create it manually again." }, 502, cors); }
   let capi = null;
-  try { capi = await fireConfirmedPurchase(env, id, request); } catch (e) { capi = { ok: false, error: String(e) }; }
-
+  try { capi = await fireConfirmedPurchase(env, id, request); } catch (e) { capi = { ok: false, error: ecoPlain(e.message) }; }
   return json({ ok: true, id, tracking, status: fields.status, capi }, 200, cors);
 }
 
@@ -425,6 +521,7 @@ async function getOrderById(env, id) {
   const data = await res.json();
   const o = decodeFields(data.fields || {});
   o.id = data.name.split("/").pop();
+  o._firestoreUpdateTime = data.updateTime || null;
   return o;
 }
 
@@ -436,22 +533,26 @@ async function getOrderById(env, id) {
  * Admin can override the fields an order may lack (commune, code_wilaya, adresse). */
 function buildEcotrackPayload(order, ov) {
   ov = ov || {};
-  const phone = String(order.phone || "").replace(/\s+/g, "");
+  const type = ov.type == null ? Number(order.ecotrackType || 1) : Number(ov.type);
+  if (![1, 2, 3, 4].includes(type)) throw new Error("type invalide");
+  const phone = String(ov.telephone || order.phone || "").replace(/\s+/g, "");
   if (!/^0[5-7][0-9]{8}$/.test(phone)) throw new Error("telephone invalide");
 
   const wilayaRaw = (ov.code_wilaya != null && ov.code_wilaya !== "") ? ov.code_wilaya : order.wilaya;
   const code_wilaya = resolveWilayaCode(wilayaRaw);
   if (!code_wilaya) throw new Error("wilaya non reconnue: \"" + (order.wilaya || "") + "\" (envoyez code_wilaya entre 1 et 58)");
 
-  const commune = String(ov.commune || order.commune || "").trim();
+  // Storefronts have historically sent this field as `baladiya`. Keep that
+  // spelling readable for orders already in Firestore as well as new ones.
+  const commune = String(ov.commune || order.commune || order.baladiya || order.municipality || "").trim();
   if (!commune) throw new Error("commune manquante");
 
-  const nom_client = String(order.customer || "").trim();
+  const nom_client = String(ov.nom_client || order.customer || "").trim();
   if (!nom_client) throw new Error("nom client manquant");
 
   const adresse = (String(ov.adresse || order.address || "").trim()) || commune;
-  const montant = Number(order.totalPrice || 0);
-  if (!(montant > 0)) throw new Error("montant invalide");
+  const montant = ov.montant == null ? Number(order.totalPrice || 0) : Number(ov.montant);
+  if (!Number.isFinite(montant) || montant < 0 || (type === 1 && montant === 0)) throw new Error("montant invalide");
 
   const produit = ((Array.isArray(order.products) ? order.products : [])
     .map(p => String(p.name || "") + (p.quantity ? " x" + p.quantity : "")).join(", ") || "Commande").slice(0, 255);
@@ -463,13 +564,25 @@ function buildEcotrackPayload(order, ov) {
     commune: commune.slice(0, 255),
     code_wilaya,
     montant,
-    produit,
-    type: Number(ov.type || 1),
+    produit: ov.produit == null ? produit : ecoPlain(ov.produit),
+    type,
     stop_desk: ov.stop_desk != null ? Number(ov.stop_desk) : 0
   };
+  if (![0, 1].includes(payload.stop_desk)) throw new Error("stop desk invalide");
   const reference = order.id ? String(order.id).slice(-12) : "";
   if (reference) payload.reference = reference;
   if (ov.remarque) payload.remarque = String(ov.remarque).slice(0, 255);
+  for (const key of ["telephone_2", "produit_a_recuperer", "code_postal", "boutique"])
+    if (ov[key] != null && ov[key] !== "") payload[key] = ecoPlain(ov[key]);
+  if (payload.telephone_2 && !PHONE_RE.test(payload.telephone_2)) throw new Error("telephone 2 invalide");
+  if (ov.fragile != null) {
+    if (![0, 1].includes(Number(ov.fragile))) throw new Error("fragile invalide");
+    payload.fragile = Number(ov.fragile);
+  }
+  if (ov.gps_link) {
+    if (!/^https:\/\//i.test(String(ov.gps_link))) throw new Error("gps link invalide");
+    payload.gps_link = ecoPlain(ov.gps_link, 1500);
+  }
   return payload;
 }
 
@@ -483,8 +596,18 @@ async function ecotrackCreateOrder(env, payload) {
   });
   const text = await res.text();
   let data = null; try { data = JSON.parse(text); } catch {}
-  if (!res.ok) throw new Error("HTTP " + res.status + " " + text.slice(0, 300));
-  if (data && data.success === false) throw new Error(data.message || "creation refusee");
+  if (!res.ok) {
+    const e = Object.assign(new Error("HTTP " + res.status + " " + text.split(env.ECOTRACK_TOKEN).join("[redacted]").slice(0, 300)), {
+      safeToRetry: res.status >= 400 && res.status < 500 && ![408, 429].includes(res.status)
+    });
+    throw e;
+  }
+  if (data && (data.success === false || data.success === 0 || data.success === "false")) {
+    const e = Object.assign(new Error(String(data.message || "creation refusee").split(env.ECOTRACK_TOKEN).join("[redacted]")), {
+      safeToRetry: true
+    });
+    throw e;
+  }
   const tracking = data && (data.tracking || data.tracking_id || data.trackingNumber ||
     (data.order && (data.order.tracking || data.order.tracking_id)) ||
     (data.data && (data.data.tracking || data.data.tracking_id)) || data.id);
@@ -536,10 +659,11 @@ const WILAYAS = [
 ];
 const WILAYA_LOOKUP = (() => { const m = {}; for (const [c, fr, ar] of WILAYAS) { m[normWilaya(fr)] = c; m[normWilaya(ar)] = c; } return m; })();
 
-async function updateOrderFields(env, id, fields) {
+async function updateOrderFields(env, id, fields, updateTime = null) {
   const token = await accessToken(env);
   const masks = Object.keys(fields).map(k => "updateMask.fieldPaths=" + encodeURIComponent(k)).join("&");
-  const res = await fetch(baseUrl(env) + "/orders/" + encodeURIComponent(id) + "?" + masks, {
+  const condition = updateTime ? "&currentDocument.updateTime=" + encodeURIComponent(updateTime) : "";
+  const res = await fetch(baseUrl(env) + "/orders/" + encodeURIComponent(id) + "?" + masks + condition, {
     method: "PATCH",
     headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
     body: JSON.stringify({ fields: encodeFields(fields) })
@@ -609,10 +733,19 @@ async function ecotrackTrackings(env, codes, diag) {
       const text = await res.text();
       const attempt = { endpoint: cand.endpoint, method: cand.method, status: res.status, body: String(text).slice(0, 1000) };
       if (diag) diag.attempts.push(attempt);
+      if (res.status === 429) throw new Error("rate_limited");
       if (!res.ok) continue;
       try { data = JSON.parse(text); } catch (e) { if (diag) attempt.parseError = String(e); data = null; continue; }
+      // Some EcoTrack tenants report unsupported routes with HTTP 200 and a
+      // failure object. Try the next route instead of showing stale status.
+      if (data && (data.success === false || data.success === 0 || data.error)) {
+        if (diag) attempt.apiError = data.message || data.error || "api_failure";
+        data = null;
+        continue;
+      }
       if (data) break;
     } catch (e) {
+      if (e && e.message === "rate_limited") throw e;
       if (diag) diag.attempts.push({ endpoint: cand.endpoint, method: cand.method, error: String(e) });
     }
   }
@@ -627,15 +760,25 @@ async function ecotrackTrackings(env, codes, diag) {
     // Defensive: EcoTrack returns activity under "activity" | "activites" | "events".
     const acts = node.activity || node.activites || node.events || (node.OrderInfo && node.OrderInfo.activity) || [];
     const timeline = (Array.isArray(acts) ? acts : []).map(a => ({
-      date: a.date || a.created_at || a.event_date || "",
+      date: ecoEventTime(a),
       status: a.event || a.status || a.libelle || a.activity || "",
       // Machine code kept separate so mapping never depends on wording.
-      activity: a.activity || a.activity_code || ""
+      activity: a.activity || a.activity_code || "",
+      reason: ecoPlain(a.reason),
+      details: ecoPlain(a.details),
+      station: ecoPlain(a.station || a.scanLocation)
     })).filter(t => t.status || t.activity);
+    // Tenants differ on event ordering. Prefer the newest dated activity;
+    // keep the API order for entries without parseable dates.
+    timeline.sort((a, b) => {
+      const at = Date.parse(a.date), bt = Date.parse(b.date);
+      return Number.isFinite(at) && Number.isFinite(bt) ? bt - at : 0;
+    });
     const last = timeline.length ? timeline[0] : null;
-    const lastRaw = last ? last.status : (node.status || node.last_status || "");
-    const mapped = mapEcotrackStatus(lastRaw, last ? last.activity : (node.activity_code || ""));
-    out[code] = { stage: mapped.stage, label: mapped.label, timeline };
+    const lastRaw = node.status || node.last_status || (last && last.status) || "";
+    const mapped = ecoStageFor(lastRaw, timeline);
+    out[code] = { stage: mapped.stage, label: mapped.label, rawStatus: lastRaw, timeline,
+      paymentState: ecoPaymentState(lastRaw, timeline) };
   }
   return out;
 }
@@ -652,14 +795,23 @@ function ecoUrl(env, path, params) {
   return base + "/api/v1/" + path.replace(/^\/+/, "") + qs;
 }
 
-async function ecoCall(env, path, { method = "GET", params, raw = false } = {}) {
+/**
+ * raw=true returns a Response; JSON responses are validated by each caller.
+ * @param {RobusteRecord} env
+ * @param {string} path
+ * @param {EcoCallOptions} [options]
+ * @returns {Promise<any>}
+ */
+async function ecoCall(env, path, { method = "GET", params, body, raw = false } = {}) {
   if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) throw new Error("ecotrack non configure");
   const res = await fetch(ecoUrl(env, path, params), {
     method,
     headers: {
       "Authorization": "Bearer " + env.ECOTRACK_TOKEN,
-      "Accept": raw ? "*/*" : "application/json"
-    }
+      "Accept": raw ? "*/*" : "application/json",
+      ...(body ? { "Content-Type": "application/json" } : {})
+    },
+    ...(body ? { body: JSON.stringify(body) } : {})
   });
   if (res.status === 429) throw new Error("rate_limited");
   if (raw) {
@@ -670,7 +822,8 @@ async function ecoCall(env, path, { method = "GET", params, raw = false } = {}) 
   let data = null;
   try { data = JSON.parse(text); } catch {}
   if (!res.ok) throw new Error("HTTP " + res.status + " " + text.slice(0, 200));
-  if (data && data.success === false) throw new Error(data.message || "refuse");
+  if (data && (data.success === false || data.success === 0 || data.success === "false"))
+    throw new Error(data.message || "refuse");
   return data;
 }
 
@@ -703,7 +856,7 @@ async function handleEcotrackValidate(request, env, cors) {
     }
     // EcoTrack allows 50 requests/minute; a 15-parcel chunk paced at 250ms
     // finishes in ~4s and leaves room for the panel's next chunk.
-    if (codes.length > 1) await new Promise(r => setTimeout(r, 250));
+    if (codes.length > 1) await new Promise(r => setTimeout(r, 1300));
   }
 
   const okCodes = results.filter(r => r.ok).map(r => r.tracking);
@@ -744,32 +897,10 @@ async function handleEcotrackLabel(url, request, env, cors) {
  * the panel would otherwise burn requests against the rate limit. */
 async function handleEcotrackReference(url, request, env, ctx, cors) {
   if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
-
-  const cache = caches.default;
-  const cacheKey = new Request(new URL("/__eco_ref", url.origin).toString(), { method: "GET" });
-  if (url.searchParams.get("fresh") !== "1") {
-    const hit = await cache.match(cacheKey);
-    if (hit) {
-      const body = await hit.json();
-      return json(Object.assign({ cached: true }, body), 200, cors);
-    }
-  }
-
-  const out = { cached: false, fetchedAt: new Date().toISOString() };
-  const grab = async (key, path, params) => {
-    try { out[key] = await ecoCall(env, path, { params }); }
-    catch (e) { out[key] = null; out[key + "_error"] = String(e.message || e); }
-  };
-  await grab("wilayas", "get/wilayas");
-  await grab("communes", "get/communes");
-  await grab("desks", "get/desks");
-  await grab("fees", "get/fees");
-
-  const payload = JSON.stringify(out);
-  ctx.waitUntil(cache.put(cacheKey, new Response(payload, {
-    headers: { "Content-Type": "application/json", "Cache-Control": "max-age=3600" }
-  })));
-  return json(out, 200, cors);
+  try {
+    return json(Object.assign({ ok: true }, await ecoReference(env, url.searchParams.get("fresh") === "1")),
+      200, Object.assign({}, cors, { "Cache-Control": "no-store" }));
+  } catch (e) { return json({ error: "reference_failed", detail: ecoPlain(e.message) }, 502, cors); }
 }
 
 /* GET /admin/ecotrack/ping — is the token still valid? */
@@ -777,6 +908,9 @@ async function handleEcotrackPing(request, env, cors) {
   if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
   try {
     const data = await ecoCall(env, "validate/token");
+    if (!data || data.success !== true) {
+      return json({ ok: false, error: (data && data.message) || "token_validation_failed" }, 502, cors);
+    }
     return json({ ok: true, data }, 200, cors);
   } catch (e) {
     return json({ ok: false, error: String(e.message || e) }, 502, cors);
@@ -954,10 +1088,16 @@ async function handleBrowserEvents(request, env, ctx, cors) {
 
   if (!data.length) return json({ ok: true, sent: 0 }, 200, cors);
 
+  /* Setting the META_TEST_EVENT_CODE secret makes these events show up in
+   * Events Manager > Test events. Delete the secret when you are done — while
+   * it is set the events are test traffic and do not count as conversions. */
+  const body = { data, access_token: TOKEN };
+  if (env.META_TEST_EVENT_CODE) body.test_event_code = env.META_TEST_EVENT_CODE;
+
   const send = fetch("https://graph.facebook.com/v21.0/" + PIXEL + "/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data, access_token: TOKEN })
+    body: JSON.stringify(body)
   }).catch(() => {});
   if (ctx && ctx.waitUntil) ctx.waitUntil(send); else await send;
 
@@ -995,6 +1135,9 @@ async function handleIntake(request, env, ctx, cors) {
   }
 
   const order = payload.order || {};
+  // Carrier links, payment flags and sync metadata are server-owned.
+  for (const key of Object.keys(order))
+    if (key.startsWith("ecotrack") || key === "metaPurchaseSentAt") delete order[key];
   const meta = payload.meta || {};
 
   // Minimal schema validation before persisting.
@@ -1006,9 +1149,17 @@ async function handleIntake(request, env, ctx, cors) {
   if (!order.address || String(order.address).trim().length < 8) return json({ error: "missing_address", message: "\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0628\u0634\u0643\u0644 \u0648\u0627\u0636\u062d" }, 400, cors);
   if (!Array.isArray(order.products) || order.products.length === 0) return json({ error: "empty_cart", message: "\u0627\u0644\u0633\u0644\u0629 \u0641\u0627\u0631\u063a\u0629" }, 400, cors);
 
+  // Use one field name from intake through parcel creation. Older orders may
+  // still have only `baladiya`, which buildEcotrackPayload handles above.
+  order.commune = String(order.commune || order.baladiya || order.municipality || "").trim();
+
   // Trust the catalogue, not the browser, for every number that leaves here.
   let priceAudit = { notes: [], bulk: false };
-  try { priceAudit = await repriceOrder(env, order); } catch (e) {}
+  try { priceAudit = await repriceOrder(env, order); }
+  catch (e) {
+    if (e && ["wilaya_not_served", "delivery_fee_unavailable", "stop_desk_not_available"].includes(e.message))
+      return json({ error: e.message, message: "طريقة التوصيل أو الولاية غير متاحة لدى Assil. راجع اختيار التوصيل." }, 400, cors);
+  }
 
   meta.ip = request.headers.get("CF-Connecting-IP") || "";
   const cf = request.cf || {};
@@ -1281,6 +1432,10 @@ function encodeValue(v) {
   return { stringValue: String(v) };
 }
 /* Decode Firestore REST value shapes back into plain JS (used by tracking lookup). */
+/**
+ * @param {RobusteRecord} fields
+ * @returns {RobusteRecord}
+ */
 function decodeFields(fields) { const out = {}; for (const k in fields) out[k] = decodeValue(fields[k]); return out; }
 function decodeValue(v) {
   if (!v || typeof v !== "object") return v;
@@ -1344,4 +1499,727 @@ async function notifyEmail(env, order, id) {
       }
     })
   });
+}
+
+/* ROBUSTE / Assil Delivery — documented API Standard extensions.
+ * This file is appended to cloudflare-worker.js by the update script, so the
+ * deployed Worker remains a single module. No token is exposed to visitors.
+ */
+const ECO_SYNC_PAGE_SIZE = 15;
+const ECO_RELATED_LIMIT = 5;
+let ecoReferenceMemory = null;
+
+function ecoNumber(value) {
+  if (value == null || String(value).trim() === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+function ecoList(value) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return [];
+  if (Array.isArray(value.data)) return value.data;
+  return Object.values(value).filter(v => v && typeof v === "object");
+}
+
+function ecoPlain(value, max = 255) {
+  return String(value == null ? "" : value).trim().slice(0, max);
+}
+
+function ecoStatusKey(value) {
+  return ecoPlain(value).toLowerCase().normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "").replace(/['’]/g, "")
+    .replace(/[^a-z0-9\u0600-\u06ff]+/g, "_").replace(/^_|_$/g, "");
+}
+
+function ecoNormalizeReference(raw) {
+  const wilayas = ecoList(raw.wilayas).map(w => {
+    const code = resolveWilayaCode(w.wilaya_id || w.code_wilaya || w.id);
+    const known = WILAYAS.find(x => x[0] === code);
+    return { code, name: ecoPlain(w.wilaya_name || w.name || (known && known[1])),
+      arabic: known ? known[2] : "" };
+  }).filter(w => w.code);
+  const active = new Set(wilayas.map(w => w.code));
+  const communes = ecoList(raw.communes).map(c => ({
+    wilaya: resolveWilayaCode(c.wilaya_id || c.code_wilaya),
+    name: ecoPlain(c.nom || c.commune || c.name),
+    postal: ecoPlain(c.code_postal || c.postal_code, 12),
+    stopDesk: c.has_stop_desk === true || Number(c.has_stop_desk) === 1
+  })).filter(c => c.wilaya && c.name && (!active.size || active.has(c.wilaya)));
+  const desksRaw = [];
+  if (raw.desks && raw.desks.my_desk) {
+    const d = raw.desks.my_desk;
+    desksRaw.push(Object.assign({ name: d.hub_name }, d.location || {}, {
+      working_hours: d.working_hours
+    }));
+  }
+  if (raw.desks && raw.desks.other_desks) desksRaw.push(...ecoList(raw.desks.other_desks));
+  else if (!raw.desks || !raw.desks.my_desk) desksRaw.push(...ecoList(raw.desks));
+  const seen = new Set();
+  const desks = desksRaw.map(d => ({
+    wilaya: resolveWilayaCode(d.code_wilaya || d.wilaya_id || d.wilaya),
+    name: ecoPlain(d.name || d.hub_name),
+    commune: ecoPlain(d.commune),
+    address: ecoPlain(d.adresse || d.address),
+    phone: ecoPlain(d.phone, 30),
+    map: /^https:\/\//i.test(String(d.map || "")) ? ecoPlain(d.map, 1500) : "",
+    hours: Array.isArray(d.working_hours) ? d.working_hours.slice(0, 7) : []
+  })).filter(d => {
+    const key = d.wilaya + ":" + ecoStatusKey(d.name) + ":" + ecoStatusKey(d.commune);
+    if (!d.wilaya || !d.commune || seen.has(key) || (active.size && !active.has(d.wilaya))) return false;
+    seen.add(key); return true;
+  });
+  const fees = {};
+  // "echnage" is the spelling in the published Postman example.
+  const groups = { delivery: ["livraison", "delivery"], exchange: ["echange", "echnage"],
+    pickup: ["pickup"], recovery: ["recouvrement"], return: ["retours", "retour"] };
+  for (const [type, aliases] of Object.entries(groups)) {
+    const table = aliases.map(k => raw.fees && raw.fees[k]).find(Boolean);
+    for (const row of ecoList(table)) {
+      const code = resolveWilayaCode(row.wilaya_id || row.code_wilaya);
+      if (!code || (active.size && !active.has(code))) continue;
+      fees[code] = fees[code] || {};
+      fees[code][type] = { home: ecoNumber(row.tarif), office: ecoNumber(row.tarif_stopdesk) };
+    }
+  }
+  return { fetchedAt: raw.fetchedAt, wilayas, communes, desks, fees,
+    available: { wilayas: !raw.wilayas_error && raw.wilayas != null,
+      communes: !raw.communes_error && raw.communes != null,
+      desks: !raw.desks_error && raw.desks != null,
+      fees: !raw.fees_error && raw.fees != null },
+    errors: Object.keys(raw).filter(k => k.endsWith("_error")).map(k => k.replace("_error", "")) };
+}
+
+async function ecoReference(env, fresh = false) {
+  const scope = await sha256Hex((env.ECOTRACK_API_URL || "") + "|" + (env.ECOTRACK_TOKEN || ""));
+  const now = Date.now();
+  if (!fresh && ecoReferenceMemory && ecoReferenceMemory.scope === scope &&
+      now - ecoReferenceMemory.at < 3600000) return ecoReferenceMemory.value;
+  const key = new Request("https://robuste-reference.invalid/ecotrack-v2/" + scope);
+  const edge = typeof caches !== "undefined" ?
+    /** @type {CacheStorage & { default?: Cache }} */ (caches).default || null : null;
+  if (!fresh && edge) {
+    try {
+      const hit = await edge.match(key);
+      if (hit) {
+        const value = await hit.json();
+        if (now - Date.parse(value.fetchedAt) < 3600000) {
+          ecoReferenceMemory = { scope, at: Date.parse(value.fetchedAt), value };
+          return value;
+        }
+      }
+    } catch {}
+  }
+  const raw = { fetchedAt: new Date().toISOString() };
+  for (const [name, route] of [["wilayas", "get/wilayas"], ["communes", "get/communes"],
+    ["desks", "get/desks"], ["fees", "get/fees"]]) {
+    try { raw[name] = await ecoCall(env, route); }
+    catch (e) { raw[name] = null; raw[name + "_error"] = ecoPlain(e.message, 180); }
+  }
+  const value = ecoNormalizeReference(raw);
+  if (value.available.fees && value.available.wilayas) {
+    ecoReferenceMemory = { scope, at: now, value };
+    if (edge) {
+      try { await edge.put(key, new Response(JSON.stringify(value), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "max-age=3600" }
+      })); } catch {}
+    }
+  }
+  return value;
+}
+
+function ecoQuote(ref, wilaya, type = 1, stopDesk = 0) {
+  const code = resolveWilayaCode(wilaya);
+  const group = ({ 1: "delivery", 2: "exchange", 3: "pickup", 4: "recovery" })[type];
+  const rows = ref && ref.fees && ref.fees[code];
+  const table = rows && rows[group];
+  const mode = stopDesk ? "office" : "home";
+  return { wilaya: code, type: group, service: table ? table[mode] : null,
+    returnFee: rows && rows.return ? rows.return[mode] : null,
+    fetchedAt: ref && ref.fetchedAt };
+}
+
+function ecoValidateDestination(ref, payload) {
+  if (ref.available.wilayas && !ref.wilayas.some(w => w.code === payload.code_wilaya))
+    throw new Error("wilaya_not_served");
+  if (ref.available.communes && ref.communes.length) {
+    const match = ref.communes.some(c => c.wilaya === payload.code_wilaya &&
+      ecoStatusKey(c.name) === ecoStatusKey(payload.commune));
+    const deskMatch = payload.stop_desk && ref.desks.some(d => d.wilaya === payload.code_wilaya &&
+      ecoStatusKey(d.commune) === ecoStatusKey(payload.commune));
+    if (!match && !deskMatch) throw new Error("commune_not_served");
+  }
+  if (payload.stop_desk && ref.available.desks && ref.available.communes) {
+    const available = ref.desks.some(d => d.wilaya === payload.code_wilaya &&
+      ecoStatusKey(d.commune) === ecoStatusKey(payload.commune)) ||
+      ref.communes.some(c => c.wilaya === payload.code_wilaya && c.stopDesk &&
+        ecoStatusKey(c.name) === ecoStatusKey(payload.commune));
+    if (!available) throw new Error("stop_desk_not_available");
+  }
+}
+
+async function ecoPublicReference(env, cors) {
+  try {
+    const ref = await ecoReference(env);
+    const fees = {};
+    for (const [code, row] of Object.entries(ref.fees)) {
+      if (row.delivery) fees[code] = { delivery: row.delivery };
+    }
+    return json({ ok: ref.available.fees && ref.available.wilayas,
+      pricesEnabled: env.ECOTRACK_LIVE_DELIVERY_PRICES !== "false", fetchedAt: ref.fetchedAt,
+      wilayas: ref.wilayas, communes: ref.communes, desks: ref.desks, fees,
+      available: ref.available }, 200, Object.assign({}, cors, { "Cache-Control": "public, max-age=300" }));
+  } catch { return json({ ok: false, error: "delivery_reference_unavailable" }, 503, cors); }
+}
+
+function ecoEventTime(a) {
+  const date = ecoPlain(a.date || a.created_at || a.event_date, 50);
+  return a.time && !date.includes("T") && !date.includes(" ") ? date + "T" + ecoPlain(a.time, 20) : date;
+}
+
+function ecoPaymentState(status, timeline) {
+  if (/^(retour|return|annul|cancel)/.test(ecoStatusKey(status))) return "return_review";
+  const keys = [status, ...timeline.map(a => a.activity || a.status)].map(ecoStatusKey);
+  if (keys.some(k => ["payed", "paid", "paye_et_archive", "paiement_archive", "paiements_archives"].includes(k)))
+    return "paid_reported";
+  if (keys.some(k => ["encaissed", "encaisse", "encaisse_non_paye", "livre_encaisse_non_paye",
+    "paiements_prets", "paiement_pret"].includes(k))) return "collected_unpaid";
+  if (keys.some(k => ["livred", "livre", "livre_non_encaisse", "delivered"].includes(k))) return "delivered_uncollected";
+  return "unknown";
+}
+
+function ecoDraftState(status) {
+  const key = ecoStatusKey(status);
+  if (["prete_a_expedier", "pret_a_expedier", "prete_a_preparer", "pret_a_preparer"].includes(key)) return "draft";
+  if (!key) return "unknown";
+  return "locked";
+}
+
+function ecoStageFor(status, timeline) {
+  const key = ecoStatusKey(status);
+  const explicit = {
+    prete_a_expedier: ["preparing", "قيد التحضير"], pret_a_expedier: ["preparing", "قيد التحضير"],
+    prete_a_preparer: ["preparing", "قيد التحضير"], en_preparation_stock: ["preparing", "قيد التحضير"],
+    stock_en_preparation: ["preparing", "قيد التحضير"],
+    en_ramassage: ["in_transit", "في الطريق"], vers_hub: ["in_transit", "في الطريق"],
+    en_hub: ["in_transit", "في الطريق"], vers_wilaya: ["in_transit", "في الطريق"],
+    en_preparation: ["in_transit", "في الطريق"], en_livraison: ["out_for_delivery", "خرج للتوصيل"],
+    suspendu: ["delayed", "التوصيل معلّق"], suspendus: ["delayed", "التوصيل معلّق"],
+    annule: ["cancelled", "ملغى"], cancelled: ["cancelled", "ملغى"], canceled: ["cancelled", "ملغى"],
+    refused: ["refused", "رفض الاستلام"]
+  };
+  if (explicit[key]) return { stage: explicit[key][0], label: explicit[key][1] };
+  if (/^retour|^return/.test(key)) {
+    const received = /recu|received|archive|stock$/.test(key);
+    return { stage: received ? "returned" : "returning", label: received ? "مرتجع" : "قيد الإرجاع" };
+  }
+  if (["paid_reported", "collected_unpaid", "delivered_uncollected"].includes(ecoPaymentState(status, timeline)))
+    return { stage: "delivered", label: "تم التسليم" };
+  const events = timeline.filter(t => {
+    const k = ecoStatusKey(t.activity || t.status);
+    return k !== "notification_on_order" && k !== "remarque";
+  });
+  const last = events[0];
+  const raw = status && key !== "notification_on_order" ? status : (last && last.status) || "";
+  if (!raw && !last) return { stage: "unknown", label: "الحالة غير متاحة" };
+  const machine = ecoStatusKey((last && (last.activity || last.status)) || raw);
+  if (!ECOTRACK_ACTIVITY_STAGES[machine] && !/prepar|ramass|hub|transit|transport|livraison|livr|deliver|ship|pick|dispatch|return|retour|cancel|annul|refus|suspend|delay|توصيل|تسليم|شحن|تحضير|مرتجع|إرجاع|رفض/i.test(raw))
+    return { stage: "unknown", label: "الحالة غير متاحة" };
+  return mapEcotrackStatus(raw, last ? last.activity || (ECOTRACK_ACTIVITY_STAGES[machine] ? machine : "") : machine);
+}
+
+function ecoAttention(status, timeline, stage, previous) {
+  const key = ecoStatusKey(status);
+  if (stage === "returned" || stage === "delivered" || stage === "cancelled") return "";
+  if (stage === "refused") return "رفض العميل الاستلام";
+  if (stage === "returning") return "طلب أو مسار إرجاع يحتاج متابعة";
+  if (stage === "delayed" || /suspend/.test(key)) return "توصيل معلّق";
+  const latest = timeline[0];
+  const detail = latest && [latest.status, latest.reason, latest.details].join(" ");
+  if (/refus|رفض/i.test(detail || "")) return "رفض العميل الاستلام";
+  if (/ne r[eé]pond|absent|لا يرد|غائب/i.test(detail || "")) return "العميل غير متاح — راجع ملاحظات الناقل";
+  if (latest && ecoStatusKey(latest.activity || latest.status) === "attempt_delivery") return "محاولة توصيل — راجع التحديثات";
+  const firstShipped = previous && (previous.ecotrackValidatedAt || previous.validatedAt);
+  if (firstShipped && Date.now() - Date.parse(firstShipped) > 7 * 86400000)
+    return "الشحنة مفتوحة منذ أكثر من 7 أيام — هذا تنبيه محلي وليس تأخيراً مؤكداً من الناقل";
+  return "";
+}
+
+function ecoSyncSnapshot(parcel, live, now) {
+  const timeline = (live.timeline || []).slice(0, 40);
+  const payment = live.paymentState || ecoPaymentState(live.rawStatus || "", timeline);
+  const state = ecoStageFor(live.rawStatus || "", timeline);
+  const fields = {
+    ecotrackRawStatus: live.rawStatus || "",
+    ecotrackStage: state.stage,
+    ecotrackStageLabel: state.label,
+    ecotrackTimeline: timeline,
+    ecotrackLastSyncedAt: now,
+    ecotrackSyncError: null,
+    ecotrackNeedsAttention: ecoAttention(live.rawStatus, timeline, state.stage, parcel)
+  };
+  if (payment !== "unknown") fields.ecotrackPaymentState = payment;
+  const draft = ecoDraftState(live.rawStatus);
+  if (draft === "locked" && !["cancelled", "unknown"].includes(state.stage)) fields.ecotrackValidated = true;
+  const canonical = { preparing: "قيد التحضير", in_transit: "تم الشحن",
+    out_for_delivery: "خرج للتوصيل", delivered: "تم التسليم",
+    returning: "قيد الإرجاع", delayed: "التوصيل معلّق", refused: "رفض الاستلام",
+    returned: "مرتجع", cancelled: "ملغى" };
+  if (canonical[state.stage] && !(draft === "draft" && state.stage === "preparing"))
+    fields.status = canonical[state.stage];
+  return fields;
+}
+
+/** @returns {Promise<RobusteRecord | null>} */
+async function ecoDocument(env, collection, id) {
+  const token = await accessToken(env);
+  const res = await fetch(baseUrl(env) + "/" + collection + "/" + encodeURIComponent(id),
+    { headers: { Authorization: "Bearer " + token } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error("database_lookup_failed");
+  const document = await res.json();
+  return Object.assign(decodeFields(document.fields || {}), { _firestoreUpdateTime: document.updateTime || null });
+}
+
+async function ecoPatchDocument(env, collection, id, fields, updateTime = null) {
+  const token = await accessToken(env);
+  const mask = Object.keys(fields).map(k => "updateMask.fieldPaths=" + encodeURIComponent(k)).join("&");
+  const condition = updateTime ? "&currentDocument.updateTime=" + encodeURIComponent(updateTime) : "";
+  const res = await fetch(baseUrl(env) + "/" + collection + "/" + encodeURIComponent(id) + "?" + mask + condition, {
+    method: "PATCH", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: encodeFields(fields) })
+  });
+  if (!res.ok) throw new Error("database_save_failed");
+}
+
+async function ecoCommitOrders(env, patches) {
+  if (!patches.length) return;
+  const token = await accessToken(env);
+  const writes = patches.map(p => ({
+    update: { name: "projects/" + env.FIREBASE_PROJECT_ID + "/databases/(default)/documents/orders/" + p.id,
+      fields: encodeFields(p.fields) },
+    updateMask: { fieldPaths: Object.keys(p.fields) },
+    currentDocument: p.updateTime ? { updateTime: p.updateTime } : { exists: true }
+  }));
+  const res = await fetch(baseUrl(env) + ":commit", {
+    method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ writes })
+  });
+  if (!res.ok) throw new Error("sync_database_commit_failed");
+}
+
+async function ecoTrackedPage(env, cursor) {
+  const query = { from: [{ collectionId: "orders" }],
+    where: { fieldFilter: { field: { fieldPath: "ecotrackTracking" }, op: "GREATER_THAN", value: { stringValue: "" } } },
+    orderBy: [{ field: { fieldPath: "ecotrackTracking" }, direction: "ASCENDING" },
+      { field: { fieldPath: "__name__" }, direction: "ASCENDING" }], limit: ECO_SYNC_PAGE_SIZE };
+  if (cursor && cursor.tracking && cursor.id) query.startAt = {
+    values: [{ stringValue: cursor.tracking },
+      { referenceValue: "projects/" + env.FIREBASE_PROJECT_ID + "/databases/(default)/documents/orders/" + cursor.id }],
+    before: false
+  };
+  const token = await accessToken(env);
+  const res = await fetch(baseUrl(env) + ":runQuery", {
+    method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ structuredQuery: query })
+  });
+  if (!res.ok) throw new Error("sync_query_failed");
+  return (await res.json()).filter(r => r.document).map(r =>
+    Object.assign(decodeFields(r.document.fields || {}), { id: r.document.name.split("/").pop(),
+      _firestoreUpdateTime: r.document.updateTime || null }));
+}
+
+async function ecoNotifyChanges(env, changes) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID || !changes.length) return;
+  for (let offset = 0; offset < changes.length; offset += 12) {
+    const messages = changes.slice(offset, offset + 12).map(c => c.tracking + " · " +
+      ecoPlain(c.label, 60) + (c.attention ? "\n" + ecoPlain(c.attention, 120) : ""));
+    const res = await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN + "/sendMessage", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: "ROBUSTE / Assil Delivery\n" + messages.join("\n\n") })
+    });
+    const data = await res.json();
+    if (!res.ok || data.ok !== true) throw new Error("shipment_alert_failed");
+    if (offset + 12 < changes.length) await new Promise(r => setTimeout(r, 1300));
+  }
+}
+
+async function ecoSyncOrders(env, orders, notify = true) {
+  const codes = [...new Set(orders.flatMap(o => [o.ecotrackTracking,
+    ...(o.ecotrackRelatedParcels || []).filter(p => !p.deletedAt).map(p => p.tracking)])
+    .filter(c => typeof c === "string" && /^[A-Za-z0-9_-]+$/.test(c)))];
+  if (codes.length > 100) throw new Error("sync_batch_too_large");
+  const live = codes.length ? await ecotrackTrackings(env, codes) : {};
+  if (codes.length && !Object.keys(live).length) throw new Error("tracking_unavailable");
+  const patches = [], alerts = [], results = [];
+  const now = new Date().toISOString();
+  for (const order of orders) {
+    const fields = {};
+    const targets = [{ parcel: order, code: order.ecotrackTracking, primary: true },
+      ...(order.ecotrackRelatedParcels || []).map(p => ({ parcel: p, code: p.tracking, primary: false }))];
+    const related = (order.ecotrackRelatedParcels || []).map(p => Object.assign({}, p));
+    for (const target of targets) {
+      if (!target.code || target.parcel.deletedAt) continue;
+      const one = live[target.code];
+      if (!one) { results.push({ id: order.id, tracking: target.code, ok: false, error: "no_live_status" }); continue; }
+      const snapshot = ecoSyncSnapshot(target.parcel, one, now);
+      // Unknown/empty carrier payloads must not replace a known state.
+      if (snapshot.ecotrackStage === "unknown") {
+        results.push({ id: order.id, tracking: target.code, ok: false, error: "unknown_live_status" }); continue;
+      }
+      const changed = target.parcel.ecotrackStage !== snapshot.ecotrackStage ||
+        target.parcel.ecotrackNeedsAttention !== snapshot.ecotrackNeedsAttention ||
+        (snapshot.ecotrackPaymentState && target.parcel.ecotrackPaymentState !== snapshot.ecotrackPaymentState);
+      const signature = [target.code, snapshot.ecotrackStage, snapshot.ecotrackNeedsAttention,
+        snapshot.ecotrackPaymentState || target.parcel.ecotrackPaymentState || "unknown"].join("|");
+      if (notify && target.parcel.ecotrackAlertSignature !== signature &&
+        (snapshot.ecotrackNeedsAttention || ["delivered", "returning", "returned", "refused", "delayed"].includes(snapshot.ecotrackStage))) {
+        alerts.push({ tracking: target.code, label: snapshot.ecotrackStageLabel,
+          attention: snapshot.ecotrackNeedsAttention, signature, id: order.id, primary: target.primary });
+      }
+      if (target.primary) Object.assign(fields, snapshot);
+      else Object.assign(related.find(p => p.tracking === target.code), snapshot);
+      results.push({ id: order.id, tracking: target.code, ok: true, stage: snapshot.ecotrackStage, changed });
+    }
+    if (related.length) fields.ecotrackRelatedParcels = related;
+    if (Object.keys(fields).length) patches.push({ id: order.id, fields, updateTime: order._firestoreUpdateTime });
+  }
+  await ecoCommitOrders(env, patches);
+  let notificationError = null;
+  if (notify && alerts.length) {
+    try {
+      await ecoNotifyChanges(env, alerts);
+      if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) {
+        // Mark notifications only AFTER Telegram accepted them; failures retry.
+        const marks = [];
+        for (const groupId of [...new Set(alerts.map(a => a.id))]) {
+          const latest = await getOrderById(env, groupId);
+          if (!latest) continue;
+          const primary = alerts.find(a => a.id === groupId && a.primary);
+          const patch = {};
+          if (primary) patch.ecotrackAlertSignature = primary.signature;
+          const relatedAlerts = alerts.filter(a => a.id === groupId && !a.primary);
+          if (relatedAlerts.length) patch.ecotrackRelatedParcels = (latest.ecotrackRelatedParcels || []).map(p => {
+            const alert = relatedAlerts.find(a => a.tracking === p.tracking);
+            return alert ? Object.assign({}, p, { ecotrackAlertSignature: alert.signature }) : p;
+          });
+          marks.push({ id: groupId, fields: patch, updateTime: latest._firestoreUpdateTime });
+        }
+        await ecoCommitOrders(env, marks);
+      }
+    }
+    catch (e) { notificationError = ecoPlain(e.message); }
+  }
+  return { ok: results.every(r => r.ok), checked: codes.length,
+    changed: results.filter(r => r.changed).length, results, notificationError };
+}
+
+async function ecoHandleSync(request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  const ids = [...new Set(Array.isArray(body.ids) ? body.ids : [])];
+  if (!ids.length || ids.length > ECO_SYNC_PAGE_SIZE || ids.some(id => !/^[A-Za-z0-9_-]+$/.test(id)))
+    return json({ error: "invalid_ids", max: ECO_SYNC_PAGE_SIZE }, 400, cors);
+  try {
+    const orders = [];
+    for (const id of ids) {
+      const order = await getOrderById(env, id);
+      if (order && order.ecotrackTracking) orders.push(order);
+    }
+    return json(await ecoSyncOrders(env, orders, true), 200, cors);
+  } catch (e) { return json({ error: "sync_failed", detail: ecoPlain(e.message) }, 502, cors); }
+}
+
+async function ecoScheduledSync(env) {
+  if (!env.ECOTRACK_API_URL || !env.ECOTRACK_TOKEN) return { skipped: "not_configured" };
+  if (env.ECOTRACK_SYNC_ENABLED === "false") return { skipped: "disabled" };
+  /** @type {RobusteRecord} */
+  const state = await ecoDocument(env, "config", "ecotrackSync") || {};
+  const orders = await ecoTrackedPage(env, state.cursor);
+  if (!orders.length) {
+    await ecoPatchDocument(env, "config", "ecotrackSync", { cursor: null,
+      completedAt: new Date().toISOString(), lastError: null });
+    return { checked: 0, cycleComplete: true };
+  }
+  // Do not advance the cursor when carrier reads or database writes fail.
+  const result = await ecoSyncOrders(env, orders, true);
+  const last = orders[orders.length - 1];
+  await ecoPatchDocument(env, "config", "ecotrackSync", {
+    cursor: orders.length < ECO_SYNC_PAGE_SIZE ? null : { tracking: last.ecotrackTracking, id: last.id },
+    lastRunAt: new Date().toISOString(), lastChecked: result.checked,
+    lastError: result.ok ? null : "some_tracking_statuses_missing",
+    lastNotificationError: result.notificationError
+  });
+  return result;
+}
+
+async function ecoHandleHealth(request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  try {
+    const state = await ecoDocument(env, "config", "ecotrackSync");
+    return json({ ok: true, scheduler: state || null, cronRequired: true,
+      telegramConfigured: !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID),
+      enabled: env.ECOTRACK_SYNC_ENABLED !== "false",
+      limits: { manualBatch: ECO_SYNC_PAGE_SIZE, trackings: 100 } }, 200, cors);
+  } catch { return json({ error: "health_read_failed" }, 502, cors); }
+}
+
+function ecoTarget(order, tracking) {
+  if (!tracking || tracking === order.ecotrackTracking)
+    return { parcel: order, tracking: order.ecotrackTracking, primary: true };
+  const parcel = (order.ecotrackRelatedParcels || []).find(p => p.tracking === tracking && !p.deletedAt);
+  if (!parcel) throw new Error("parcel_not_linked_to_order");
+  return { parcel, tracking, primary: false };
+}
+
+async function ecoSaveTarget(env, order, target, patch) {
+  if (target.primary) return updateOrderFields(env, order.id, patch, order._firestoreUpdateTime);
+  const related = (order.ecotrackRelatedParcels || []).map(p =>
+    p.tracking === target.tracking ? Object.assign({}, p, patch) : p);
+  return updateOrderFields(env, order.id, { ecotrackRelatedParcels: related }, order._firestoreUpdateTime);
+}
+
+function ecoAudit(parcel, action, detail) {
+  return [...(Array.isArray(parcel.ecotrackAudit) ? parcel.ecotrackAudit : []).slice(-29),
+    { at: new Date().toISOString(), action, detail: ecoPlain(detail) }];
+}
+
+async function ecoRemoteOrder(env, tracking) {
+  const result = await ecoCall(env, "get/orders", { params: { tracking } });
+  const rows = Array.isArray(result) ? result : ecoList(result && result.data);
+  return rows.find(row => String(row.tracking) === tracking) || null;
+}
+
+async function ecoAssertDraft(env, target) {
+  if (target.parcel.ecotrackValidated) throw new Error("parcel_already_dispatched");
+  const remote = await ecoRemoteOrder(env, target.tracking);
+  // Absence can mean archived, unavailable or wrong tenant; never assume editable.
+  if (!remote || ecoDraftState(remote.status) !== "draft") throw new Error("parcel_not_confirmed_as_draft");
+  return remote;
+}
+
+function ecoUpdateFields(fields) {
+  if (!fields || typeof fields !== "object" || Array.isArray(fields)) throw new Error("invalid_fields");
+  const allowed = ["reference", "client", "tel", "tel2", "adresse", "code_postal",
+    "commune", "wilaya", "montant", "remarque", "product", "boutique",
+    "type", "stop_desk", "fragile", "gps_link"];
+  const out = {};
+  for (const key of allowed) {
+    if (!Object.prototype.hasOwnProperty.call(fields, key)) continue;
+    const v = fields[key];
+    if (["wilaya", "montant", "type", "stop_desk", "fragile"].includes(key)) {
+      const n = ecoNumber(v);
+      if (n == null) throw new Error("invalid_" + key);
+      if (key === "wilaya" && (!Number.isInteger(n) || n < 1 || n > 58)) throw new Error("invalid_wilaya");
+      if (key === "type" && ![1, 2, 3, 4].includes(n)) throw new Error("invalid_type");
+      if (["stop_desk", "fragile"].includes(key) && ![0, 1].includes(n)) throw new Error("invalid_" + key);
+      out[key] = n;
+    } else {
+      const text = ecoPlain(v, key === "gps_link" ? 1500 : 255);
+      if (["client", "adresse", "commune", "tel"].includes(key) && !text) throw new Error("missing_" + key);
+      if (["tel", "tel2"].includes(key) && text && !PHONE_RE.test(text)) throw new Error("invalid_" + key);
+      if (key === "gps_link" && text && !/^https:\/\//i.test(text)) throw new Error("invalid_gps_link");
+      out[key] = text;
+    }
+  }
+  if (!Object.keys(out).length) throw new Error("no_fields");
+  return out;
+}
+
+async function ecoReserveAction(env, key, orderId, type) {
+  if (!/^[A-Za-z0-9_-]{12,100}$/.test(key)) throw new Error("invalid_action_id");
+  const token = await accessToken(env);
+  const res = await fetch(baseUrl(env) + "/ecotrackActions?documentId=" + encodeURIComponent(key), {
+    method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: encodeFields({ orderId, type, state: "pending", at: new Date().toISOString() }) })
+  });
+  if (res.status === 409) {
+    const old = await ecoDocument(env, "ecotrackActions", key);
+    if (!old || old.orderId !== orderId || old.type !== type) throw new Error("action_id_conflict");
+    if (old.state === "rejected") {
+      // Only explicit carrier rejections can be retried automatically.
+      await ecoPatchDocument(env, "ecotrackActions", key,
+        { state: "pending", retryAt: new Date().toISOString() }, old._firestoreUpdateTime);
+      return null;
+    }
+    return old;
+  }
+  if (!res.ok) throw new Error("action_reservation_failed");
+  return null;
+}
+
+async function ecoCreateRelated(env, order, body) {
+  const type = Number(body.type);
+  if (![2, 3].includes(type)) throw new Error("only_exchange_or_pickup");
+  if (!order.ecotrackTracking) throw new Error("source_parcel_required");
+  const related = order.ecotrackRelatedParcels || [];
+  if (related.length >= ECO_RELATED_LIMIT) throw new Error("related_parcel_limit");
+  const overrides = Object.assign({}, body.fields || {}, { type });
+  const payload = buildEcotrackPayload(order, overrides);
+  const ref = await ecoReference(env);
+  ecoValidateDestination(ref, payload);
+  const quote = ecoQuote(ref, payload.code_wilaya, type, payload.stop_desk);
+  const key = ecoPlain(body.actionId, 100);
+  if (!/^[A-Za-z0-9_-]{12,100}$/.test(key)) throw new Error("invalid_action_id");
+  payload.reference = "RB-" + order.id.slice(-12) + "-" + key.slice(-12);
+  const old = await ecoReserveAction(env, key, order.id, type);
+  if (old) {
+    if (!old.tracking) throw new Error("action_pending_reconciliation");
+    const exists = related.some(p => p.tracking === old.tracking);
+    if (!exists && old.parcel) await updateOrderFields(env, order.id,
+      { ecotrackRelatedParcels: [...related, old.parcel] }, order._firestoreUpdateTime);
+    return { ok: true, tracking: old.tracking, already: true };
+  }
+  // A failed/ambiguous POST must be reconciled; never blindly retry creation.
+  let created;
+  try { created = await ecotrackCreateOrder(env, payload); }
+  catch (e) {
+    if (e.safeToRetry) await ecoPatchDocument(env, "ecotrackActions", key,
+      { state: "rejected", failure: ecoPlain(e.message, 180) });
+    throw e;
+  }
+  const parcel = { tracking: created.tracking, ecotrackType: type, ecotrackValidated: false,
+    ecotrackPayload: payload, ecotrackStage: "preparing", ecotrackStageLabel: "قيد التحضير",
+    ecotrackPaymentState: "unknown", ecotrackServiceFeeEstimate: quote.service,
+    ecotrackReturnFeeEstimate: quote.returnFee, ecotrackTariffFetchedAt: quote.fetchedAt,
+    totalPrice: payload.montant, wilaya: payload.code_wilaya,
+    customer: payload.nom_client, phone: payload.telephone, commune: payload.commune,
+    address: payload.adresse, deliveryType: payload.stop_desk ? "office" : "home",
+    createdAt: new Date().toISOString(), actionId: key };
+  try { await ecoPatchDocument(env, "ecotrackActions", key, { state: "created", tracking: created.tracking, parcel }); }
+  catch { return { ok: false, error: "parcel_created_action_save_failed", tracking: created.tracking,
+    reference: payload.reference, detail: "Parcel created at Assil; reconcile before retrying." }; }
+  try {
+    const latest = await getOrderById(env, order.id);
+    if (!latest || (latest.ecotrackRelatedParcels || []).length >= ECO_RELATED_LIMIT)
+      throw new Error("related_parcel_limit");
+    await updateOrderFields(env, order.id,
+      { ecotrackRelatedParcels: [...(latest.ecotrackRelatedParcels || []), parcel] }, latest._firestoreUpdateTime);
+  }
+  catch { return { ok: false, error: "parcel_created_save_failed", tracking: created.tracking,
+    detail: "Retry with the same actionId to link the already-created parcel; do not create another." }; }
+  return { ok: true, tracking: created.tracking };
+}
+
+async function ecoHandleParcelAction(request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
+  const id = ecoPlain(body.id, 100);
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
+  try {
+    const order = await getOrderById(env, id);
+    if (!order) return json({ error: "order_not_found" }, 404, cors);
+    if (body.action === "create-related") return json(await ecoCreateRelated(env, order, body), 200, cors);
+    const target = ecoTarget(order, body.tracking);
+    if (!target.tracking || !/^[A-Za-z0-9_-]+$/.test(target.tracking)) throw new Error("invalid_tracking");
+    const params = { tracking: target.tracking };
+    let data;
+    /** @type {RobusteRecord} */
+    let patch = {};
+    if (body.action === "update") {
+      await ecoAssertDraft(env, target);
+      const fields = ecoUpdateFields(body.fields);
+      const saved = target.parcel.ecotrackPayload || buildEcotrackPayload(order, {});
+      const destination = { code_wilaya: fields.wilaya || saved.code_wilaya,
+        commune: fields.commune || saved.commune,
+        stop_desk: fields.stop_desk == null ? saved.stop_desk : fields.stop_desk };
+      const ref = await ecoReference(env);
+      ecoValidateDestination(ref, destination);
+      data = await ecoCall(env, "update/order", { method: "POST", params: Object.assign(params, fields) });
+      const payload = Object.assign({}, saved);
+      const map = { client: "nom_client", tel: "telephone", tel2: "telephone_2",
+        wilaya: "code_wilaya", product: "produit" };
+      for (const [key, value] of Object.entries(fields)) payload[map[key] || key] = value;
+      patch.ecotrackPayload = payload;
+      const quote = ecoQuote(ref, payload.code_wilaya, payload.type, payload.stop_desk);
+      Object.assign(patch, { ecotrackType: payload.type, ecotrackServiceFeeEstimate: quote.service,
+        ecotrackReturnFeeEstimate: quote.returnFee, ecotrackTariffFetchedAt: quote.fetchedAt });
+      // Do not rewrite the original purchase/customer data to match an after-sales parcel.
+      if (target.primary) {
+        if (fields.client != null) patch.customer = fields.client;
+        if (fields.tel != null) patch.phone = fields.tel;
+        if (fields.adresse != null) patch.address = fields.adresse;
+        if (fields.commune != null) patch.commune = patch.baladiya = fields.commune;
+        if (fields.wilaya != null) patch.wilaya = WILAYAS.find(w => w[0] === fields.wilaya)[2];
+        if (fields.montant != null) patch.ecotrackCodAmount = fields.montant;
+        if (fields.stop_desk != null) patch.deliveryType = fields.stop_desk ? "office" : "home";
+      } else {
+        Object.assign(patch, { customer: payload.nom_client, phone: payload.telephone,
+          address: payload.adresse, commune: payload.commune, wilaya: payload.code_wilaya,
+          totalPrice: payload.montant, deliveryType: payload.stop_desk ? "office" : "home" });
+      }
+    } else if (body.action === "delete") {
+      if (body.confirm !== true) throw new Error("confirmation_required");
+      await ecoAssertDraft(env, target);
+      data = await ecoCall(env, "delete/order", { method: "DELETE", params });
+      if (target.primary) {
+        patch = { ecotrackTracking: null, ecotrackValidated: false, ecotrackValidatedAt: null,
+          ecotrackStage: null, ecotrackStageLabel: null, ecotrackRawStatus: null,
+          ecotrackTimeline: [], ecotrackPaymentState: "unknown", ecotrackPayload: null,
+          ecotrackCodAmount: null, ecotrackNeedsAttention: "", status: "مؤكد",
+          ecotrackDeletedDraftTracking: target.tracking, ecotrackDeletedDraftAt: new Date().toISOString() };
+      } else patch = { deletedAt: new Date().toISOString(), ecotrackStage: "cancelled", ecotrackStageLabel: "مسودة محذوفة" };
+    } else if (body.action === "dispatch") {
+      if (body.confirm !== true) throw new Error("confirmation_required");
+      data = await ecoCall(env, "valid/order", { method: "POST", params });
+      patch = { ecotrackValidated: true, ecotrackValidatedAt: new Date().toISOString() };
+    } else if (body.action === "note") {
+      const content = ecoPlain(body.content);
+      if (!content) throw new Error("empty_note");
+      data = await ecoCall(env, "add/maj", { method: "POST", params: Object.assign(params, { content }) });
+    } else if (body.action === "request-return") {
+      if (body.confirm !== true) throw new Error("confirmation_required");
+      data = await ecoCall(env, "ask/for/order/return", { method: "POST", params });
+      // A request is not an accepted return and may be ignored by the courier.
+      patch.ecotrackReturnRequestedAt = new Date().toISOString();
+    } else if (body.action === "receive-return") {
+      if (body.confirmPhysicalReceipt !== true) throw new Error("physical_receipt_confirmation_required");
+      data = await ecoCall(env, "valid/returns", { method: "POST", body: { trackings: [target.tracking] } });
+      if (!data || data.returned !== "success") throw new Error("no_eligible_return");
+      patch.ecotrackReturnReceivedAt = new Date().toISOString();
+    } else throw new Error("unknown_action");
+    if (!data || (body.action !== "receive-return" && data.success !== true && data.success !== 1))
+      throw new Error("courier_did_not_confirm_action");
+    patch.ecotrackAudit = ecoAudit(target.parcel, body.action, body.content || target.tracking);
+    try { await ecoSaveTarget(env, order, target, patch); }
+    catch { return json({ ok: false, error: "courier_updated_save_failed", action: body.action,
+      tracking: target.tracking, detail: "Action completed at Assil; reconcile locally before retrying." }, 502, cors); }
+    return json({ ok: true, action: body.action, tracking: target.tracking,
+      message: ecoPlain(data.message), patch }, 200, cors);
+  } catch (e) {
+    const error = ecoPlain(e.message, 220);
+    const conflict = /draft|dispatched|reconciliation|conflict|pending/.test(error);
+    return json({ error: "parcel_action_failed", detail: error }, conflict ? 409 : 400, cors);
+  }
+}
+
+async function ecoHandleHistory(url, request, env, cors) {
+  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+  const id = ecoPlain(url.searchParams.get("id"), 100);
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) return json({ error: "invalid_id" }, 400, cors);
+  try {
+    const order = await getOrderById(env, id);
+    if (!order) return json({ error: "order_not_found" }, 404, cors);
+    const target = ecoTarget(order, url.searchParams.get("tracking"));
+    if (!target.tracking || !/^[A-Za-z0-9_-]+$/.test(target.tracking)) throw new Error("invalid_tracking");
+    const result = { ok: true, tracking: target.tracking, history: null, notes: [], order: null, errors: [] };
+    for (const [key, path] of [["history", "get/tracking/info"], ["notes", "get/maj"], ["order", "get/orders"]]) {
+      try { result[key] = await ecoCall(env, path, { params: { tracking: target.tracking } }); }
+      catch { result.errors.push(key); }
+    }
+    const remote = result.order && ecoList(result.order.data || result.order)
+      .find(row => String(row.tracking) === target.tracking);
+    if (remote) {
+      const patch = { ecotrackActualServiceFee: ecoNumber(remote.tarif_prestation),
+        ecotrackActualReturnFee: ecoNumber(remote.tarif_retour),
+        ecotrackPaymentReference: remote.payment_id == null ? null : String(remote.payment_id),
+        ecotrackReturnReference: remote.return_id == null ? null : String(remote.return_id),
+        ecotrackFeeCheckedAt: new Date().toISOString() };
+      await ecoSaveTarget(env, order, target, patch);
+      result.parcelPatch = patch;
+    }
+    return json(result, 200, cors);
+  } catch (e) { return json({ error: "history_failed", detail: ecoPlain(e.message) }, 502, cors); }
 }

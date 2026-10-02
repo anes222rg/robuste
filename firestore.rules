@@ -27,6 +27,17 @@ service cloud.firestore {
         && request.resource.data.wilaya.size() >= 2
         && request.resource.data.address is string
         && request.resource.data.address.size() >= 5
+        // Courier links, financial states and API action records are server-owned.
+        // Public checkout must never seed another parcel's tracking or payment flags.
+        && !request.resource.data.keys().hasAny([
+          'ecotrackTracking', 'ecotrackRelatedParcels', 'ecotrackPayload',
+          'ecotrackStage', 'ecotrackRawStatus', 'ecotrackValidated',
+          'ecotrackPaymentState', 'ecotrackCodAmount',
+          'ecotrackActualServiceFee', 'ecotrackActualReturnFee',
+          'ecotrackServiceFeeEstimate', 'ecotrackReturnFeeEstimate',
+          'ecotrackTimeline', 'ecotrackPaymentReference',
+          'ecotrackReturnReference', 'metaPurchaseSentAt'
+        ])
         && (!('status' in request.resource.data) || request.resource.data.status == 'جديد')
         && !phoneBlocked(request.resource.data.phone);
     }
@@ -47,6 +58,11 @@ service cloud.firestore {
 
     // All other config docs stay server-only.
     match /config/{doc} {
+      allow read, write: if false;
+    }
+
+    // Duplicate-prevention reservations are accessible only through the Worker.
+    match /ecotrackActions/{actionId} {
       allow read, write: if false;
     }
 

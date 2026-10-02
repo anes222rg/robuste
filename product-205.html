@@ -398,7 +398,7 @@ window.rbNormPhone=rbNormPhone;
 function rbBlocked(reason){ try{ if(window.fbq){ fbq('trackCustom','FormBlocked',{reason:reason, page_id:'205'}); } if(window.gtag){ gtag('event','form_blocked',{reason:reason}); } }catch(e){} }
 window.rbBlocked=rbBlocked;
 window.RB_PAGE_BUILD = "2026-08-04-pack205-v1";
-function deliveryFeeFor(wilaya, type){ var f=deliveryFees[wilaya]; if(!f) return null; var home=f[0], office=f[1]; if(type==='office'){ return (office==null? home : office); } return home; }
+function deliveryFeeFor(wilaya, type){ if(window.RBEcoDelivery&&window.RBEcoDelivery.ready()) return window.RBEcoDelivery.feeFor(wilaya,type);  var f=deliveryFees[wilaya]; if(!f) return null; var home=f[0], office=f[1]; if(type==='office'){ return (office==null? home : office); } return home; }
 function fmtDzd(n){ try{ return Number(n||0).toLocaleString(); }catch(e){ return String(n); } }
 function updateOrderSummary(){ try{ var subEl=document.getElementById('orderProductPrice'); var sub=subEl? (parseFloat(subEl.value)||0):0; var ws=document.getElementById('wilayaSelect'); var wilaya=ws? ws.value:''; var tEl=document.querySelector('input[name="deliveryType"]:checked'); var type=tEl? tEl.value:'home'; var sSub=document.getElementById('sumSubtotal'), sDel=document.getElementById('sumDelivery'), sTot=document.getElementById('sumTotal'); if(sSub) sSub.innerText=fmtDzd(sub)+' د.ج'; if(!wilaya){ if(sDel) sDel.innerText='اختر الولاية'; if(sTot) sTot.innerText=fmtDzd(sub)+' د.ج'; return; } var fee=deliveryFeeFor(wilaya,type); var na=(type==='office' && deliveryFees[wilaya] && deliveryFees[wilaya][1]==null); if(fee==null) fee=0; if(sDel) sDel.innerText=fmtDzd(fee)+' د.ج'+(na?' (للمنزل)':''); if(sTot) sTot.innerText=fmtDzd(sub+fee)+' د.ج'; }catch(e){} }
 function updateExpressSummary(){ try{ if(!currentProduct) return; var qEl=document.getElementById('expressQty'); var qty=qEl? (parseInt(qEl.value)||1):1; var sub=currentProduct.price*qty; var wEl=document.getElementById('expressWilaya'); var wilaya=wEl? wEl.value:''; var tEl=document.querySelector('input[name="expDeliveryType"]:checked'); var type=tEl? tEl.value:'home'; var de=document.getElementById('expDelivery'), te=document.getElementById('expTotal'); var sv=document.getElementById('expSubtotal'); if(sv) sv.innerText=fmtDzd(sub)+' دج'; if(!wilaya){ if(de) de.innerText='اختر الولاية'; if(te) te.innerText=fmtDzd(sub)+' دج'; return; } var fee=deliveryFeeFor(wilaya,type); if(fee==null) fee=0; if(de) de.innerText=fmtDzd(fee)+' دج'+(type==='office'?' (مكتب)':' (منزل)'); if(te) te.innerText=fmtDzd(sub+fee)+' دج'; }catch(e){} }
@@ -1039,5 +1039,6 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
   }).catch(function(){});
 })();
 </script>
+<script defer src="robuste-ecotrack-delivery.js?v=2"></script>
 </body>
 </html>
