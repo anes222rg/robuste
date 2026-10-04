@@ -133,14 +133,13 @@ gtag('config', 'G-GREM5BTR7T');
 <script type="application/ld+json" id="product-jsonld">{"@context":"https://schema.org/","@type":"Product","name":"ROBUSTE PANINEUSE ET GRILL 1000W","image":["https://www.robustedz.store/images/PANINEUSE%20ET%20GRILL%201000W.png"],"description":"La panineuse et grill Robuste 1000W vous permet de préparer des sandwiches grillés, paninis et bien plus encore. Surface antiadhésive, chauffe rapide et facile à nettoyer.","sku":"103","mpn":"103","brand":{"@type":"Brand","name":"ROBUSTE"},"offers":{"@type":"Offer","url":"https://www.robustedz.store/product-103.html","priceCurrency":"DZD","price":"6500.00","priceValidUntil":"2027-12-31","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","seller":{"@type":"Organization","name":"ROBUSTE"},"priceSpecification":{"@type":"UnitPriceSpecification","priceType":"https://schema.org/ListPrice","price":"8000.00","priceCurrency":"DZD"},"shippingDetails":{"@type":"OfferShippingDetails","shippingDestination":{"@type":"DefinedRegion","addressCountry":"DZ"},"deliveryTime":{"@type":"ShippingDeliveryTime","handlingTime":{"@type":"QuantitativeValue","minValue":0,"maxValue":1,"unitCode":"DAY"},"transitTime":{"@type":"QuantitativeValue","minValue":1,"maxValue":3,"unitCode":"DAY"}}},"hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","applicableCountry":"DZ","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","merchantReturnDays":7,"returnMethod":"https://schema.org/ReturnByMail"}}}</script>
 <link rel="stylesheet" href="robuste-ecotrack-delivery.css?v=3">
 <script id="rb-simple-checkout">
-/* ROBUSTE: simple checkout. Free delivery is only for orders containing SKU 108. */
+/* ROBUSTE: simple checkout; standard delivery fees for all products. */
 (function () {
   "use strict";
 
   window.rbFreeDeliveryFor = function (items) {
-    return Array.isArray(items) && items.length > 0 && items.every(function (item) {
-      return item && String(item.id) === "108";
-    });
+    // Standard paid delivery applies to every product and cart.
+    return false;
   };
 
   window.rbNormalizeCustomerPhone = function (value) {
@@ -170,17 +169,7 @@ gtag('config', 'G-GREM5BTR7T');
   };
 
   window.rbProductCheckoutCopy = function (product) {
-    if (!product || String(product.id) !== "108") return product;
-    var copy = Object.assign({}, product);
-    function freeCopy(text) {
-      return String(text || "")
-        .replace(/مصاريف التوصيل تظهر بعد اختيار الولاية/g, "التوصيل مجاني")
-        .replace(/التوصيل حسب الولاية/g, "توصيل مجاني");
-    }
-    copy.description_long = freeCopy(copy.description_long);
-    copy.description_short = freeCopy(copy.description_short);
-    if (Array.isArray(copy.features)) copy.features = copy.features.map(freeCopy);
-    return copy;
+    return product;
   };
 
   var css = document.createElement("style");
@@ -1215,6 +1204,7 @@ window.submitExpressOrder = submitExpressOrder; window.directBuy = directBuy; wi
 </script>
 <script defer src="rb-live.js?v=1"></script>
 <script defer src="robuste-ecotrack-delivery.js?v=3"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"5f70ee79eb6c4543918acb7115a325f6","r":1,"spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"5f70ee79eb6c4543918acb7115a325f6","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>

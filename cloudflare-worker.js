@@ -99,6 +99,10 @@ async function repriceOrder(env, order) {
     return l;
   });
 
+  // All products use the same live carrier tariff or existing fallback fee.
+  delete order.ecotrackCustomerDeliveryFree;
+  delete order.ecotrackQuotedServiceFee;
+
   const clientFee = Math.max(0, Number(order.deliveryFee) || 0);
   let fee = clientFee;
   if (fee > MAX_DELIVERY_FEE) { notes.push("سعر توصيل غير معقول (" + fee + ") أُلغي"); fee = 0; }
@@ -132,15 +136,24 @@ async function repriceOrder(env, order) {
   return { notes, bulk };
 }
 
-// Rejects placeholder / troll names. Requires exactly two words, each with >=2 letters.
+// Accept a customer's name without requiring a surname or a word count.
 function isRealName(name) {
-  const s = String(name || "").trim();
-  if (s.length < 4) return false;
-  const parts = s.split(/\s+/).filter(w => (w.match(/\p{L}/gu) || []).length >= 2);
-  return parts.length === 2;
+  return typeof name === "string" && name.trim().length > 0 &&
+    name.trim().length <= 120 && /\p{L}/u.test(name);
 }
 
-// Rejects lazy / fake phone numbers (all-same digit, too few distinct digits, long sequential runs).
+// Accept local/international numbers and harmless spacing without changing phone validation.
+function normalizeCustomerPhone(value) {
+  let phone = String(value == null ? "" : value).trim()
+    .replace(/[٠-٩]/g, n => String(n.charCodeAt(0) - 1632))
+    .replace(/[۰-۹]/g, n => String(n.charCodeAt(0) - 1776))
+    .replace(/[\s().-]/g, "");
+  if (/^(?:\+213|00213|213)[5-7][0-9]{8}$/.test(phone))
+    phone = "0" + phone.replace(/^(?:\+213|00213|213)/, "");
+  return phone;
+}
+
+// Detect unusual phone patterns for review, without blocking valid-format numbers.
 function isLazyPhone(phone) {
   const d = String(phone || "").replace(/\D/g, "");
   if (d.length !== 10) return true;
@@ -1142,12 +1155,12 @@ async function handleIntake(request, env, ctx, cors) {
   const meta = payload.meta || {};
 
   // Minimal schema validation before persisting.
+  order.phone = normalizeCustomerPhone(order.phone);
   if (!order.phone || !PHONE_RE.test(String(order.phone))) return json({ error: "invalid_order_phone", message: "\u0631\u0642\u0645 \u0647\u0627\u062a\u0641 \u063a\u064a\u0631 \u0635\u062d\u064a\u062d" }, 400, cors);
-  if (isLazyPhone(order.phone)) return json({ error: "suspicious_phone", message: "\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0631\u0642\u0645 \u0647\u0627\u062a\u0641 \u062d\u0642\u064a\u0642\u064a" }, 400, cors);
   if (!order.customer) return json({ error: "missing_fields", message: "\u064a\u0631\u062c\u0649 \u0645\u0644\u0621 \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0644 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629" }, 400, cors);
-  if (!isRealName(order.customer)) return json({ error: "invalid_name", message: "\u0627\u0644\u0631\u062c\u0627\u0621 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0627\u0633\u0645 \u0648\u0627\u0644\u0644\u0642\u0628 (\u0643\u0644\u0645\u062a\u0627\u0646 \u0641\u0642\u0637)" }, 400, cors);
+  if (!isRealName(order.customer)) return json({ error: "invalid_name", message: "يرجى إدخال اسمك" }, 400, cors);
   if (!order.wilaya) return json({ error: "missing_wilaya", message: "\u064a\u0631\u062c\u0649 \u0627\u062e\u062a\u064a\u0627\u0631 \u0627\u0644\u0648\u0644\u0627\u064a\u0629" }, 400, cors);
-  if (!order.address || String(order.address).trim().length < 8) return json({ error: "missing_address", message: "\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0628\u0634\u0643\u0644 \u0648\u0627\u0636\u062d" }, 400, cors);
+  if (typeof order.address !== "string" || !order.address.trim()) return json({ error: "missing_address", message: "يرجى إدخال عنوانك" }, 400, cors);
   if (!Array.isArray(order.products) || order.products.length === 0) return json({ error: "empty_cart", message: "\u0627\u0644\u0633\u0644\u0629 \u0641\u0627\u0631\u063a\u0629" }, 400, cors);
 
   // Use one field name from intake through parcel creation. Older orders may
@@ -1178,6 +1191,8 @@ async function handleIntake(request, env, ctx, cors) {
   let watch = { phones: [], ips: [] };
   try { watch = await readWatchlist(env); } catch {}
   const flags = Array.isArray(payload.risk && payload.risk.flags) ? payload.risk.flags.slice() : [];
+  // A number pattern can be unusual but real: accept it and flag it for review.
+  if (isLazyPhone(order.phone)) flags.push({ key: "phone_pattern", level: "yellow", label: "رقم بنمط متكرر — تحقق عند تأكيد الطلب" });
   // A forged cart is a strong abuse signal — surface it instead of silently fixing it.
   if (priceAudit.notes.length) {
     flags.push({ key: "price_mismatch", level: "red", label: "بيانات سلة معدّلة: " + priceAudit.notes.join(" · ") });
