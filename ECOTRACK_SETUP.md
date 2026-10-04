@@ -42,7 +42,7 @@ Add a **Cron Trigger** to this same Worker, for example:
 */5 * * * *
 ```
 
-Each run processes up to **15 parent orders**, rotates through the linked orders using a persisted cursor, and includes their related exchange/Pickup parcels. A full sweep takes more than one run when there are more than 15 parents. Larger volumes therefore have a longer refresh delay; this is polling, not a real-time webhook.
+Each run reads up to **50 order documents** in document-ID order and synchronizes up to **15 linked parent orders**, including their exchange/Pickup parcels. Parents remain eligible after their original draft is deleted. The persisted cursor advances past unlinked orders too; older cursor formats reset automatically once after this update. A full sweep can take several runs, especially with many unlinked orders. This is polling, not a real-time webhook.
 
 The admin panel also refreshes a batch every **two minutes while it is open**. The manual status refresh covers the selected local orders in batches. Opening the panel is not a replacement for a Cron Trigger if you need unattended updates.
 

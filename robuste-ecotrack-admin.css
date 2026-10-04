@@ -32,6 +32,31 @@
 .eco-dialog-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px}.eco-dialog .eco-check{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.7;margin:16px 0;min-height:44px}.eco-dialog .eco-check input{width:20px;height:20px;min-height:20px;flex:none;margin-top:3px}
 .eco-dialog .eco-help{font-size:14px;color:#586474;line-height:1.7}.eco-history-list{list-style:none;padding:0;margin:0}.eco-history-list li{padding:12px 0;border-bottom:1px solid #edf0f3;font-size:14px;line-height:1.7}.eco-history-list time{display:block;color:#586474;direction:ltr;text-align:right}
 .eco-dialog [hidden]{display:none!important}
+.eco-connection{font-size:13px;color:var(--eco-muted);margin-bottom:18px;border-bottom:1px solid var(--eco-border);padding-bottom:12px}
+.eco-connection summary{cursor:pointer;min-height:32px}.eco-connection p{margin:8px 0 0;line-height:1.8}
+.eco-pipeline{display:flex;gap:8px;overflow-x:auto;margin:0 0 18px;padding-bottom:6px}
+.eco-pipeline button{flex:none;border:1px solid var(--eco-border);background:#fff;color:#405166;border-radius:10px;padding:8px 12px;font:inherit;font-size:14px;cursor:pointer}
+.eco-pipeline button[aria-pressed="true"]{background:#202a36;border-color:#202a36;color:#fff}
+.eco-pipeline span{display:inline-block;padding:0 6px;margin-inline-start:4px;border-radius:6px;background:#edf2f8;color:#344e6b;font-size:12px;font-weight:700}
+.eco-tracking{font-family:ui-monospace,monospace;font-weight:650;display:flex;align-items:center;gap:8px}
+.eco-tools .eco-copy{min-height:30px;padding:3px 8px;font-size:12px}
+.eco-more{margin-top:8px}.eco-more summary{cursor:pointer;color:var(--eco-blue);min-height:32px;font-weight:600;list-style:none}
+.eco-more summary::after{content:" ▾"}.eco-more[open] summary::after{content:" ▴"}
+.eco-more .eco-row-actions{padding:10px 0}.eco-table .eco-row-actions{max-width:340px;min-width:180px}
+.eco-dialog-footer{position:sticky;bottom:-24px;background:#fff;padding:14px 0;border-top:1px solid var(--eco-border);z-index:1}
+@media(max-width:700px){
+  #sec-ecotrack .eco-table-wrap:has([data-label]){border:0;background:transparent;overflow:visible}
+  #sec-ecotrack .eco-table:has([data-label]),#sec-ecotrack .eco-table:has([data-label]) tbody{display:block;white-space:normal}
+  #sec-ecotrack .eco-table:has([data-label]) thead{display:none}
+  #sec-ecotrack .eco-table:has([data-label]) tr{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--eco-border);border-radius:12px;background:#fff;margin-bottom:12px;overflow:hidden}
+  #sec-ecotrack .eco-table td[data-label]{display:block;min-width:0;padding:12px;border-bottom:1px solid #edf0f3}
+  #sec-ecotrack .eco-table td[data-label]::before{content:attr(data-label);display:block;color:var(--eco-muted);font-size:12px;margin-bottom:6px}
+  #sec-ecotrack .eco-table td[data-label="العميل والتتبع"],#sec-ecotrack .eco-table td[data-label="الإجراءات"]{grid-column:1/-1}
+  #sec-ecotrack .eco-table td[data-label="الإجراءات"]{border:0}
+  .eco-table .eco-row-actions{min-width:0;max-width:none}.eco-table .eco-row-actions button{flex:1 1 auto}
+  .eco-tracking{overflow-wrap:anywhere;flex-wrap:wrap}.eco-secondary{max-width:none}
+  .eco-dialog-footer{bottom:-18px}.eco-heading .eco-actions button{flex:1}
+}
 @media(max-width:900px){.eco-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.eco-heading{flex-direction:column}.eco-actions{width:100%}.eco-scroll-hint{display:block}}
 @media(max-width:520px){.eco-tools{font-size:14px}.eco-metrics{gap:8px}.eco-metric{padding:12px}.eco-metric-value{font-size:23px}.eco-form-grid{grid-template-columns:1fr}.eco-field.eco-wide{grid-column:auto}.eco-dialog{padding:18px}.eco-heading h2{font-size:22px}.eco-tabs button{padding:8px 10px}.eco-dialog-footer{flex-wrap:wrap}.eco-filters input{min-width:0;width:100%}.eco-table th,.eco-table td{padding:10px 12px}}
 @media(prefers-reduced-motion:reduce){.eco-tools *, .eco-dialog *{scroll-behavior:auto!important}}

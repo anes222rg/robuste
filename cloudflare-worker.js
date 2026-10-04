@@ -851,39 +851,40 @@ async function handleEcotrackValidate(request, env, cors) {
   try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
 
   const list = Array.isArray(body.trackings) ? body.trackings : (body.tracking ? [body.tracking] : []);
-  const codes = list.map(c => String(c || "").trim()).filter(c => /^[A-Za-z0-9_-]+$/.test(c));
-  if (!codes.length) return json({ error: "no_tracking" }, 400, cors);
-  /* Each parcel costs 2 subrequests here (valid/order + the Firestore patch),
+  const codes = list.map(c => String(c || "").trim());
+  if (!codes.length || codes.some(c => !/^[A-Za-z0-9_-]+$/.test(c))) return json({ error: "invalid_tracking" }, 400, cors);
+  if (!Array.isArray(body.ids) || body.ids.length !== codes.length ||
+      body.ids.some(id => !/^[A-Za-z0-9_-]+$/.test(String(id))))
+    return json({ error: "invalid_ids" }, 400, cors);
+  /* Each parcel costs 3 subrequests here (read parent, valid/order, patch),
    * and a Worker gets 50 subrequests per request on the free plan. 15 keeps a
    * comfortable margin; the panel splits larger batches into chunks. */
   if (codes.length > 15) return json({ error: "too_many", max: 15 }, 400, cors);
 
   const results = [];
-  for (const tracking of codes) {
-    const params = { tracking };
-    if (body.ask_collection) params.ask_collection = "1";
+  for (let i = 0; i < codes.length; i++) {
+    const tracking = codes[i];
     try {
-      const data = await ecoCall(env, "valid/order", { method: "POST", params });
-      results.push({ tracking, ok: true, message: (data && data.message) || "" });
+      const actionRequest = new Request(request.url, { method: "POST", headers: request.headers,
+        body: JSON.stringify({ id: body.ids[i], tracking, action: "dispatch", confirm: true,
+          ask_collection: body.ask_collection === true }) });
+      const response = await ecoHandleParcelAction(actionRequest, env, cors, true);
+      const data = await response.json();
+      results.push({ tracking, ok: response.ok && data.ok === true,
+        message: data.message || "", error: data.error ? data.detail || data.error : undefined,
+        patch: data.patch, courierApplied: data.courierApplied === true });
+      if (/rate_limited/.test(data.detail || "")) {
+        for (const skipped of codes.slice(i + 1)) results.push({ tracking: skipped, ok: false, error: "rate_limited" });
+        break;
+      }
     } catch (e) {
       results.push({ tracking, ok: false, error: String(e.message || e) });
     }
-    // EcoTrack allows 50 requests/minute; a 15-parcel chunk paced at 250ms
-    // finishes in ~4s and leaves room for the panel's next chunk.
-    if (codes.length > 1) await new Promise(r => setTimeout(r, 1300));
+    // Pace courier writes; stop the remaining batch on a rate-limit response.
+    if (i + 1 < codes.length) await new Promise(r => setTimeout(r, 1300));
   }
 
   const okCodes = results.filter(r => r.ok).map(r => r.tracking);
-  // Record the dispatch so the panel can tell "parcel made" from "handed over".
-  const stamp = new Date().toISOString();
-  if (okCodes.length && Array.isArray(body.ids) && body.ids.length === codes.length) {
-    for (let i = 0; i < codes.length; i++) {
-      if (!results[i].ok) continue;
-      const id = String(body.ids[i] || "").trim();
-      if (!/^[A-Za-z0-9_-]+$/.test(id)) continue;
-      try { await updateOrderFields(env, id, { ecotrackValidated: true, ecotrackValidatedAt: stamp }); } catch (e) {}
-    }
-  }
   return json({ ok: results.every(r => r.ok), validated: okCodes.length, results }, 200, cors);
 }
 
@@ -1171,8 +1172,9 @@ async function handleIntake(request, env, ctx, cors) {
   let priceAudit = { notes: [], bulk: false };
   try { priceAudit = await repriceOrder(env, order); }
   catch (e) {
-    if (e && ["wilaya_not_served", "delivery_fee_unavailable", "stop_desk_not_available"].includes(e.message))
+    if (e && ["wilaya_not_served", "commune_not_served", "delivery_fee_unavailable", "stop_desk_not_available"].includes(e.message))
       return json({ error: e.message, message: "طريقة التوصيل أو الولاية غير متاحة لدى Assil. راجع اختيار التوصيل." }, 400, cors);
+    return json({ error: "repricing_failed", message: "تعذّر تأكيد مبلغ الطلب. أعد المحاولة بعد لحظات." }, 503, cors);
   }
 
   meta.ip = request.headers.get("CF-Connecting-IP") || "";
@@ -1825,13 +1827,12 @@ async function ecoCommitOrders(env, patches) {
 }
 
 async function ecoTrackedPage(env, cursor) {
+  // Scan stable document IDs, including parents whose original draft was deleted.
+  // Read up to 50 documents but synchronize at most 15 linked parents per run.
   const query = { from: [{ collectionId: "orders" }],
-    where: { fieldFilter: { field: { fieldPath: "ecotrackTracking" }, op: "GREATER_THAN", value: { stringValue: "" } } },
-    orderBy: [{ field: { fieldPath: "ecotrackTracking" }, direction: "ASCENDING" },
-      { field: { fieldPath: "__name__" }, direction: "ASCENDING" }], limit: ECO_SYNC_PAGE_SIZE };
-  if (cursor && cursor.tracking && cursor.id) query.startAt = {
-    values: [{ stringValue: cursor.tracking },
-      { referenceValue: "projects/" + env.FIREBASE_PROJECT_ID + "/databases/(default)/documents/orders/" + cursor.id }],
+    orderBy: [{ field: { fieldPath: "__name__" }, direction: "ASCENDING" }], limit: 50 };
+  if (cursor && cursor.version === 2 && cursor.id) query.startAt = {
+    values: [{ referenceValue: "projects/" + env.FIREBASE_PROJECT_ID + "/databases/(default)/documents/orders/" + cursor.id }],
     before: false
   };
   const token = await accessToken(env);
@@ -1840,9 +1841,22 @@ async function ecoTrackedPage(env, cursor) {
     body: JSON.stringify({ structuredQuery: query })
   });
   if (!res.ok) throw new Error("sync_query_failed");
-  return (await res.json()).filter(r => r.document).map(r =>
+  const documents = (await res.json()).filter(r => r.document).map(r =>
     Object.assign(decodeFields(r.document.fields || {}), { id: r.document.name.split("/").pop(),
       _firestoreUpdateTime: r.document.updateTime || null }));
+  const orders = [];
+  let last = null, scanned = 0;
+  for (const order of documents) {
+    last = order; scanned++;
+    if (ecoHasParcels(order)) orders.push(order);
+    if (orders.length === ECO_SYNC_PAGE_SIZE) break;
+  }
+  return { orders, scanned, cursor: last && (scanned < documents.length || documents.length === query.limit)
+    ? { version: 2, id: last.id } : null };
+}
+
+function ecoHasParcels(order) {
+  return !!(order.ecotrackTracking || (order.ecotrackRelatedParcels || []).some(p => p.tracking && !p.deletedAt));
 }
 
 async function ecoNotifyChanges(env, changes) {
@@ -1941,7 +1955,7 @@ async function ecoHandleSync(request, env, cors) {
     const orders = [];
     for (const id of ids) {
       const order = await getOrderById(env, id);
-      if (order && order.ecotrackTracking) orders.push(order);
+      if (order && ecoHasParcels(order)) orders.push(order);
     }
     return json(await ecoSyncOrders(env, orders, true), 200, cors);
   } catch (e) { return json({ error: "sync_failed", detail: ecoPlain(e.message) }, 502, cors); }
@@ -1952,18 +1966,19 @@ async function ecoScheduledSync(env) {
   if (env.ECOTRACK_SYNC_ENABLED === "false") return { skipped: "disabled" };
   /** @type {RobusteRecord} */
   const state = await ecoDocument(env, "config", "ecotrackSync") || {};
-  const orders = await ecoTrackedPage(env, state.cursor);
-  if (!orders.length) {
+  const page = await ecoTrackedPage(env, state.cursor);
+  const orders = page.orders;
+  if (!orders.length && !page.cursor) {
     await ecoPatchDocument(env, "config", "ecotrackSync", { cursor: null,
-      completedAt: new Date().toISOString(), lastError: null });
+      completedAt: new Date().toISOString(), lastRunAt: new Date().toISOString(),
+      lastChecked: 0, lastScanned: page.scanned, lastError: null });
     return { checked: 0, cycleComplete: true };
   }
   // Do not advance the cursor when carrier reads or database writes fail.
   const result = await ecoSyncOrders(env, orders, true);
-  const last = orders[orders.length - 1];
   await ecoPatchDocument(env, "config", "ecotrackSync", {
-    cursor: orders.length < ECO_SYNC_PAGE_SIZE ? null : { tracking: last.ecotrackTracking, id: last.id },
-    lastRunAt: new Date().toISOString(), lastChecked: result.checked,
+    cursor: page.cursor,
+    lastRunAt: new Date().toISOString(), lastChecked: result.checked, lastScanned: page.scanned,
     lastError: result.ok ? null : "some_tracking_statuses_missing",
     lastNotificationError: result.notificationError
   });
@@ -2118,8 +2133,8 @@ async function ecoCreateRelated(env, order, body) {
   return { ok: true, tracking: created.tracking };
 }
 
-async function ecoHandleParcelAction(request, env, cors) {
-  if (!(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
+async function ecoHandleParcelAction(request, env, cors, authenticated = false) {
+  if (!authenticated && !(await adminOk(request, env))) return json({ error: "unauthorized" }, 401, cors);
   let body;
   try { body = await request.json(); } catch { return json({ error: "bad_json" }, 400, cors); }
   const id = ecoPlain(body.id, 100);
@@ -2179,6 +2194,9 @@ async function ecoHandleParcelAction(request, env, cors) {
       } else patch = { deletedAt: new Date().toISOString(), ecotrackStage: "cancelled", ecotrackStageLabel: "مسودة محذوفة" };
     } else if (body.action === "dispatch") {
       if (body.confirm !== true) throw new Error("confirmation_required");
+      if (target.parcel.ecotrackValidated) return json({ ok: true, already: true,
+        action: body.action, tracking: target.tracking, patch: { ecotrackValidated: true } }, 200, cors);
+      if (body.ask_collection === true) params.ask_collection = "1";
       data = await ecoCall(env, "valid/order", { method: "POST", params });
       patch = { ecotrackValidated: true, ecotrackValidatedAt: new Date().toISOString() };
     } else if (body.action === "note") {
@@ -2201,7 +2219,8 @@ async function ecoHandleParcelAction(request, env, cors) {
     patch.ecotrackAudit = ecoAudit(target.parcel, body.action, body.content || target.tracking);
     try { await ecoSaveTarget(env, order, target, patch); }
     catch { return json({ ok: false, error: "courier_updated_save_failed", action: body.action,
-      tracking: target.tracking, detail: "Action completed at Assil; reconcile locally before retrying." }, 502, cors); }
+      tracking: target.tracking, courierApplied: true, patch,
+      detail: "Action completed at Assil; reconcile locally before retrying." }, 502, cors); }
     return json({ ok: true, action: body.action, tracking: target.tracking,
       message: ecoPlain(data.message), patch }, 200, cors);
   } catch (e) {

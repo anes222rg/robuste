@@ -11,6 +11,39 @@
   var paymentLabels = { unknown: "غير معلوم", return_review: "إرجاع / إلغاء — يحتاج تسوية يدوية",
     delivered_uncollected: "تم التسليم — لم يُبلّغ التحصيل",
     collected_unpaid: "مُحصّل — غير مدفوع", paid_reported: "موسوم مدفوعاً لدى الناقل" };
+  var errors = {
+    unauthorized: "انتهت الجلسة. سجّل الدخول مجدداً.", rate_limited: "بلغنا حد طلبات Assil. انتظر بضع دقائق قبل المحاولة مجدداً.",
+    parcel_already_dispatched: "سُلّم هذا الطرد للناقل؛ استخدم الملاحظات أو طلب الإرجاع.",
+    parcel_not_confirmed_as_draft: "لم يؤكد Assil أن الطرد مسودة قابلة للتعديل. حدّث حالته أولاً.",
+    commune_not_served: "البلدية المختارة غير متاحة. اختر بلدية من القائمة.",
+    wilaya_not_served: "الولاية غير متاحة لدى Assil.", stop_desk_not_available: "لا يوجد مكتب استلام مؤكّد لهذه البلدية.",
+    tracking_unavailable: "تعذّر جلب حالات الطرود من Assil. حاول مجدداً لاحقاً.",
+    no_eligible_return: "لم يؤكد Assil وجود مرتجع جاهز للاستلام.",
+    action_pending_reconciliation: "نتيجة محاولة الإنشاء السابقة غير مؤكدة. طابق رقم الطرد في Assil قبل إنشاء طرد آخر.",
+    related_parcel_limit: "وصل الطلب إلى الحد الأقصى للطرود المرتبطة.",
+    courier_updated_save_failed: "تم الإجراء لدى Assil، لكن تعذّر حفظه في المتجر. حدّث الحالة وطابق الطرد قبل إجراء آخر.",
+    parcel_created_save_failed: "أُنشئ الطرد لدى Assil. أعد نفس المحاولة لربط الطرد الموجود دون إنشاء طرد جديد.",
+    parcel_created_action_save_failed: "أُنشئ الطرد، لكن حفظ بياناته تعذّر. طابقه في Assil قبل المحاولة مجدداً."
+  };
+  function errorText(data) {
+    var code = data.detail || data.message || data.error || "";
+    return errors[data.error] || errors[code] || (/rate_limited|HTTP 429/.test(code) ? errors.rate_limited : code) || "تعذّر الاتصال بالخادم. حاول مجدداً.";
+  }
+  function hasParcels(d) { return !!(d.ecotrackTracking || (d.ecotrackRelatedParcels || []).some(function (p) { return p.tracking && !p.deletedAt; })); }
+  function isDraft(p) { return !p.ecotrackValidated && (!p.ecotrackStage || ["unknown", "preparing"].includes(p.ecotrackStage)); }
+  function matchesStage(row, filter) {
+    var p = row.data, stage = p.ecotrackStage || "unknown";
+    if (filter === "draft") return isDraft(p);
+    if (filter === "attention") return !!p.ecotrackNeedsAttention || stage === "unknown";
+    if (filter === "active") return !isDraft(p) && !["delivered", "returned", "cancelled"].includes(stage);
+    if (filter === "closed") return ["delivered", "returned", "cancelled"].includes(stage);
+    return true;
+  }
+  function dateMillis(value) {
+    if (value && typeof value.toDate === "function") return value.toDate().getTime();
+    if (value && typeof value.seconds === "number") return value.seconds * 1000;
+    return Date.parse(value || "");
+  }
   function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
   }); }
@@ -51,9 +84,9 @@
       else if (stage === "unknown") s.unknown++;
       else s.open++;
       if (p.ecotrackNeedsAttention) s.attention++;
-      if (r.type === 3) { s.pickupCount++; return; }
+      if (r.type === 3) s.pickupCount++;
       var state = p.ecotrackPaymentState || "unknown";
-      if (r.amount != null) {
+      if (r.type !== 3 && r.amount != null) {
         if (state === "paid_reported") { s.paid += r.amount; s.paidCount++; }
         if (state === "collected_unpaid") { s.unpaid += r.amount; s.unpaidCount++; }
         if (state === "delivered_uncollected") { s.uncollected += r.amount; s.uncollectedCount++; }
@@ -74,10 +107,10 @@
     return '"' + text.replace(/"/g, '""') + '"';
   }
   function create(config) {
-    var state = { reference: null, health: null, tab: "parcels", search: "", period: "all",
-      busy: false, message: "", error: "", timer: null, healthTimer: null, started: false, panelCursor: 0 };
+    var state = { reference: null, health: null, tab: "parcels", search: "", period: "all", filter: "all", limit: 50,
+      busy: false, message: "", error: "", timer: null, healthTimer: null, started: false, panelCursor: 0, retryAfter: 0 };
     var host = document.getElementById("sec-ecotrack");
-    function isReady() { return !!(state.reference && state.reference.available && state.reference.available.fees); }
+    function isReady() { return !!(state.reference && state.reference.available && state.reference.available.fees && state.reference.available.wilayas); }
     function resolveCode(value) {
       if (!state.reference) return Number(value) || 0;
       var w = state.reference.wilayas.find(function (x) { return x.code === Number(value) ||
@@ -98,24 +131,37 @@
       var data;
       try { data = await response.json(); } catch { data = {}; }
       if (!response.ok || data.error || data.ok === false && !data.results) {
-        var e = new Error(data.detail || data.message || data.error || "تعذّر الاتصال بالخادم");
+        var e = new Error(errorText(data));
+        if (response.status === 429 || /rate_limited|HTTP 429/.test(data.detail || data.error || "")) state.retryAfter = Date.now() + 300000;
         e.data = data; throw e;
       }
       return data;
     }
-    function allRows() {
+    function applyPatch(row, patch) {
+      if (!patch) return;
+      var record = config.getOrders().find(function (r) { return r.id === row.id; });
+      if (!record) return;
+      if (row.primary) Object.assign(record.data, patch);
+      else {
+        var parcel = (record.data.ecotrackRelatedParcels || []).find(function (p) { return p.tracking === row.tracking; });
+        if (parcel) Object.assign(parcel, patch);
+      }
+      if (config.onChange) config.onChange();
+    }
+    function allRows(ignoreStage) {
       var rows = flatten(config.getOrders());
       if (state.period !== "all") {
         var since = Date.now() - Number(state.period) * 86400000;
         rows = rows.filter(function (r) {
-          var date = Date.parse(r.data.ecotrackCreatedAt || r.data.createdAt || r.source.createdAt || r.source.timestamp || "");
+          var date = dateMillis(r.data.ecotrackCreatedAt || r.data.createdAt || r.source.createdAt || r.source.timestamp);
           return Number.isFinite(date) && date >= since;
         });
       }
       var query = state.search.toLowerCase().trim();
-      return query ? rows.filter(function (r) {
+      rows = query ? rows.filter(function (r) {
         return [r.tracking, r.customer, r.id, wilayaName(r.wilaya)].join(" ").toLowerCase().includes(query);
       }) : rows;
+      return ignoreStage || state.tab !== "parcels" ? rows : rows.filter(function (r) { return matchesStage(r, state.filter); });
     }
     function metric(label, value, note) {
       return '<div class="eco-metric"><div class="eco-metric-label">' + esc(label) +
@@ -123,18 +169,19 @@
     }
     function render() {
       if (!host) return;
+      var restoreSearch = document.activeElement && document.activeElement.id === "ecoSearch";
       var rows = allRows(), summary = statistics(rows), health = state.health || {}, scheduler = health.scheduler;
       var lastRun = scheduler && scheduler.lastRunAt;
       var html = '<div class="eco-tools"><div class="eco-heading"><div><h2>Assil Delivery / Ecotrack</h2>' +
-        '<div class="eco-subtitle">متابعة الشحنات، التحكم في الطرود، وتعرفة حسابك — دون مشاركة رمز API.</div></div><div class="eco-actions">' +
+        '<div class="eco-subtitle">أنشئ المسودة، اطبع الملصق، ثم أكّد تسليم الطرد للناقل. تابع حالته والتحصيل هنا.</div></div><div class="eco-actions">' +
+        (config.goShipping ? button("إنشاء شحنة", 'data-eco="shipping"', "eco-primary") : "") +
         button(state.busy ? "جارٍ التحديث…" : "تحديث الحالات الآن", 'data-eco="sync"' + (state.busy ? " disabled" : ""), "eco-primary") +
         button("تحديث التعرفة والمكاتب", 'data-eco="reference"' + (state.busy ? " disabled" : "")) + "</div></div>";
-      html += '<div class="eco-banner' + (!lastRun || scheduler && scheduler.lastError ? " eco-warning" : "") + '">';
-      html += lastRun ? "آخر تشغيل تلقائي في الخادم: " + esc(new Date(lastRun).toLocaleString("ar-DZ")) :
-        "التحديث يعمل كل دقيقتين أثناء فتح لوحة الإدارة. للعمل 24/7، أضف Cron Trigger للـ Worker كما في ملف الإعداد.";
-      if (scheduler && scheduler.lastError) html += "<br>آخر مشكلة: " + esc(scheduler.lastError);
-      html += "<br>" + (health.telegramConfigured ? "تنبيهات Telegram مفعّلة بالإعداد الموجود." :
-        "تنبيهات Telegram تحتاج TELEGRAM_BOT_TOKEN و TELEGRAM_CHAT_ID في إعدادات الـ Worker فقط.") + "</div>";
+      html += '<details class="eco-connection"><summary>' + (lastRun ? "آخر تحديث تلقائي: " + esc(new Date(lastRun).toLocaleString("ar-DZ")) :
+        "التحديث التلقائي يعمل أثناء فتح اللوحة") + '</summary><p>' +
+        (health.enabled === false ? "التحديث في الخلفية معطّل." : !lastRun ? "فعّل التحديث في الخلفية من إعدادات Worker لمتابعة الطرود عند إغلاق اللوحة." : "التحديث في الخلفية مفعّل.") +
+        (scheduler && scheduler.lastError ? " آخر مشكلة: " + esc(scheduler.lastError) : "") +
+        (health.telegramConfigured ? " تنبيهات Telegram مفعّلة." : " تنبيهات Telegram غير مفعّلة.") + "</p></details>";
       if (state.error) html += '<div class="eco-banner eco-error" role="alert">' + esc(state.error) + "</div>";
       if (state.message) html += '<div class="eco-banner" role="status">' + esc(state.message) + "</div>";
       html += '<div class="eco-tabs" role="tablist" aria-label="أدوات الشحن">';
@@ -144,6 +191,15 @@
       html += '</div><div class="eco-filters"><label for="ecoPeriod">الفترة</label><select id="ecoPeriod" aria-label="فترة التقرير">' +
         '<option value="all">كل الشحنات المحلية</option><option value="30">آخر 30 يوماً</option><option value="7">آخر 7 أيام</option></select>' +
         '<input id="ecoSearch" type="search" placeholder="بحث برقم التتبع أو العميل أو الولاية" aria-label="بحث في الشحنات" value="' + esc(state.search) + '"></div>';
+      if (state.tab === "parcels") {
+        html += '<div class="eco-pipeline" role="group" aria-label="تصفية حالات الطرود">';
+        var baseRows = allRows(true);
+        [["all", "كل الطرود"], ["draft", "مسودات للتسليم"], ["active", "في الطريق"], ["attention", "تحتاج متابعة"], ["closed", "مكتملة"]].forEach(function (f) {
+          html += '<button type="button" data-filter="' + f[0] + '" aria-pressed="' + (state.filter === f[0]) + '">' + f[1] +
+            ' <span>' + baseRows.filter(function (r) { return matchesStage(r, f[0]); }).length + '</span></button>';
+        });
+        html += "</div>";
+      }
       if (state.tab === "parcels") html += parcelView(rows, summary);
       if (state.tab === "finance") html += financeView(rows, summary);
       if (state.tab === "locations") html += locationsView();
@@ -160,38 +216,47 @@
       });
       host.querySelector("#ecoPeriod").value = state.period;
       bind();
+      if (restoreSearch) host.querySelector("#ecoSearch").focus({ preventScroll: true });
     }
     function parcelView(rows, s) {
       var html = '<div class="eco-metrics">' + metric("الشحنات المرتبطة", s.total, "الأصلية + التبادل والاسترجاع") +
         metric("تم التسليم", s.delivered, "حالة مبلغ التحصيل معروضة منفصلة") +
         metric("المرتجعات المستلمة", s.returned, "طلبات الإرجاع وحدها لا تُحسب") +
         metric("تحتاج متابعة", s.attention, s.unknown + " شحنة بلا حالة متزامنة") + "</div>";
-      if (!rows.length) return html + '<div class="eco-table-wrap"><div class="eco-empty">لا توجد طرود مرتبطة بهذه الفترة. أنشئ المسودة من شاشة الشحن الحالية.</div></div>';
+      if (!rows.length) return html + '<div class="eco-table-wrap"><div class="eco-empty">لا توجد طرود تطابق هذا العرض.' +
+        (state.search || state.filter !== "all" || state.period !== "all" ? '<p>' + button("مسح الفلاتر", 'data-eco="reset"') + '</p>' :
+          '<p>ابدأ بتأكيد الطلب ثم إنشاء المسودة من شاشة الشحن.</p>' + (config.goShipping ? button("فتح شاشة الشحن", 'data-eco="shipping"', "eco-primary") : "")) + '</div></div>';
       html += '<div class="eco-table-wrap"><table class="eco-table"><thead><tr><th>رقم التتبع / العميل</th><th>النوع / الولاية</th><th>الحالة</th><th>التحصيل</th><th>الإجراءات</th></tr></thead><tbody>';
-      rows.forEach(function (r, i) {
+      rows.slice(0, state.limit).forEach(function (r, i) {
         var p = r.data, stage = p.ecotrackStage || "unknown";
-        html += '<tr><td dir="ltr">' + esc(r.tracking) + '<span class="eco-secondary" dir="rtl">' + esc(r.customer) +
-          (r.primary ? "" : " · مرتبط بالطلب الأصلي") + '</span></td><td>' + esc(typeLabels[r.type] || "—") +
-          '<span class="eco-secondary">' + esc(wilayaName(r.wilaya)) + '</span></td><td><span class="eco-state ' +
+        html += '<tr><td data-label="العميل والتتبع"><div class="eco-tracking" dir="ltr">' + esc(r.tracking) +
+          ' ' + button("نسخ", 'data-row="' + i + '" data-action="copy"', "eco-copy") + '</div><span class="eco-secondary" dir="rtl">' + esc(r.customer) +
+          (r.primary ? "" : " · مرتبط بالطلب الأصلي") + '</span></td><td data-label="الشحنة">' + esc(typeLabels[r.type] || "—") +
+          '<span class="eco-secondary">' + esc(wilayaName(r.wilaya)) + '</span></td><td data-label="الحالة"><span class="eco-state ' +
           (stage === "delivered" ? "eco-good" : p.ecotrackNeedsAttention ? "eco-alert" : "") + '">' +
-          esc(p.ecotrackStageLabel || "لم تُحدّث الحالة بعد") + "</span>";
+          esc(isDraft(p) ? "مسودة — بانتظار التسليم" : p.ecotrackStageLabel || "لم تُحدّث الحالة بعد") + "</span>";
         if (p.ecotrackNeedsAttention) html += '<span class="eco-secondary">' + esc(p.ecotrackNeedsAttention) + "</span>";
         if (p.ecotrackReturnRequestedAt) html += '<span class="eco-secondary">طُلب الإرجاع؛ قبول الناقل غير مضمون.</span>';
         html += '<span class="eco-secondary">' + (p.ecotrackLastSyncedAt ? "آخر تحقق: " +
-          esc(new Date(p.ecotrackLastSyncedAt).toLocaleString("ar-DZ")) : "يلزم تحديث") + "</span></td><td>" +
+          esc(new Date(p.ecotrackLastSyncedAt).toLocaleString("ar-DZ")) : "يلزم تحديث") + '</span></td><td data-label="التحصيل">' +
           esc(r.type === 3 ? "Pickup — خارج إجمالي COD" : money(r.amount)) +
           '<span class="eco-secondary">' + esc(paymentLabels[p.ecotrackPaymentState || "unknown"] || paymentLabels.unknown) +
-          '</span></td><td><div class="eco-row-actions">' + button("السجل والملاحظات", 'data-row="' + i + '" data-action="history"');
+          '</span></td><td data-label="الإجراءات"><div class="eco-row-actions">' + button("السجل والملاحظات", 'data-row="' + i + '" data-action="history"');
         html += button("الملصق", 'data-row="' + i + '" data-action="label"');
-        if (!p.ecotrackValidated) html += button("تعديل المسودة", 'data-row="' + i + '" data-action="update"') +
+        if (isDraft(p)) html += button("تأكيد التسليم للناقل", 'data-row="' + i + '" data-action="dispatch"', "eco-primary");
+        html += '</div><details class="eco-more"><summary>المزيد</summary><div class="eco-row-actions">' +
+          button("تحديث هذا الطلب", 'data-row="' + i + '" data-action="sync"');
+        if (config.openOrder) html += button("فتح الطلب الأصلي", 'data-row="' + i + '" data-action="order"');
+        if (isDraft(p)) html += button("تعديل المسودة", 'data-row="' + i + '" data-action="update"') +
           button("حذف المسودة", 'data-row="' + i + '" data-action="delete"', "eco-danger");
-        if (!r.primary && !p.ecotrackValidated) html += button("تأكيد التسليم للناقل", 'data-row="' + i + '" data-action="dispatch"');
         if (r.primary) html += button("تبادل / Pickup", 'data-row="' + i + '" data-action="related"');
-        if (!["returned", "cancelled"].includes(stage)) html += button("طلب إرجاع", 'data-row="' + i + '" data-action="request-return"');
-        if (["returning", "returned"].includes(stage)) html += button("استلام المرتجع", 'data-row="' + i + '" data-action="receive-return"');
-        html += "</div></td></tr>";
+        if (!isDraft(p) && !p.ecotrackReturnRequestedAt && !["delivered", "returned", "cancelled"].includes(stage))
+          html += button("طلب إرجاع", 'data-row="' + i + '" data-action="request-return"');
+        if (["returning", "returned"].includes(stage) && !p.ecotrackReturnReceivedAt) html += button("استلام المرتجع", 'data-row="' + i + '" data-action="receive-return"');
+        html += "</div></details></td></tr>";
       });
-      return html + "</tbody></table></div>";
+      html += '</tbody></table></div><p class="eco-subtitle">عرض ' + Math.min(rows.length, state.limit) + ' من ' + rows.length + ' طرد</p>';
+      return html + (rows.length > state.limit ? button("عرض المزيد", 'data-eco="more"') : "");
     }
     function financeView(rows, s) {
       var html = '<div class="eco-banner eco-warning">هذا التقرير مبني على حالات الناقل للشحنات المرتبطة بمتجرك فقط، وليس كشف حساب Assil كاملاً. ' +
@@ -259,6 +324,9 @@
       host.querySelectorAll("[data-tab]").forEach(function (b) {
         b.onclick = function () { state.tab = b.dataset.tab; state.error = ""; render(); };
       });
+      host.querySelectorAll("[data-filter]").forEach(function (b) {
+        b.onclick = function () { state.filter = b.dataset.filter; state.limit = 50; render(); };
+      });
       host.querySelector("#ecoPeriod").onchange = function (e) { state.period = e.target.value; render(); };
       var searchTimer;
       host.querySelector("#ecoSearch").oninput = function (e) {
@@ -273,6 +341,9 @@
           if (b.dataset.eco === "sync") syncAll();
           if (b.dataset.eco === "reference") refreshReference(true);
           if (b.dataset.eco === "csv") exportCsv();
+          if (b.dataset.eco === "shipping" && config.goShipping) config.goShipping();
+          if (b.dataset.eco === "more") { state.limit += 50; render(); }
+          if (b.dataset.eco === "reset") { state.search = ""; state.period = "all"; state.filter = "all"; state.limit = 50; render(); }
         };
       });
       host.querySelectorAll("[data-action]").forEach(function (b) {
@@ -280,13 +351,29 @@
       });
     }
     async function refreshReference(fresh) {
+      var ref = null;
       try {
-        var ref = await request("GET", "/admin/ecotrack/reference" + (fresh ? "?fresh=1" : ""));
+        ref = await request("GET", "/admin/ecotrack/reference" + (fresh ? "?fresh=1" : ""));
         if (!ref.available || !Array.isArray(ref.wilayas)) throw new Error("انشر نسخة Worker المحدّثة أولاً؛ تنسيق التعرفة الحالي قديم.");
-        state.reference = ref;
-        if (config.onReference) config.onReference(ref);
         state.error = "";
-      } catch (e) { state.error = "تعذّر جلب التعرفة: " + e.message; }
+      } catch (e) { ref = null; state.error = "تعذّر جلب التعرفة: " + e.message; }
+      if (!ref || !ref.available || !ref.available.wilayas || !ref.available.communes || !ref.communes.length) {
+        try {
+          var response = await fetch("robuste-delivery-locations.json?v=3", { credentials: "omit" });
+          if (!response.ok) throw new Error("fallback_unavailable");
+          var fallback = await response.json();
+          if (!fallback.wilayas || !fallback.communes || !fallback.communes.length) throw new Error("fallback_unavailable");
+          ref = Object.assign({}, ref || fallback, { locationsFallback: true,
+            wilayas: ref && ref.available.wilayas ? ref.wilayas : fallback.wilayas,
+            communes: fallback.communes, desks: ref && ref.available.desks ? ref.desks : fallback.desks,
+            available: Object.assign({}, ref && ref.available || fallback.available, { wilayas: true, communes: true }) });
+        } catch (_) {
+          // Keep the last usable list during an outage.
+          if (state.reference) ref = state.reference;
+        }
+      }
+      if (ref) state.reference = ref;
+      if (config.onReference && state.reference) config.onReference(state.reference);
       render();
     }
     async function refreshHealth() {
@@ -306,7 +393,8 @@
     }
     async function syncAll() {
       if (state.busy) return;
-      var ids = config.getOrders().filter(function (r) { return !!r.data.ecotrackTracking; }).map(function (r) { return r.id; });
+      var ids = [...new Set(allRows().map(function (r) { return r.id; }))];
+      if (!ids.length) { state.message = "لا توجد طرود لتحديثها في هذا العرض."; render(); return; }
       state.busy = true; state.error = ""; render();
       try {
         var result = await syncIds(ids, true);
@@ -316,8 +404,8 @@
       finally { state.busy = false; render(); }
     }
     async function syncNext() {
-      if (state.busy || document.visibilityState === "hidden") return;
-      var ids = config.getOrders().filter(function (r) { return !!r.data.ecotrackTracking; }).map(function (r) { return r.id; });
+      if (state.busy || document.visibilityState === "hidden" || Date.now() < state.retryAfter) return;
+      var ids = config.getOrders().filter(function (r) { return hasParcels(r.data); }).map(function (r) { return r.id; });
       if (!ids.length) return;
       if (state.panelCursor >= ids.length) state.panelCursor = 0;
       var batch = ids.slice(state.panelCursor, state.panelCursor + 15); state.panelCursor += batch.length;
@@ -365,7 +453,9 @@
           catch (e) {
             var error = form.querySelector("[data-error]"); error.hidden = false; error.textContent = e.message;
             if (e.data && e.data.tracking) error.textContent += " · رقم الطرد: " + e.data.tracking + " — لا تنشئ طرداً آخر قبل المطابقة.";
-            busy = false; submit.disabled = false; submit.textContent = submitLabel;
+            busy = false; submit.disabled = !!(e.data && (e.data.courierApplied ||
+              ["parcel_created_action_save_failed", "action_pending_reconciliation"].includes(e.data.error)));
+            submit.textContent = submit.disabled ? "يلزم مطابقة الطرد أولاً" : submitLabel;
             layer.querySelectorAll("[data-close]").forEach(function (b) { b.disabled = false; });
           }
         };
@@ -383,9 +473,11 @@
       var p = row.data.ecotrackPayload || {}, original = row.source || row.data;
       var client = p.nom_client || original.customer || "", phone = p.telephone || original.phone || "";
       var w = resolveCode(p.code_wilaya || row.wilaya), delivery = p.stop_desk == null ? row.data.deliveryType || "home" : p.stop_desk ? "office" : "home";
-      var html = '<div class="eco-form-grid">' + field("اسم العميل", "client", client, { required: true }) +
+      var html = (state.reference && state.reference.locationsFallback ? '<div class="eco-banner eco-warning">قائمة المواقع من آخر نسخة متوفرة. راجع العنوان؛ يؤكد Assil الخدمة عند حفظ الطرد.</div>' : "") +
+        '<div class="eco-form-grid">' + field("اسم العميل", "client", client, { required: true }) +
         field("الهاتف", "tel", phone, { required: true, type: "tel" }) +
-        '<div class="eco-field"><label for="ecoField-wilaya">الولاية</label><select id="ecoField-wilaya" name="wilaya" required>';
+        '<div class="eco-field"><label for="ecoField-wilaya">الولاية</label><select id="ecoField-wilaya" name="wilaya" required>' +
+        '<option value=""' + (!w ? " selected" : "") + '>اختر الولاية</option>';
       if (state.reference) state.reference.wilayas.forEach(function (x) {
         html += '<option value="' + x.code + '"' + (x.code === w ? " selected" : "") + ">" + esc(x.arabic || x.name) + "</option>";
       });
@@ -407,11 +499,22 @@
       return html + '</div><p class="eco-help" data-quote>جارٍ قراءة التعرفة…</p><p class="eco-help">لا تغيّر مبلغ COD إلا بعد تأكيد العميل. ' +
         'تكلفة الناقل منفصلة عن مبلغ الطلب القديم؛ إنشاء الطرد ينتج مسودة ولا يرسله تلقائياً.</p>';
     }
-    function bindParcelForm(form, related) {
+    function bindParcelForm(form, related, parcelType) {
       var wilaya = form.elements.wilaya, stop = form.elements.stop_desk, commune = form.elements.commune;
+      var address = form.elements.adresse, homeAddress = address.value, officeAddress = null, lastWilaya = wilaya.value;
+      var savedAmount = form.elements.montant.value;
+      function syncAddress() {
+        var selected = commune.selectedOptions[0];
+        if (stop.value === "1" && selected && selected.value) {
+          if (officeAddress === null) homeAddress = address.value;
+          officeAddress = selected.dataset.address || "مكتب الاستلام في " + selected.value;
+          address.value = officeAddress;
+        } else if (officeAddress !== null) { address.value = homeAddress; officeAddress = null; }
+      }
       function fill() {
         var ref = state.reference, n = Number(wilaya.value), office = stop.value === "1";
-        var previous = commune.value || commune.dataset.initial || "";
+        var previous = wilaya.value === lastWilaya ? commune.value || commune.dataset.initial || "" : "";
+        lastWilaya = wilaya.value; delete commune.dataset.initial;
         var rows = ref ? ref.communes.filter(function (c) {
           return c.wilaya === n && (!office || c.stopDesk === true ||
             ref.desks.some(function (d) { return d.wilaya === n && key(d.commune) === key(c.name); }));
@@ -429,22 +532,24 @@
           var option = document.createElement("option"); option.value = r.name; option.textContent = r.label; option.dataset.address = r.address || "";
           if (key(previous) === key(r.name)) option.selected = true; commune.appendChild(option);
         });
-        if (!ref && previous) {
+        if ((!ref || !ref.available.communes) && previous) {
           var legacy = document.createElement("option"); legacy.value = previous; legacy.textContent = previous; legacy.selected = true; commune.appendChild(legacy);
         }
-        quote();
+        syncAddress(); quote();
       }
       function quote() {
-        var value = rateFor(wilaya.value, stop.value === "1" ? "office" : "home", related ? Number(form.elements.type.value) : 1);
+        var value = rateFor(wilaya.value, stop.value === "1" ? "office" : "home", related ? Number(form.elements.type.value) : parcelType || 1);
         form.querySelector("[data-quote]").textContent = "تكلفة الناقل حسب تعرفة الحساب: " + money(value) +
           (value == null ? " — غير متاحة؛ لا تُعاملها كصفر." : " (تقدير إلى أن يؤكدها الناقل)");
       }
       wilaya.onchange = fill; stop.onchange = fill;
-      commune.onchange = function () {
-        var selected = commune.selectedOptions[0];
-        if (stop.value === "1" && selected && selected.dataset.address) form.elements.adresse.value = selected.dataset.address;
+      commune.onchange = syncAddress;
+      if (related) form.elements.type.onchange = function () {
+        if (this.value === "3") { savedAmount = form.elements.montant.value; form.elements.montant.value = "0"; }
+        else form.elements.montant.value = savedAmount;
+        form.elements.produit_a_recuperer.parentElement.hidden = this.value === "3";
+        quote();
       };
-      if (related) form.elements.type.onchange = quote;
       fill();
     }
     function formFields(form) {
@@ -452,6 +557,10 @@
       ["client", "tel", "tel2", "wilaya", "stop_desk", "commune", "adresse", "montant", "product", "fragile", "remarque"].forEach(function (name) {
         var value = form.elements[name].value.trim();
         fields[name] = ["wilaya", "stop_desk", "montant", "fragile"].includes(name) ? Number(value) : value;
+        if (["tel", "tel2"].includes(name)) {
+          fields[name] = value.replace(/[٠-٩]/g, function (n) { return String(n.charCodeAt(0) - 1632); }).replace(/[\s().-]/g, "");
+          fields[name] = fields[name].replace(/^(?:\+213|00213|213)([5-7][0-9]{8})$/, "0$1");
+        }
       });
       return fields;
     }
@@ -472,10 +581,11 @@
         }
         var result = await request("POST", "/admin/ecotrack/parcel", body);
         if (related) { try { sessionStorage.removeItem(storageKey); } catch {} }
+        else applyPatch(row, result.patch);
         state.message = related ? "أُنشئت المسودة " + result.tracking + "؛ يلزم تأكيد التسليم للناقل يدوياً." : "تم تحديث المسودة لدى Assil.";
         render(); return result;
       }, related ? "إنشاء المسودة" : "حفظ التعديل");
-      bindParcelForm(document.querySelector(".eco-modal-layer form"), related);
+      bindParcelForm(document.querySelector(".eco-modal-layer form"), related, row.type);
       await promise;
     }
     async function confirmAction(row, actionName) {
@@ -492,12 +602,15 @@
         var body = { id: row.id, tracking: row.tracking, action: actionName, confirm: form.elements.confirm.checked };
         if (actionName === "receive-return") body.confirmPhysicalReceipt = true;
         var result = await request("POST", "/admin/ecotrack/parcel", body);
+        applyPatch(row, result.patch);
         state.message = result.message || "تم تنفيذ الإجراء. تحديث الحالة النهائية يتبع بيانات الناقل."; render(); return result;
       }, labels[actionName]);
     }
     async function history(row) {
       var result = await request("GET", "/admin/ecotrack/history?id=" + encodeURIComponent(row.id) + "&tracking=" + encodeURIComponent(row.tracking));
+      applyPatch(row, result.parcelPatch);
       var node = result.history || {}, events = node.activity || node.events || [], notes = Array.isArray(result.notes) ? result.notes : [];
+      if (!Array.isArray(events)) events = [];
       var html = "";
       if (result.errors.length) html += '<div class="eco-banner eco-warning">بعض البيانات غير متاحة: ' + esc(result.errors.join(", ")) + "</div>";
       html += '<h3>سجل العمليات</h3><ul class="eco-history-list">';
@@ -516,7 +629,17 @@
     async function action(row, actionName) {
       state.error = "";
       try {
-        if (actionName === "label") await config.printLabel(row.tracking);
+        if (actionName === "copy") {
+          await navigator.clipboard.writeText(row.tracking); state.message = "نُسخ رقم التتبع " + row.tracking; render();
+        }
+        else if (actionName === "order" && config.openOrder) config.openOrder(row.id);
+        else if (actionName === "sync") {
+          if (state.busy) return;
+          state.busy = true; render();
+          try { var updated = await syncIds([row.id], false); state.message = updated.missing ? "بعض الحالات غير متاحة لدى Assil." : "تم تحديث حالات هذا الطلب."; }
+          finally { state.busy = false; render(); }
+        }
+        else if (actionName === "label") await config.printLabel(row.tracking);
         else if (actionName === "update" || actionName === "related") await edit(row, actionName === "related");
         else if (actionName === "history") await history(row);
         else await confirmAction(row, actionName);
@@ -560,7 +683,8 @@
       clearInterval(state.timer); clearInterval(state.healthTimer); state.started = false;
     }
     return { start: start, stop: stop, render: render, ready: isReady, rateFor: rateFor,
-      resolveShipping: resolveShipping, refreshReference: refreshReference, state: state };
+      resolveShipping: resolveShipping, refreshReference: refreshReference, state: state,
+      focusOrder: function (id) { state.tab = "parcels"; state.search = id; state.filter = "all"; state.period = "all"; state.limit = 50; render(); } };
   }
   window.RBEcoAdmin = { create: create, flatten: flatten, statistics: statistics, csvCell: csvCell };
 })();

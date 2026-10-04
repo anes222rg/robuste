@@ -367,6 +367,8 @@ select.st-select option{background:#fff;color:var(--ink)}
 
 /* ---------- eco module blending ---------- */
 #sec-ecotrack .eco-tools{font-size:15px}
+.ship-steps{display:flex;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px;font-size:14px;color:var(--ink-2)}
+.ship-steps span{display:flex;align-items:center;gap:8px}.ship-steps b{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--blue-soft);color:var(--blue)}
 .eco-modal-layer{z-index:2400}
 
 /* ---------- print ---------- */
@@ -525,7 +527,7 @@ body.modal-open .bottom-nav{display:none}
 .bulk-l .bclear:hover{background:rgba(255,255,255,.22)}
 
 </style>
-<link rel="stylesheet" href="robuste-ecotrack-admin.css?v=2">
+<link rel="stylesheet" href="robuste-ecotrack-admin.css?v=4">
 </head>
 <body>
 
@@ -615,7 +617,7 @@ body.modal-open .bottom-nav{display:none}
 <div id="printArea"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="robuste-ecotrack-admin.js?v=2"></script>
+<script src="robuste-ecotrack-admin.js?v=4"></script>
 <script>
 (function(){
 'use strict';
@@ -1256,11 +1258,11 @@ function moreItems(o){var d=o.data,id=o.id,arch=isArchived(d),s=statusKey(d);ret
   s!=='وهمي'?{label:'تعليم كوهمي',icon:'bi-incognito',danger:true,fn:function(){if(confirm('تعليم الطلب كوهمي؟ سيُستبعد من الإحصائيات.'))applyStatus(id,'وهمي');}}:null,
   s!=='تجريبي'?{label:'تعليم كتجريبي',icon:'bi-bug',fn:function(){applyStatus(id,'تجريبي');}}:null];}
 function quickShip(id,btn){var r=getRec(id);if(!r)return;var d=r.data;if(d.ecotrackTracking){rbToast('هذا الطلب لديه طرد مسبقاً.','info',4000);return;}
-  var c=shipChecks(d);if(!c.ok){rbToast('حقول ناقصة للشحن: '+c.missing.map(function(x){return x.label;}).join('، ')+'\nافتح الطلب وعدّلها.','err',9000,{label:'فتح',fn:function(){openOrder(id);}});return;}
+  var c=shipChecks(d);if(!c.ok&&!ecoAdmin){rbToast('حقول ناقصة للشحن: '+c.missing.map(function(x){return x.label;}).join('، ')+'\nافتح الطلب وعدّلها.','err',9000,{label:'فتح',fn:function(){openOrder(id);}});return;}
   var old=btn?btn.innerHTML:'';if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner-border spinner-border-sm"></span>';}
   return autoShipEcotrack(id,{stop_desk:stopDeskFor(guessDeliveryType(d)),commune:orderCommune(d)}).then(function(data){var rr=getRec(id);if(rr){rr.data.ecotrackTracking=data.tracking;if(data.status)rr.data.status=data.status;}
     rbToast('✅ تم إنشاء الطرد'+(data.tracking?': '+data.tracking:'')+'\nاطبع الملصق ثم أكّد الشحن من صفحة الشحن.','ok',10000,data.tracking?{label:'الملصق',fn:function(){rbPrintLabel(data.tracking,null);}}:null);renderAll();return data;})
-  .catch(function(err){if(btn&&document.contains(btn)){btn.disabled=false;btn.innerHTML=old;}var code=err&&err.message;var m=ecotrackErr(code,err&&err.detail);if(code==='cancelled_by_admin')rbToast(m,'info',4000);else rbToast('❌ '+m,'err',12000);throw err;});}
+  .catch(function(err){if(btn&&document.contains(btn)){btn.disabled=false;btn.innerHTML=old;}var code=err&&err.message;var m=ecotrackErr(code,err&&err.detail);if(code==='cancelled_by_admin')rbToast(m,'info',4000);else rbToast('❌ '+m,'err',12000);return null;});}
 
 /* ---- Meta purchase events (deferred so «تراجع» can cancel them) ---- */
 var _metaJobs={};
@@ -1329,21 +1331,21 @@ function rbAdminHeaders(){
   if(rbSignedIn()){
     return auth.currentUser.getIdToken()
       .then(function(t){h["Authorization"]="Bearer "+t;return h;})
-      .catch(function(){return rbLegacyKeyInto(h);});
+      .catch(function(){throw new Error('انتهت الجلسة. سجّل الدخول مجدداً.');});
   }
   return Promise.resolve(rbLegacyKeyInto(h));
 }
-function rbAdminPost(path,body){
+function rbAdminRequest(path,method,body){
   return rbAdminHeaders().then(function(h){
-    return fetch(WORKER_URL+path,{method:"POST",headers:h,body:JSON.stringify(body||{})});
+    if(method==='GET')delete h['Content-Type'];
+    var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},45000);
+    return fetch(WORKER_URL+path,{method:method,headers:h,signal:controller.signal,...(method==='POST'?{body:JSON.stringify(body||{})}:{})})
+      .catch(function(e){if(e.name==='AbortError')throw new Error('انتهت مهلة الاتصال. حدّث حالة الطرد قبل إعادة إجراء الإنشاء أو التسليم.');throw e;})
+      .finally(function(){clearTimeout(timer);});
   });
 }
-function rbAdminGet(path){
-  return rbAdminHeaders().then(function(h){
-    delete h["Content-Type"];
-    return fetch(WORKER_URL+path,{headers:h});
-  });
-}
+function rbAdminPost(path,body){return rbAdminRequest(path,'POST',body);}
+function rbAdminGet(path){return rbAdminRequest(path,'GET');}
 
 /* ---- EcoTrack: dispatch + labels ---------------------------------------
  * create/order only drafts the parcel. valid/order ("Expédier") is what hands
@@ -1357,6 +1359,8 @@ function rbEcoValidated(d){ return !!(d && d.ecotrackValidated); }
  * hence fetch -> blob -> open. */
 function rbPrintLabel(tracking,btn){
   var old=btn?btn.innerHTML:null;
+  var preview=window.open('about:blank','_blank');
+  if(preview)try{preview.document.title='ملصق '+tracking;preview.document.body.textContent='جارٍ تحميل الملصق…';}catch(_){}
   if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner-border spinner-border-sm"></span>';}
   return rbAdminGet("/admin/ecotrack/label?tracking="+encodeURIComponent(tracking))
     .then(function(res){
@@ -1365,11 +1369,11 @@ function rbPrintLabel(tracking,btn){
     })
     .then(function(blob){
       var u=URL.createObjectURL(blob);
-      var w=window.open(u,"_blank");
-      if(!w) rbToast("🚫 المتصفح منع النافذة — اسمح بالنوافذ المنبثقة لطباعة الملصق.","err",9000);
+      if(preview&&!preview.closed)preview.location.href=u;
+      else{var a=document.createElement('a');a.href=u;a.download=tracking+'.pdf';document.body.appendChild(a);a.click();a.remove();rbToast('تم تنزيل الملصق. افتحه للطباعة.','ok',6000);}
       setTimeout(function(){URL.revokeObjectURL(u);},60000);
     })
-    .catch(function(e){ rbToast("❌ تعذّر جلب الملصق: "+e.message,"err",9000); })
+    .catch(function(e){if(preview&&!preview.closed)preview.close();rbToast("❌ تعذّر جلب الملصق: "+e.message,"err",9000);})
     .then(function(){ if(btn){btn.disabled=false;btn.innerHTML=old;} });
 }
 
@@ -1389,7 +1393,8 @@ function rbValidateParcels(rows){
       .then(function(res){return res.json().catch(function(){return{};});})
       .then(function(j){
         (j.results||[]).forEach(function(r){
-          if(r.ok)done.ok++; else {done.fail++;done.errors.push(r.tracking+": "+(r.error||"?"));}
+          if(r.ok){done.ok++;var target=chunk.find(function(p){return p.tracking===r.tracking;});var rec=target&&getRec(target.id);if(rec)Object.assign(rec.data,r.patch||{ecotrackValidated:true});}
+          else {done.fail++;done.errors.push(r.tracking+": "+(r.error||"?"));}
         });
         if(!j.results) { done.fail+=chunk.length; done.errors.push(j.error||"لا استجابة"); }
       })
@@ -1405,17 +1410,19 @@ function rbValidateParcels(rows){
   });
 }
 
-var shipView='',shipLimit=50;
+var shipView='',shipLimit=50,shipQuery='',shipSelection={};
 window.__renderRegistry.shipping=function(){
   var host=$("sec-shipping");var biz=businessOrders();
   var keep={},fid=null,fcls=null,ae=document.activeElement;Array.prototype.forEach.call(host.querySelectorAll('tr[data-id]'),function(tr){var ci=tr.querySelector('.ship-commune'),sl=tr.querySelector('.ship-dt');keep[tr.getAttribute('data-id')]={c:ci?ci.value:null,dt:sl?sl.value:null};});
   if(ae&&host.contains(ae)&&ae.closest('tr[data-id]')){fid=ae.closest('tr[data-id]').getAttribute('data-id');fcls=ae.classList.contains('ship-commune')?'ship-commune':ae.classList.contains('ship-dt')?'ship-dt':null;}
-  var queue=biz.filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;});
+  var query=normTxt(shipQuery);var searched=biz.filter(function(o){return !query||hayOf(o).indexOf(query)!==-1;});
+  var queue=searched.filter(function(o){return inSet(SHIPPABLE_SET,statusKey(o.data))&&!o.data.ecotrackTracking;});
   queue.sort(function(a,b){var x=orderDate(a.data),y=orderDate(b.data);return (x?x.getTime():0)-(y?y.getTime():0);});
-  var shipped=biz.filter(function(o){return !!o.data.ecotrackTracking;});
+  var shipped=searched.filter(function(o){return !!o.data.ecotrackTracking;});
   var pending=shipped.filter(function(o){return !rbEcoValidated(o.data)&&!inSet(FINAL_SET,statusKey(o.data));});
   var view=shipView||(pending.length?'drafts':'all');var list=view==='drafts'?pending:shipped;
-  var html='<div class="sec-tools"><div class="text-muted" style="font-size:14px;max-width:760px">اختر <b>🏢 مكتب</b> أو <b>🏠 منزل</b> لكل طلب ثم «أرسل». قبل الإنشاء يتحقق النظام من الحقول المطلوبة (<i class="bi bi-check-circle-fill text-success"></i> / <i class="bi bi-x-circle-fill text-danger"></i>)، ولا يمكن شحن نفس الطلب مرتين.</div><button class="btn-soft" id="ecoTestConnection" type="button"><i class="bi bi-plug"></i> تحقق من اتصال Assil</button></div>';
+  var html='<div class="ship-steps" aria-label="خطوات الشحن"><span><b>1</b> تأكيد الطلب</span><span><b>2</b> مراجعة وإنشاء المسودة</span><span><b>3</b> طباعة الملصق</span><span><b>4</b> تأكيد التسليم للناقل</span></div>';
+  html+='<div class="sec-tools"><label class="search-box"><i class="bi bi-search"></i><input id="shipSearch" type="search" value="'+esc(shipQuery)+'" placeholder="بحث بالعميل، الهاتف أو التتبع" aria-label="بحث في طلبات الشحن"></label><button class="btn-soft" id="ecoTestConnection" type="button"><i class="bi bi-plug"></i> تحقق من اتصال Assil</button><button class="btn-soft" id="shipTracking" type="button"><i class="bi bi-activity"></i> متابعة الطرود والتحصيل</button></div>';
   html+='<div class="panel mb-3"><h6><i class="bi bi-box-arrow-up"></i> جاهزة للشحن <span class="badge2">'+fmtNum(queue.length)+'</span><span class="muted">الأقدم أولاً</span></h6>';
   if(!queue.length)html+='<div class="empty"><i class="bi bi-check2-circle"></i><div class="mt-2">لا توجد طلبات جاهزة للشحن.</div><button type="button" class="btn-soft" data-go-orders="new"><i class="bi bi-stars"></i> الطلبات بانتظار التأكيد</button></div>';
   else{html+='<div class="table-wrap"><table class="tbl stack"><thead><tr><th>الزبون</th><th>العنوان</th><th>المنتجات</th><th>التوصيل</th><th>سعر التوصيل</th><th>المبلغ</th><th>التحقق</th><th>إرسال</th></tr></thead><tbody>';
@@ -1428,7 +1435,7 @@ window.__renderRegistry.shipping=function(){
         +'<td data-label="سعر التوصيل" class="ship-fee" style="white-space:nowrap;">'+(fee==null?'<span class="text-muted">؟</span>':esc(fmtMoney(fee)))+'</td>'
         +'<td data-label="المبلغ" style="white-space:nowrap;"><b>'+esc(fmtMoney(orderTotal(d)))+'</b></td>'
         +'<td data-label="التحقق" class="ship-check">'+checklistHtml(c)+'</td>'
-        +'<td data-label="إرسال"><button type="button" class="btn btn-sm btn-brand ship-btn"><i class="bi bi-truck"></i> أرسل</button><div class="ship-msg" style="font-size:13px;"></div></td>'
+        +'<td data-label="إرسال"><button type="button" class="btn btn-sm btn-brand ship-btn"><i class="bi bi-box-seam"></i> مراجعة وإنشاء مسودة</button><div class="ship-msg" style="font-size:13px;"></div></td>'
         +'</tr>';});
     html+='</tbody></table></div>';}
   html+='</div>';
@@ -1441,18 +1448,24 @@ window.__renderRegistry.shipping=function(){
     html+='<div class="table-wrap"><table class="tbl stack"><thead><tr><th style="width:40px;"></th><th>الزبون</th><th>الولاية</th><th>رقم التتبع</th><th>الحالة</th><th>التسليم للمكتب</th><th>الملصق</th></tr></thead><tbody>';
     shown.forEach(function(o){var d=o.data;var v=rbEcoValidated(d);var tr=d.ecotrackTracking;
       html+='<tr data-id="'+esc(o.id)+'" data-tracking="'+esc(tr)+'">'
-        +'<td data-label="تحديد">'+(v?'':'<input type="checkbox" class="eco-pick" aria-label="تحديد الطرد">')+'</td>'
+        +'<td data-label="تحديد">'+(v?'':'<input type="checkbox" class="eco-pick"'+(shipSelection[o.id]?' checked':'')+' aria-label="تحديد الطرد">')+'</td>'
         +'<td data-label="الزبون"><button type="button" class="ship-name" data-open="'+esc(o.id)+'">'+esc(customerName(d))+'</button><div class="sub">'+esc(relTime(parseDate(d.ecotrackCreatedAt)||orderDate(d)))+'</div></td>'
         +'<td data-label="الولاية">'+esc(orderWilaya(d))+'</td>'
         +'<td data-label="رقم التتبع" dir="ltr"><span class="chip">'+esc(tr)+'</span></td>'
         +'<td data-label="الحالة">'+badge(d)+'</td>'
         +'<td data-label="التسليم للمكتب">'+(v?'<span class="val-ok" style="font-size:13px;"><i class="bi bi-check-circle-fill"></i> مؤكَّد'+(d.ecotrackValidatedAt?' · '+esc(fmtDate(parseDate(d.ecotrackValidatedAt))):'')+'</span>':'<button type="button" class="btn btn-sm btn-brand eco-validate"><i class="bi bi-send-check"></i> تأكيد</button>')+'</td>'
-        +'<td data-label="الملصق"><button type="button" class="btn btn-sm btn-outline-secondary eco-label" aria-label="طباعة الملصق"><i class="bi bi-printer"></i></button></td>'
+        +'<td data-label="الملصق"><div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-outline-secondary eco-label" aria-label="طباعة الملصق"><i class="bi bi-printer"></i> الملصق</button><button type="button" class="btn btn-sm btn-outline-secondary" data-eco-order="'+esc(o.id)+'">تفاصيل الطرد</button></div></td>'
         +'</tr>';});
     html+='</tbody></table></div>';
     if(list.length>shown.length)html+='<div class="ow-more mt-3"><button type="button" class="btn-soft" id="shipMore"><i class="bi bi-chevron-down"></i> عرض المزيد ('+fmtNum(list.length-shown.length)+')</button></div>';}
   html+='</div>';
   host.innerHTML=html;
+  var search=host.querySelector('#shipSearch');
+  search.oninput=function(){shipQuery=this.value;shipLimit=50;window.__renderRegistry.shipping();var next=host.querySelector('#shipSearch');next.focus();};
+  if(ae&&ae.id==='shipSearch')search.focus({preventScroll:true});
+  host.querySelector('#shipTracking').onclick=function(){showSection('ecotrack');};
+  host.querySelectorAll('[data-eco-order]').forEach(function(b){b.onclick=function(){showSection('ecotrack');if(ecoAdmin)ecoAdmin.focusOrder(this.dataset.ecoOrder);};});
+  host.querySelectorAll('.eco-pick').forEach(function(cb){cb.onchange=function(){var id=this.closest('tr').dataset.id;if(this.checked)shipSelection[id]=true;else delete shipSelection[id];};});
   Object.keys(keep).forEach(function(id){var tr=host.querySelector('tr[data-id="'+(window.CSS&&CSS.escape?CSS.escape(id):id)+'"]');if(!tr)return;var ci=tr.querySelector('.ship-commune'),sl=tr.querySelector('.ship-dt');if(ci&&keep[id].c)ci.value=keep[id].c;if(sl&&keep[id].dt)sl.value=keep[id].dt;if(fid===id&&fcls){var f=tr.querySelector('.'+fcls);if(f)try{f.focus({preventScroll:true});}catch(_){}}});
 
   host.onclick=function(e){var n=e.target.closest('[data-open]');if(n){openOrder(n.getAttribute('data-open'));return;}var sv=e.target.closest('[data-sv]');if(sv){shipView=sv.getAttribute('data-sv');shipLimit=50;window.__renderRegistry.shipping();return;}var g=e.target.closest('[data-go-orders]');if(g){goOrders(g.getAttribute('data-go-orders'),{reset:true});return;}if(e.target.closest('#shipMore')){shipLimit+=50;window.__renderRegistry.shipping();}};
@@ -1467,14 +1480,14 @@ window.__renderRegistry.shipping=function(){
   });
   function ecoPicked(){return Array.prototype.slice.call(host.querySelectorAll('.eco-pick:checked')).map(function(cb){var row=cb.closest('tr');return {id:row.getAttribute('data-id'),tracking:row.getAttribute('data-tracking')};});}
   var selAll=$("ecoSelAll");
-  if(selAll)selAll.addEventListener('click',function(){var boxes=host.querySelectorAll('.eco-pick');var turnOn=Array.prototype.some.call(boxes,function(b){return !b.checked;});for(var i=0;i<boxes.length;i++)boxes[i].checked=turnOn;});
+  if(selAll){selAll.innerHTML='<i class="bi bi-check2-square"></i> تحديد المسودات المعروضة';selAll.addEventListener('click',function(){var boxes=host.querySelectorAll('.eco-pick');var turnOn=Array.prototype.some.call(boxes,function(b){return !b.checked;});for(var i=0;i<boxes.length;i++){boxes[i].checked=turnOn;boxes[i].onchange();}});}
   var vSel=$("ecoValidateSel");
-  if(vSel)vSel.addEventListener('click',function(){var picked=ecoPicked();if(!picked.length){rbToast("حدّد طرداً واحداً على الأقل.","info",5000);return;}if(!confirm("تأكيد شحن "+picked.length+" طرد؟\n\nبعد التأكيد لا يمكن تعديل الطرد ولا حذفه من الـ API."))return;rbValidateParcels(picked);});
+  if(vSel)vSel.addEventListener('click',function(){var picked=ecoPicked();if(!picked.length){rbToast("حدّد طرداً واحداً على الأقل.","info",5000);return;}if(!confirm("أؤكد تسليم "+picked.length+" طرد فعلياً للناقل.\n\nبعد التأكيد لا يمكن تعديل الطرد ولا حذفه."))return;this.disabled=true;rbValidateParcels(picked).finally(function(){if(document.contains(vSel))vSel.disabled=false;});});
   var pSel=$("ecoPrintSel");
   if(pSel)pSel.addEventListener('click',function(){var picked=ecoPicked();if(!picked.length){rbToast("حدّد طرداً واحداً على الأقل.","info",5000);return;}var btn=this;btn.disabled=true;
     picked.reduce(function(chain,r){return chain.then(function(){return rbPrintLabel(r.tracking,null);}).then(function(){return new Promise(function(res){setTimeout(res,600);});});},Promise.resolve()).then(function(){btn.disabled=false;});});
   var vBtns=host.querySelectorAll('.eco-validate');
-  for(var vi=0;vi<vBtns.length;vi++)vBtns[vi].addEventListener('click',function(){var row=this.closest('tr');if(!confirm("تأكيد شحن هذا الطرد؟\n\nبعد التأكيد لا يمكن تعديله ولا حذفه."))return;rbValidateParcels([{id:row.getAttribute('data-id'),tracking:row.getAttribute('data-tracking')}]);});
+  for(var vi=0;vi<vBtns.length;vi++)vBtns[vi].addEventListener('click',function(){var row=this.closest('tr'),btn=this;if(!confirm("أؤكد تسليم هذا الطرد فعلياً للناقل.\n\nبعد التأكيد لا يمكن تعديله ولا حذفه."))return;btn.disabled=true;rbValidateParcels([{id:row.getAttribute('data-id'),tracking:row.getAttribute('data-tracking')}]).finally(function(){if(document.contains(btn))btn.disabled=false;});});
   var lBtns=host.querySelectorAll('.eco-label');
   for(var li=0;li<lBtns.length;li++)lBtns[li].addEventListener('click',function(){rbPrintLabel(this.closest('tr').getAttribute('data-tracking'),this);});
   function refreshShipRow(row){var id=row.getAttribute('data-id');var rec=getRec(id);if(!rec)return;var d=rec.data;var ci=row.querySelector('.ship-commune');var commune=ci?(ci.value||'').trim():'';var feeCell=row.querySelector('.ship-fee');var fee=deliveryOf(d);if(feeCell)feeCell.innerHTML=(fee==null?'<span class="text-muted">؟</span>':esc(fmtMoney(fee)));var chk=row.querySelector('.ship-check');if(chk)chk.innerHTML=checklistHtml(shipChecks(d,commune));}
@@ -1485,14 +1498,14 @@ window.__renderRegistry.shipping=function(){
     var row=this.closest('tr');var id=row.getAttribute('data-id');var ci=row.querySelector('.ship-commune');var commune=ci?(ci.value||'').trim():'';
     var sel=row.querySelector('.ship-dt');var dt=sel?sel.value:'office';
     var msg=row.querySelector('.ship-msg');var b=this;var rec=getRec(id);if(!rec)return;var d=rec.data;var c=shipChecks(d,commune);
-    if(!c.ok){msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}
+    if(!c.ok&&!ecoAdmin){msg.innerHTML='<span class="text-danger">حقول ناقصة: '+esc(c.missing.map(function(x){return x.label;}).join('، '))+'</span>';return;}
     b.disabled=true;b.innerHTML='<span class="spinner-border spinner-border-sm"></span>';
     var ov2={stop_desk:stopDeskFor(dt),commune:commune||orderCommune(d)};
-    autoShipEcotrack(id,ov2).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}msg.innerHTML='<span class="text-success">تم ✓ '+esc(data.tracking||'')+'</span>';setTimeout(renderAll,900);}).catch(function(err){b.disabled=false;b.innerHTML='<i class="bi bi-truck"></i> أرسل';msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message,err&&err.detail))+'</span>';});
+    autoShipEcotrack(id,ov2).then(function(data){var r=getRec(id);if(r){r.data.ecotrackTracking=data.tracking;if(data.status)r.data.status=data.status;}msg.innerHTML='<span class="text-success">تم ✓ '+esc(data.tracking||'')+'</span>';setTimeout(renderAll,900);}).catch(function(err){b.disabled=false;b.innerHTML='<i class="bi bi-box-seam"></i> مراجعة وإنشاء مسودة';msg.innerHTML='<span class="text-danger">'+esc(ecotrackErr(err&&err.message,err&&err.detail))+'</span>';});
   });
 };
 function ecotrackErr(code,detail){var m={'already_shipped':'الطلب مشحون مسبقاً','order_not_found':'الطلب غير موجود','invalid_parcel':'بيانات الطرد ناقصة','ecotrack_create_failed':'فشل الإنشاء في Ecotrack','ecotrack non configure':'إعدادات Ecotrack ناقصة في الـ Worker','unauthorized':'انتهت الجلسة — سجّل الدخول من جديد','wilaya non reconnue':'الولاية غير معروفة','commune manquante':'البلدية ناقصة','cancelled_by_admin':'تم إلغاء الإجراء — لم يُنشأ طرد','shipment_pending_reconciliation':'نتيجة الإنشاء غير مؤكدة — طابقها في Assil قبل إعادة المحاولة','saved_parcel_but_db_update_failed':'أُنشئ الطرد، لكن تعذّر ربطه بالطلب — لا تنشئ طرداً آخر','saved_parcel_but_action_update_failed':'أُنشئ الطرد، لكن تعذّر حفظ سجل الإجراء — طابقه أولاً','shipment_reservation_failed':'تعذّر تأمين إجراء الإنشاء — لم يُرسل إلى الناقل'};var base=m[code]||code||'فشل الإرسال';return base+((detail&&String(detail)!==String(code))?(' — '+detail):'');}
-async function autoShipEcotrack(id,overrides){if(ecoAdmin)overrides=await ecoAdmin.resolveShipping(id,overrides||{});var user=auth.currentUser;if(!user)throw new Error('unauthorized');var idToken=await user.getIdToken();var res=await fetch(WORKER_URL+"/admin/confirm-ship",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},body:JSON.stringify(Object.assign({id:id},overrides||{}))});var data=await res.json().catch(function(){return {};});if(!res.ok){var e=new Error(data.error||data.detail||"فشل الإرسال");e.detail=data.detail||"";if(data.tracking)e.detail+=(e.detail?" · ":"")+"رقم الطرد: "+data.tracking+" — لا تنشئ طرداً آخر قبل المطابقة.";throw e;}return data;}
+async function autoShipEcotrack(id,overrides){if(ecoAdmin)overrides=await ecoAdmin.resolveShipping(id,overrides||{});var user=auth.currentUser;if(!user)throw new Error('unauthorized');var res=await rbAdminPost('/admin/confirm-ship',Object.assign({id:id},overrides||{}));var data=await res.json().catch(function(){return {};});if(!res.ok){var e=new Error(data.error||data.detail||"فشل الإرسال");e.detail=data.detail||"";if(data.tracking)e.detail+=(e.detail?" · ":"")+"رقم الطرد: "+data.tracking+" — لا تنشئ طرداً آخر قبل المطابقة.";throw e;}return data;}
 
 /* ============ PRODUCTS ============ */
 window.__renderRegistry.products=function(){
@@ -1704,7 +1717,7 @@ function omWireView(rec){var id=rec.id;var root=$("orderModalContent");
     else if(act==='cancel')askCancel(id,a,refresh);
     else if(act==='ship')omShip(id,a);
     else if(act==='label'){if(d.ecotrackTracking)rbPrintLabel(d.ecotrackTracking,a);}
-    else if(act==='track'){orderModal.hide();showSection('ecotrack');}
+    else if(act==='track'){orderModal.hide();showSection('ecotrack');if(ecoAdmin)ecoAdmin.focusOrder(id);}
     else if(act==='copy')copyText(orderInfoText(getRec(id)),'✅ تم نسخ معلومات الطلب');
     else if(act==='edit'){omState.edit=true;openOrder(id);}};
   root.onkeydown=function(e){if(e.key==='Enter'){var h=e.target.closest('[data-open]');if(h){e.preventDefault();openOrder(h.getAttribute('data-open'));}}};
@@ -1719,8 +1732,8 @@ function omWireView(rec){var id=rec.id;var root=$("orderModalContent");
   var fe=$("mShipFee");if(fe)fe.textContent='توصيل مدفوع: '+fmtMoney(deliveryOf(cur()));
   var sb=$("mShip");if(sb)sb.onclick=function(){omShip(id,sb);};}
 function omShip(id,btn){var r=getRec(id);if(!r)return;var d=r.data;var msg=$("mShipMsg");var sel=$("mShipDt");var dt=sel?sel.value:guessDeliveryType(d);var commune=orderCommune(d);
-  if(!commune&&!(ecoAdmin&&ecoAdmin.ready())){commune=(prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:')||'').trim();if(!commune)return;}
-  var c=shipChecks(d,commune);if(!c.ok){var m='حقول ناقصة: '+c.missing.map(function(x){return x.label;}).join('، ');if(msg)msg.innerHTML='<span class="text-danger">'+esc(m)+'</span>';else rbToast(m,'err',8000);return;}
+  if(!commune&&!ecoAdmin){commune=(prompt('البلدية ناقصة — أدخل اسم البلدية للشحن:')||'').trim();if(!commune)return;}
+  var c=shipChecks(d,commune);if(!c.ok&&!ecoAdmin){var m='حقول ناقصة: '+c.missing.map(function(x){return x.label;}).join('، ');if(msg)msg.innerHTML='<span class="text-danger">'+esc(m)+'</span>';else rbToast(m,'err',8000);return;}
   var sb=$("mShip");var btns=[sb,btn].filter(function(x,i,a){return x&&a.indexOf(x)===i;});btns.forEach(function(b){b.disabled=true;});var oldHtml=sb?sb.innerHTML:'';if(sb)sb.innerHTML='<span class="spinner-border spinner-border-sm"></span>';
   autoShipEcotrack(id,{stop_desk:stopDeskFor(dt),commune:commune}).then(function(data){var rr=getRec(id);if(rr){rr.data.ecotrackTracking=data.tracking;if(data.status)rr.data.status=data.status;}rbToast('✅ تم إنشاء الطرد'+(data.tracking?': '+data.tracking:''),'ok',8000);renderAll();if(omState.id===id)openOrder(id,{keepScroll:true});})
   .catch(function(err){btns.forEach(function(b){if(document.contains(b))b.disabled=false;});if(sb&&document.contains(sb))sb.innerHTML=oldHtml;var code=err&&err.message;var m=ecotrackErr(code,err&&err.detail);if(code==='cancelled_by_admin'){rbToast(m,'info',4000);return;}if(msg&&document.contains(msg))msg.innerHTML='<span class="text-danger">'+esc(m)+'</span>';else rbToast('❌ '+m,'err',10000);});}
@@ -1823,16 +1836,13 @@ function fireWorkerPurchase(id){
   try{
     if(!id){rbToast("\u274c \u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0639\u0631\u0651\u0641 \u0644\u0644\u0637\u0644\u0628 \u2014 \u0644\u0645 \u064a\u064f\u0631\u0633\u0644 \u0623\u064a \u062d\u062f\u062b.","err",0);return;}
     if(typeof WORKER_URL==="undefined"||!WORKER_URL){rbToast("\u274c \u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0633\u064a\u0631\u0641\u0631 \u063a\u064a\u0631 \u0645\u0636\u0628\u0648\u0637 \u2014 \u0644\u0645 \u064a\u064f\u0631\u0633\u0644 \u0623\u064a \u062d\u062f\u062b.","err",0);return;}
-    var k=robusteAdminKey();
-    if(!k){rbToast("\u274c \u0644\u0645 \u062a\u064f\u062f\u062e\u0644 \u0645\u0641\u062a\u0627\u062d \u0627\u0644\u0625\u062f\u0627\u0631\u0629 \u2014 \u0644\u0645 \u064a\u064f\u0631\u0633\u0644 \u062d\u062f\u062b \u0627\u0644\u0634\u0631\u0627\u0621 \u0625\u0644\u0649 \u0645\u064a\u062a\u0627.","err",0);return;}
     var wait=rbToast("\u23f3 \u062c\u0627\u0631\u064d \u0625\u0631\u0633\u0627\u0644 \u062d\u062f\u062b \u0627\u0644\u0634\u0631\u0627\u0621 \u0625\u0644\u0649 \u0645\u064a\u062a\u0627\u2026","wait",0);
-    fetch(WORKER_URL+"/admin/confirm-purchase",{method:"POST",headers:{"Content-Type":"application/json","X-Admin-Key":k},body:JSON.stringify({id:id})})
+    rbAdminPost('/admin/confirm-purchase',{id:id})
       .then(function(res){return res.text().then(function(t){var d=null;try{d=JSON.parse(t);}catch(e){}return {status:res.status,ok:res.ok,data:d,text:t};});})
       .then(function(r){
         rbRemoveToast(wait);
         if(r.status===401){
-          var t401=rbToast("\u274c \u0645\u0641\u062a\u0627\u062d \u0627\u0644\u0625\u062f\u0627\u0631\u0629 \u062e\u0627\u0637\u0626 (401)\n\u0627\u0636\u063a\u0637 \u0647\u0646\u0627 \u0644\u0645\u0633\u062d\u0647 \u0648\u0625\u0639\u0627\u062f\u0629 \u0625\u062f\u062e\u0627\u0644\u0647.","err",0);
-          if(t401)t401.addEventListener("click",rbResetAdminKey);
+          rbToast('انتهت الجلسة أو لا تملك صلاحية الإدارة. سجّل الدخول بحساب المتجر.','err',10000);
           return;
         }
         if(!r.ok){rbToast("\u274c \u0641\u0634\u0644 \u0627\u0644\u0625\u0631\u0633\u0627\u0644 \u2014 \u0631\u0645\u0632 "+r.status+"\n"+String(r.text).slice(0,220),"err",0);return;}
@@ -1863,8 +1873,6 @@ function rbBulkSendMeta(){
   var list=rbEligibleForMeta();
   if(!list.length){rbToast("لا توجد طلبات مؤهّلة للإرسال.\nالشروط: مؤكّدة + لم تُرسل سابقاً + عمرها أقل من 6 أيام.","info",14000);return;}
   if(!confirm("سيتم إرسال "+list.length+" طلب إلى ميتا. هل تريد المتابعة؟"))return;
-  var k=robusteAdminKey();
-  if(!k){rbToast("❌ لم تُدخل مفتاح الإدارة — لم يُرسل شيء.","err",0);return;}
   var ok=0,already=0,fail=0,i=0;
   var prog=rbToast("⏳ 0 / "+list.length,"wait",0);
   function step(){
@@ -1876,7 +1884,7 @@ function rbBulkSendMeta(){
     }
     var id=list[i].id;i++;
     if(prog)prog.textContent="⏳ "+i+" / "+list.length;
-    fetch(WORKER_URL+"/admin/confirm-purchase",{method:"POST",headers:{"Content-Type":"application/json","X-Admin-Key":k},body:JSON.stringify({id:id})})
+    rbAdminPost('/admin/confirm-purchase',{id:id})
       .then(function(res){return res.json().catch(function(){return null;});})
       .then(function(d){if(d&&d.already)already++;else if(d&&d.ok)ok++;else fail++;})
       .catch(function(){fail++;})
@@ -1931,7 +1939,8 @@ function boot(){
     if(window.RBEcoAdmin&&!ecoAdmin){
       ecoAdmin=window.RBEcoAdmin.create({
         getOrders:function(){return allOrders;},get:rbAdminGet,post:rbAdminPost,printLabel:rbPrintLabel,
-        isActive:function(){return section==='ecotrack';},onReference:function(){if(ordersLoaded)renderAll();}
+        isActive:function(){return section==='ecotrack';},onReference:function(){if(ordersLoaded)renderAll();},
+        openOrder:openOrder,goShipping:function(){showSection('shipping');},onChange:function(){updateBadges();}
       });
       window.__renderRegistry.ecotrack=function(){ecoAdmin.render();};
     }

@@ -1,0 +1,302 @@
+{
+  "package": "robuste-admin-ecotrack-update",
+  "date": "2026-10-04",
+  "type": "update-only",
+  "files": [
+    {
+      "path": "ADMIN_WORKFLOW_FIXES.md",
+      "bytes": 3879,
+      "sha256": "62351fb2f6e0d21da4879b51181419535851adc08692068fbe534f71e1fafe57"
+    },
+    {
+      "path": "ECOTRACK_SETUP.md",
+      "bytes": 12118,
+      "sha256": "6d46e91ec0dc5ac04d887bad0f2eb67941c488704a65281e147089e8ca5087ae"
+    },
+    {
+      "path": "START_HERE.txt",
+      "bytes": 1890,
+      "sha256": "1de9fa28a1ae01c4616284298796a06ef76faf3affc9505a3352baecb54ad771"
+    },
+    {
+      "path": "admin.html",
+      "bytes": 226344,
+      "sha256": "d421661b59201424cecb4b621bd90ef5269a2e65ffffe63077d9a56e696f556d"
+    },
+    {
+      "path": "cloudflare-worker.js",
+      "bytes": 127960,
+      "sha256": "dbe590db2fa9aa3e8795322c7e68794073576005900b4175366d679409de65ee"
+    },
+    {
+      "path": "firestore.rules",
+      "bytes": 3337,
+      "sha256": "3ea8af906a7fd9c8aeee92bfe1c389d8b4c07230a12560577c66f0b23ca498fc"
+    },
+    {
+      "path": "index.html",
+      "bytes": 66538,
+      "sha256": "e251eab2f041c6487b97b3c08d978947b350f52153ff7b4a9341c3084b804d2a"
+    },
+    {
+      "path": "product-1.html",
+      "bytes": 83672,
+      "sha256": "9886251363d973e2bf7577a75794a25aefa530de710b2360c51ffe987103720e"
+    },
+    {
+      "path": "product-10.html",
+      "bytes": 83244,
+      "sha256": "d589a2d51fe0283ce8235875ea7d81e898f5c7cbed6d5fcaf10fdec8e94946d8"
+    },
+    {
+      "path": "product-100.html",
+      "bytes": 89613,
+      "sha256": "cf7ce0c4019ba6acfcd5325d0b4ac43a389a9ff1d84dac9be7a6cae29f6f12be"
+    },
+    {
+      "path": "product-101.html",
+      "bytes": 83785,
+      "sha256": "ec5957ccd046e1f107dc17adb01912786cb4e4183af78e40818c5a7864c6b44a"
+    },
+    {
+      "path": "product-102.html",
+      "bytes": 93704,
+      "sha256": "70805a6fb5f0ec6ba6bc0f7cefa9f5774f8d76fd7d96dde68d3c9f125172434b"
+    },
+    {
+      "path": "product-103.html",
+      "bytes": 90717,
+      "sha256": "dcb31aeb8d885c9c720a5d37ac7b4ad0e9661ffc7d68d9f4aa8114723d73a04c"
+    },
+    {
+      "path": "product-104.html",
+      "bytes": 85052,
+      "sha256": "a73b82dd250202e3855c3603408f7781a0fab56021ac28e2f1b8a01dc8081e96"
+    },
+    {
+      "path": "product-105.html",
+      "bytes": 83950,
+      "sha256": "6979f8349c214db6dbd6d9575528d9c7cb5e0b5f625267899b71998294eb6b8c"
+    },
+    {
+      "path": "product-106.html",
+      "bytes": 85527,
+      "sha256": "2636d66643a59435fe56e4e871f0b74c62d083d06d9482f991b0464905bfe3b8"
+    },
+    {
+      "path": "product-107.html",
+      "bytes": 98025,
+      "sha256": "94678488d237d0de7bd8e7340999b8e43da1a8d7b4cbf22d942c5341642116ad"
+    },
+    {
+      "path": "product-108.html",
+      "bytes": 96890,
+      "sha256": "8e561f1f197312f5908a679a803f8417ede43df7450a208b9d60e81040d04d5f"
+    },
+    {
+      "path": "product-11.html",
+      "bytes": 83237,
+      "sha256": "0f0b177b1d9b1ac8b30ae26ad142806c4988d76caf4fcf374ca04c3c185c519f"
+    },
+    {
+      "path": "product-12.html",
+      "bytes": 83142,
+      "sha256": "8e589af88d02048357654c6d121a15bc92a76388104c47198cbe072c63b9b2ef"
+    },
+    {
+      "path": "product-13.html",
+      "bytes": 83248,
+      "sha256": "8fff16058dcc736ba01f346f0dbe03630597696cb7ad91da32afcd4475a39106"
+    },
+    {
+      "path": "product-14.html",
+      "bytes": 83100,
+      "sha256": "2d2447665f77227c54eb78af47a54a5dc86dd7189e763d1e1aa1473ed2bc83ef"
+    },
+    {
+      "path": "product-15.html",
+      "bytes": 83237,
+      "sha256": "e5f5050f0d7f872806a3816df3d5de446f65c46b67ea1d18205a0921b2ce3952"
+    },
+    {
+      "path": "product-19.html",
+      "bytes": 83234,
+      "sha256": "95748c2c2d70e92e2d32c6a827cb4d211633ad5dceccf8ce6e3f4b7ba1c1bc4e"
+    },
+    {
+      "path": "product-2.html",
+      "bytes": 83411,
+      "sha256": "7e8af720d11f6a62728aeccd3184d14fd27f469f7e2dc3084ac86225ef11cf56"
+    },
+    {
+      "path": "product-20.html",
+      "bytes": 84156,
+      "sha256": "bef5cbb1dcd33b783e59866f782ff7258bedb4924fe4a49320542adf88121aef"
+    },
+    {
+      "path": "product-200.html",
+      "bytes": 81562,
+      "sha256": "c7925e41051cad8ba5149efcf4f9a526ae1664ddea7b7c20139351d77b8b3610"
+    },
+    {
+      "path": "product-201.html",
+      "bytes": 81716,
+      "sha256": "dcbb68b3605cbd1e06e74fc873edfaba5120f1a8bc35435ce8b9f4e61bb232c4"
+    },
+    {
+      "path": "product-202.html",
+      "bytes": 84015,
+      "sha256": "ab51d62d9beb32fbac82f04e4ae8d388e6bc1f5ca2f6054ff40cc40fbdb862f1"
+    },
+    {
+      "path": "product-203.html",
+      "bytes": 84009,
+      "sha256": "8a4a5eaa4a4265edf35caa84581e32acfffbb98a5d8e1a91575dcb2eda42cfde"
+    },
+    {
+      "path": "product-204.html",
+      "bytes": 84331,
+      "sha256": "79fc9dc568a61b65260b7dfa5a99141b4937f91833e02e6a6b818452324b8690"
+    },
+    {
+      "path": "product-205.html",
+      "bytes": 83552,
+      "sha256": "5b14c2f267b330e8affc28d7c706a010a6a18482247c2f7e5afb9f169861bdee"
+    },
+    {
+      "path": "product-206.html",
+      "bytes": 78794,
+      "sha256": "8386c2f50f0c0f08347c9529a314e23943b9301fd7c7bb4c99ec327772e3ae7b"
+    },
+    {
+      "path": "product-21.html",
+      "bytes": 83314,
+      "sha256": "ae07ae3a26d635f3d6592974704318eaf30162b2209960930ea88e9bddef4fd5"
+    },
+    {
+      "path": "product-22.html",
+      "bytes": 83346,
+      "sha256": "c07adca6b3ef5d10ccd55dabbb7d039a450fa2f13d142185550af467d03091de"
+    },
+    {
+      "path": "product-23.html",
+      "bytes": 83256,
+      "sha256": "f5138fd1bfa6be9c02f4961c74a62060bd9233b583ab3841fa4bccf0d5807628"
+    },
+    {
+      "path": "product-24.html",
+      "bytes": 83260,
+      "sha256": "549519ae989a3637fda5e4c5dd602b41dfbb30c99e9e15dc85524a75c5f9789c"
+    },
+    {
+      "path": "product-25.html",
+      "bytes": 91308,
+      "sha256": "d7bc8e5a40fc369065f12aa6cc803afc6bbb25b0eacda59410dff940de6454fa"
+    },
+    {
+      "path": "product-26.html",
+      "bytes": 83245,
+      "sha256": "10a961714d276cf56e7ba1513e62168792b1b3fe84f9eb3d1ab58d3154b51d51"
+    },
+    {
+      "path": "product-27.html",
+      "bytes": 83069,
+      "sha256": "cbee08fe2f1de8e4e265a6ec1e7f10e8ed290804425a84b1833644bdca207d21"
+    },
+    {
+      "path": "product-28.html",
+      "bytes": 83066,
+      "sha256": "1dad287a467bfcc73f78c25c4bcac3fb5c0fc318c703eab913f48a75410425da"
+    },
+    {
+      "path": "product-29.html",
+      "bytes": 83400,
+      "sha256": "8eae3e6b43de52de7cced2e866e920355ab4e81954bbabc74c7df6eaab4d12b3"
+    },
+    {
+      "path": "product-3.html",
+      "bytes": 83347,
+      "sha256": "4a2b348aae2b97f3e14917f108210892f1bdbd9e8d596b7296dae2a1d254acf8"
+    },
+    {
+      "path": "product-4.html",
+      "bytes": 89470,
+      "sha256": "2242c76c5781f7a386b1d16dabd568c2fcb0e4fee511e3a78a420beae24e5785"
+    },
+    {
+      "path": "product-5.html",
+      "bytes": 83251,
+      "sha256": "ac52624f3df7cb59490e3a831cefcf6ca6b1db769408d595163da6942172253d"
+    },
+    {
+      "path": "product-6.html",
+      "bytes": 83323,
+      "sha256": "a6a519bf49bcb523a7d8ded1e6f4c426ceec91bead098215fa0c8ab2db3a9541"
+    },
+    {
+      "path": "product-7.html",
+      "bytes": 83333,
+      "sha256": "150d52957216871901f4db61691108034a16009df15464ecd43c8ff6ec0fce9c"
+    },
+    {
+      "path": "product-8.html",
+      "bytes": 83297,
+      "sha256": "61ae28a60c62885d65085108451e8962de3efc4630e9fa61eea10eeeb7fd1639"
+    },
+    {
+      "path": "product-9.html",
+      "bytes": 83183,
+      "sha256": "0cb6b6aab2e0f2daf4ba74df2136a1504d70efab390569fc27d91f551072e15f"
+    },
+    {
+      "path": "product.html",
+      "bytes": 76441,
+      "sha256": "0225d4ae5feb962f5e31a6abb9e70321c665bcf32b39f0c93ffe65f206ee07c9"
+    },
+    {
+      "path": "reviews/admin-desktop.png",
+      "bytes": 118195,
+      "sha256": "9a902612db4c7b821b45b38892ae7e9f5f2f1596fe851d250c63303c1ec4913e"
+    },
+    {
+      "path": "reviews/admin-mobile.png",
+      "bytes": 95532,
+      "sha256": "0b6abe8a7cbe26e4e58248627bd56ab2de949b0facd362c3dd0a73667dfb0a74"
+    },
+    {
+      "path": "robuste-delivery-locations.json",
+      "bytes": 105332,
+      "sha256": "a2b77e907e6557b019d4d0612ec89a897ae25fb54b0903af323c18ac7091bd67"
+    },
+    {
+      "path": "robuste-ecotrack-admin.css",
+      "bytes": 8611,
+      "sha256": "fa5a6e87e207dfa2589172f33e67ef1fab19f68b9542d9abcb4c17e2c1da40f9"
+    },
+    {
+      "path": "robuste-ecotrack-admin.js",
+      "bytes": 56297,
+      "sha256": "c19d9b0ba9fee96be1dfa56da70c56e12ff140f23cbe1e945b43cbd3d208f206"
+    },
+    {
+      "path": "robuste-ecotrack-delivery.js",
+      "bytes": 30740,
+      "sha256": "c8c95a3a63a11287309b81fdf4b50751e25cc9911fab08ba9e7773db3af2cc8c"
+    },
+    {
+      "path": "tests/admin-workflows.browser.mjs",
+      "bytes": 18402,
+      "sha256": "f027b2b1c74e4fb7f7ca73bca9106b337bf3b964a143cd6f7e939ed53fd63a2d"
+    },
+    {
+      "path": "tests/ecotrack-features.test.mjs",
+      "bytes": 29212,
+      "sha256": "b65e9a7addd13c5af1fb7754eef041e8a3351ab495755c80fd9c143b808162d4"
+    },
+    {
+      "path": "tests/ecotrack-integration.test.mjs",
+      "bytes": 3976,
+      "sha256": "3791d73647854bc5ff0a4a605531d24d3a6e8be3aaeb7860ac5b9c42028f973f"
+    }
+  ]
+}

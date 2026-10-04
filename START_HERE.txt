@@ -1,0 +1,24 @@
+ROBUSTE ADMIN + ECOTRACK UPDATE - 2026-10-04
+
+This ZIP contains changed files for your EXISTING project. It is not a complete standalone website.
+
+WHAT TO DO
+1. Keep a backup of the current project, Worker source and Firestore rules.
+2. Extract this ZIP into your existing project folder, keeping the same paths and replacing matching files.
+3. Publish cloudflare-worker.js to your EXISTING Cloudflare Worker. Keep its current URL, environment settings, secrets and Cron Trigger.
+4. Publish firestore.rules in your EXISTING Firebase project's Firestore Rules editor. No new Firebase project is required.
+5. Upload the included HTML, frontend JavaScript, CSS and robuste-delivery-locations.json to your website host, keeping paths. Keep all other existing website files.
+6. Reload admin.html and sign in with your existing admin account.
+
+cloudflare-worker.js and firestore.rules are backend deployment files. They do not activate by uploading them to your website host. tests/, reviews/ and the Markdown documents are for your local review.
+
+DAILY SHIPPING FLOW
+Confirm order -> review and create courier draft -> print label -> hand parcel to courier -> confirm handover -> follow status and collection.
+
+WHAT CHANGED
+Clearer admin navigation, parcel filters/search, mobile cards, editing, Pickup requests, label previews and handover actions. Fixed checkout repricing, location fallback, related-parcel sync, product-cost saving, stale UI updates and courier/save error handling.
+
+VALIDATION
+34 backend/integration checks and 13 browser workflow checks passed. Browser and courier calls were mocked; no real parcels or messages were created. Live deployment is still required and the live connection has not been verified.
+
+See ADMIN_WORKFLOW_FIXES.md for the change list and ECOTRACK_SETUP.md for existing configuration details. PACKAGE_MANIFEST.json lists file hashes for this archive.

@@ -269,11 +269,13 @@
     try {
       var response = await fetch(worker + "/delivery/reference", { credentials: "omit", signal: controller && controller.signal });
       var data = await response.json();
-      if (!response.ok || !data.ok || !data.wilayas || !data.communes || !data.desks) throw new Error("reference_unavailable");
+      if (!response.ok || !data.ok || !data.available || !data.available.communes ||
+          !Array.isArray(data.wilayas) || !Array.isArray(data.communes) || !data.communes.length || !data.desks)
+        throw new Error("reference_unavailable");
       reference = data; lastError = "";
       try { sessionStorage.setItem("robuste_eco_reference:" + worker, JSON.stringify(data)); } catch (_) {}
       apply(); document.dispatchEvent(new CustomEvent("robuste:ecotrack-reference", { detail: data }));
-    } catch (_) { lastError = "reference_unavailable"; apply(); }
+    } catch (_) { lastError = "reference_unavailable"; await fetchFallback(); apply(); }
     finally { if (timer) clearTimeout(timer); }
   }
   async function fetchFallback() {
@@ -292,7 +294,8 @@
   function init() {
     worker = String(window.ROBUSTE_WORKER_URL || "https://robuste.aneslaidaoui06.workers.dev").replace(/\/+$/, "");
     try { var cached = JSON.parse(sessionStorage.getItem("robuste_eco_reference:" + worker) || "null");
-      if (cached && cached.wilayas && cached.communes && Date.now() - Date.parse(cached.fetchedAt) < 3600000) reference = cached;
+      if (cached && cached.available && cached.available.communes && cached.wilayas && cached.communes && cached.communes.length &&
+          Date.now() - Date.parse(cached.fetchedAt) < 3600000) reference = cached;
     } catch (_) {}
     window.onWilayaCommune = function () { apply(); };
     apply(); fetchFallback(); fetchLive();

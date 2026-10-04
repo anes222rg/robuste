@@ -56,6 +56,11 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Shared purchase costs used by the products and settlement screens.
+    match /config/productCosts {
+      allow read, write: if isAdmin();
+    }
+
     // All other config docs stay server-only.
     match /config/{doc} {
       allow read, write: if false;

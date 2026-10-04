@@ -116,12 +116,18 @@ function fixture(initial = { "order-1": order({ ecotrackTracking: "ECO_ONE" }) }
         let rows = [...docs].filter(([p]) => p.startsWith("orders/"));
         if (filter && filter.field.fieldPath === "ecotrackTracking") rows = rows.filter(([, e]) => typeof e.value.ecotrackTracking === "string" && e.value.ecotrackTracking);
         if (filter && filter.field.fieldPath === "phone") rows = rows.filter(([, e]) => e.value.phone === filter.value.stringValue);
-        rows.sort(([a, av], [b, bv]) => String(av.value.ecotrackTracking).localeCompare(String(bv.value.ecotrackTracking)) || a.localeCompare(b));
+        const byId = q.orderBy && q.orderBy[0].field.fieldPath === "__name__";
+        rows.sort(([a, av], [b, bv]) => byId ? a.localeCompare(b) : String(av.value.ecotrackTracking).localeCompare(String(bv.value.ecotrackTracking)) || a.localeCompare(b));
         if (q.startAt) {
-          const tracking = q.startAt.values[0].stringValue;
-          const id = q.startAt.values[1].referenceValue.split("/").pop();
-          rows = rows.filter(([p, e]) => String(e.value.ecotrackTracking) > tracking ||
-            e.value.ecotrackTracking === tracking && p.split("/").pop() > id);
+          if (byId) {
+            const id = q.startAt.values[0].referenceValue.split("/").pop();
+            rows = rows.filter(([p]) => p.split("/").pop() > id);
+          } else {
+            const tracking = q.startAt.values[0].stringValue;
+            const id = q.startAt.values[1].referenceValue.split("/").pop();
+            rows = rows.filter(([p, e]) => String(e.value.ecotrackTracking) > tracking ||
+              e.value.ecotrackTracking === tracking && p.split("/").pop() > id);
+          }
         }
         return response(rows.slice(0, q.limit || 100).map(([p, e]) => ({ document: document(p, e) })));
       }
@@ -396,6 +402,115 @@ test("report math preserves zero-cost fees and excludes Pickup from COD totals",
     { type: 3, amount: 5000, data: { ecotrackStage: "delivered", ecotrackPaymentState: "paid_reported" } }
   ];
   const s = context.window.RBEcoAdmin.statistics(rows);
-  assert.equal(s.paid, 1000); assert.equal(s.fees, 0); assert.equal(s.missingFees, 0); assert.equal(s.pickupCount, 1);
+  assert.equal(s.paid, 1000); assert.equal(s.fees, 0); assert.equal(s.missingFees, 1); assert.equal(s.pickupCount, 1);
   assert.ok(context.window.RBEcoAdmin.csvCell("=HYPERLINK(\"bad\")").startsWith('"\'='));
+});
+
+test("invalid commune rejects checkout before any order can be persisted", async () => {
+  const f = fixture({});
+  try {
+    const response = await worker.default.fetch(new Request("https://worker.test/", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order: order({ commune: "Not Served", totalPrice: 1 }) })
+    }), f.env, {});
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "commune_not_served");
+    assert.ok(!f.calls.some(c => c.method === "POST" && c.url.endsWith("/documents/orders")));
+  } finally { f.restore(); }
+});
+
+test("related parcels continue scheduled and manual sync after primary draft deletion", async () => {
+  const f = fixture({ "order-1": order({ ecotrackTracking: "ECO_ONE",
+    ecotrackRelatedParcels: [{ tracking: "ECO_RELATED", ecotrackType: 3 }] }) });
+  f.live.ECO_RELATED = { status: "en_livraison" };
+  try {
+    assert.equal((await f.action({ id: "order-1", action: "delete", confirm: true })).status, 200);
+    assert.equal((await worker.ecoScheduledSync(f.env)).checked, 1);
+    assert.equal(f.read("order-1").ecotrackRelatedParcels[0].ecotrackStage, "out_for_delivery");
+    const req = new Request("https://worker.test/admin/ecotrack/sync", {
+      method: "POST", headers: { "X-Admin-Key": f.env.ADMIN_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: ["order-1"] })
+    });
+    const response = await worker.default.fetch(req, f.env, {});
+    assert.equal((await response.json()).checked, 1);
+  } finally { f.restore(); }
+});
+
+test("scheduler advances through unlinked orders and migrates its old cursor safely", async () => {
+  const initial = {};
+  for (let i = 0; i < 60; i++) initial["order-" + String(i).padStart(2, "0")] = order({ ecotrackTracking: null });
+  initial["order-60"] = order({ ecotrackTracking: "ECO_LAST" });
+  const f = fixture(initial);
+  f.set("config/ecotrackSync", { cursor: { tracking: "ECO_OLD", id: "order-60" } });
+  try {
+    assert.equal((await worker.ecoScheduledSync(f.env)).checked, 0);
+    assert.equal(f.docs.get("config/ecotrackSync").value.cursor.id, "order-49");
+    assert.equal((await worker.ecoScheduledSync(f.env)).checked, 1);
+    assert.equal(f.docs.get("config/ecotrackSync").value.cursor, null);
+  } finally { f.restore(); }
+});
+
+async function validateBatch(f, tracking = "ECO_ONE") {
+  const req = new Request("https://worker.test/admin/ecotrack/validate", {
+    method: "POST", headers: { "X-Admin-Key": f.env.ADMIN_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ ids: ["order-1"], trackings: [tracking] })
+  });
+  const response = await worker.default.fetch(req, f.env, {});
+  return { status: response.status, data: await response.json() };
+}
+
+test("batch dispatch validates ownership and never dispatches an unlinked tracking", async () => {
+  const f = fixture();
+  try {
+    const r = await validateBatch(f, "OTHER_PARCEL");
+    assert.equal(r.data.ok, false); assert.equal(r.data.validated, 0);
+    assert.ok(!f.calls.some(c => c.url.includes("/valid/order")));
+  } finally { f.restore(); }
+});
+
+test("batch dispatch reports database failure after a successful courier action", async () => {
+  const f = fixture(); f.failOrderPatchOnce = true;
+  try {
+    const r = await validateBatch(f);
+    assert.equal(r.data.ok, false); assert.equal(r.data.validated, 0);
+    assert.equal(r.data.results[0].courierApplied, true);
+    assert.equal(f.read("order-1").ecotrackValidated, undefined);
+  } finally { f.restore(); }
+});
+
+test("repeating a confirmed dispatch does not call the courier twice", async () => {
+  const f = fixture();
+  try {
+    assert.equal((await validateBatch(f)).data.validated, 1);
+    assert.equal((await validateBatch(f)).data.validated, 1);
+    assert.equal(f.calls.filter(c => c.url.includes("/valid/order")).length, 1);
+  } finally { f.restore(); }
+});
+
+test("courier rejection cannot be reported as a successful batch dispatch", async () => {
+  const f = fixture(), original = globalThis.fetch;
+  globalThis.fetch = async (input, init) => String(input).includes("/valid/order")
+    ? new Response(JSON.stringify({ success: false, message: "Parcel not ready" })) : original(input, init);
+  try {
+    const r = await validateBatch(f);
+    assert.equal(r.data.ok, false); assert.equal(r.data.validated, 0);
+    assert.equal(f.read("order-1").ecotrackValidated, undefined);
+  } finally { f.restore(); }
+});
+
+test("incomplete live communes do not replace usable customer fallback locations", async () => {
+  const original = readFileSync(new URL("../robuste-ecotrack-delivery.js", import.meta.url), "utf8");
+  const source = original.slice(0, original.lastIndexOf("})();")) +
+    "window.setReference = function(data){reference=data;}; window.fetchLive = fetchLive;})();";
+  const fallback = { available: { wilayas: true, communes: true, fees: false }, wilayas: [{ code: 19 }],
+    communes: [{ wilaya: 19, name: "El Eulma" }], desks: [] };
+  const context = { window: {}, document: { readyState: "loading", baseURI: "https://store.test/",
+    addEventListener() {}, querySelectorAll() { return []; }, getElementById() { return null; } },
+    AbortController, setTimeout() { return 1; }, clearTimeout() {}, sessionStorage: { setItem() {} },
+    fetch: async () => new Response(JSON.stringify({ ok: true, wilayas: [{ code: 19 }], communes: [], desks: [],
+      available: { wilayas: true, communes: false, fees: true } })) };
+  vm.runInNewContext(source, context); context.window.setReference(fallback);
+  await context.window.fetchLive();
+  assert.equal(context.window.RBEcoDelivery.locationsReady(), true);
+  assert.equal(context.window.RBEcoDelivery.communeList(19).length, 1);
 });
