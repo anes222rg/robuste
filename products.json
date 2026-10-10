@@ -379,7 +379,7 @@
   {
     "id": 11,
     "title": "PETRIN 1000 W PK2",
-    "price": 16900,
+    "price": 15000,
     "old_price": 22000,
     "images": [
       "images/pètrin pk2 noir.jpg",
@@ -629,7 +629,7 @@
   {
     "id": 25,
     "title": "PETRIN PRO MAX 8L 1800W",
-    "price": 19900,
+    "price": 20600,
     "old_price": 24900,
     "images": [
       "images/petrin promax noir.jpg",
@@ -648,7 +648,7 @@
       "3 ملحقات: عجين · بيض · خلط",
       "الدفع عند الاستلام · 58 ولاية"
     ],
-    "stock": 12,
+    "stock": 2,
     "category": "cuisine",
     "badge": "عرض خاص"
   },
