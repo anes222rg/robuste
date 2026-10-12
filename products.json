@@ -312,7 +312,7 @@
       "Fonction pulse",
       "Nettoyage facile"
     ],
-    "stock": 9,
+    "stock": 0,
     "category": "cuisine",
     "badge": ""
   },
@@ -332,7 +332,7 @@
       "Couvercle de sécurité",
       "Moteur puissant 350W"
     ],
-    "stock": 6,
+    "stock": 0,
     "category": "cuisine",
     "badge": "Nouveau"
   },
@@ -352,7 +352,7 @@
       "Lames en acier inoxydable",
       "Fonction reverse"
     ],
-    "stock": 11,
+    "stock": 0,
     "category": "cuisine",
     "badge": ""
   },
@@ -372,7 +372,7 @@
       "Multi-fonctions",
       "Sécurité enfant"
     ],
-    "stock": 8,
+    "stock": 0,
     "category": "cuisine",
     "badge": ""
   },
@@ -414,7 +414,7 @@
       "Lames en inox",
       "Design compact"
     ],
-    "stock": 13,
+    "stock": 0,
     "category": "cuisine",
     "badge": ""
   },
@@ -606,7 +606,7 @@
   },
   {
     "id": 29,
-    "title": "FRITEUSE ELECTRIQUE SANS HUILE 5.7 TACTILE",
+    "title": "FRITEUSE ELECTRIQUE SANS HUILE 8L TACTILE",
     "price": 16600,
     "old_price": 18000,
     "images": [
@@ -614,10 +614,10 @@
       "images/air fryer friture max 5.7l 2.webp",
       "images/air fryer friture max 5.7l 3.webp"
     ],
-    "description_short": "Friteuse à air chaud sans huile 5.7L tactile",
-    "description_long": "Friteuse à air chaud 5.7L avec écran tactile et multiple programmes de cuisson. Moderne et facile d'utilisation.",
+    "description_short": "Friteuse à air chaud sans huile 8L tactile",
+    "description_long": "Friteuse à air chaud 8L avec écran tactile et multiple programmes de cuisson. Moderne et facile d'utilisation.",
     "features": [
-      "Capacité 5.7L",
+      "Capacité 8L",
       "Ecran tactile",
       "8 programmes automatiques",
       "Design moderne"
@@ -648,7 +648,7 @@
       "3 ملحقات: عجين · بيض · خلط",
       "الدفع عند الاستلام · 58 ولاية"
     ],
-    "stock": 1,
+    "stock": 0,
     "category": "cuisine",
     "badge": "عرض خاص"
   },
@@ -688,7 +688,7 @@
       "Facile à nettoyer",
       "Design moderne"
     ],
-    "stock": 25,
+    "stock": 0,
     "category": "cuisine",
     "badge": "Nouveau"
   },
@@ -764,7 +764,7 @@
   {
     "id": 101,
     "title": "ASPIRATEUR SOUFFLEUR A MAIN",
-    "price": 4400,
+    "price": 3950,
     "old_price": 5500,
     "images": [
       "images/ASPIRATEUR SOUFFLEUR A MAIN 3.png",
