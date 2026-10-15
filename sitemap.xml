@@ -427,4 +427,11 @@
       <image:title>Défroisseur ROBUSTE AeroSteam Pro Style 2 1550W</image:title>
     </image:image>
   </url>
+  <url>
+    <loc>https://www.robustedz.store/product-109.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image><image:loc>https://www.robustedz.store/images/maxvita/maxvita-hero.webp</image:loc><image:title>ROBUSTE maxVita 600</image:title></image:image>
+  </url>
 </urlset>

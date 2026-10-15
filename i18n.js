@@ -384,6 +384,8 @@
     [`دفرويسور ROBUSTE AeroSteam Pro Style 2 يساعدك على تخفيف تكمشات لباسك. تقنية الشفط تساعد على تثبيت القماش أثناء تمرير البخار. بقوة 1550 واط، يسخن في 29 ثانية، وله مستويان للبخار ومستويان للشفط، خزان ماء 180 مل، لوحة تحكم باللمس، كابل 1.9 متر وتوقف تلقائي بعد 8 دقائق. اتبعي دليل الجهاز وملصق العناية بالقماش قبل الاستعمال. الدفع عند الاستلام؛ مصاريف التوصيل تظهر بعد اختيار الولاية.`, `The ROBUSTE AeroSteam Pro Style 2 helps smooth clothing creases. Suction helps hold the fabric while you steam. It has 1550 W of power, heats up in 29 seconds, and offers two steam levels, two suction levels, a 180 ml tank, touch controls, a 1.9 m cord and automatic shutoff after 8 minutes. Follow the manual and the garment care label. Pay on delivery; shipping costs appear after you select your wilaya.`, `Le ROBUSTE AeroSteam Pro Style 2 aide à atténuer les plis. L'aspiration aide à maintenir le tissu pendant le passage de la vapeur. Il offre 1550 W de puissance, une mise en chauffe en 29 secondes, deux niveaux de vapeur et d'aspiration, un réservoir de 180 ml, des commandes tactiles, un cordon de 1,9 m et un arrêt automatique après 8 minutes. Suivez la notice et l'étiquette d'entretien du textile. Paiement à la livraison ; les frais s'affichent après le choix de la wilaya.`]
   ];
 
+  // Optional page/product copy, loaded before this shared translator.
+  if (Array.isArray(window.RB_I18N_ROWS)) ROWS = ROWS.concat(window.RB_I18N_ROWS);
   var T = {};
   for (var i = 0; i < ROWS.length; i++) { T[normKey(ROWS[i][0])] = { en: ROWS[i][1], fr: ROWS[i][2] }; }
 

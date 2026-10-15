@@ -964,5 +964,30 @@
     "stock": 10,
     "category": "maison",
     "badge": "Nouveau"
+  },
+  {
+    "id": 109,
+    "title": "عصارة الحمضيات ROBUSTE maxVita 600",
+    "price": 3500,
+    "old_price": 4000,
+    "images": [
+      "images/maxvita/maxvita-hero.webp",
+      "images/maxvita/maxvita-in-use.webp",
+      "images/maxvita/maxvita-lifestyle.webp",
+      "images/maxvita/maxvita-detail.webp"
+    ],
+    "description_short": "عصير طازج تحضّرو في دارك. عصارة كهربائية بسعة 0.6 لتر ودوران في اتجاهين، للبرتقال والليمون والجريب فروت والرمان.",
+    "description_long": "ابدأ نهارك بطعم العصير الطازج مع ROBUSTE maxVita 600. للبرتقال والليمون والجريب فروت والرمان، مع دوران في اتجاهين وإبريق مدرّج بسعة 0.6 لتر ومقبض وفوهة للصب. تأتي بغطاء لحفظ نكهة العصير وبقدرة 30 واط. حضّر الثمرة واعصرها حسب تعليمات الجهاز.",
+    "features": [
+      "سعة 0.6 لتر · إبريق مدرّج",
+      "دوران في اتجاهين: يمين / يسار",
+      "للحمضيات والرمان",
+      "قدرة 30 واط · غطاء مرفق"
+    ],
+    "stock": null,
+    "category": "cuisine",
+    "badge": "maxVita",
+    "model": "MAXVITA 600",
+    "promotion_end": "2026-10-31"
   }
 ]
