@@ -18,12 +18,16 @@ The supplied packaging photos support:
 
 The visible jug has a handle, pouring lip and measurement markings.
 The original box photo is linked beside the specification table.
-Pomegranate compatibility has not been established and is not advertised.
-No cold/flu prevention claims, invented reviews, former price or scarcity counter were added.
+The seller explicitly confirmed pomegranate compatibility on 2026-10-15; it is included in the copy.
+No cold/flu prevention claims, invented reviews or scarcity counter were added.
+Two-cone promotional copy and specification row were removed at the seller’s request.
 
 ## Commercial settings
 
 - Price: 3,500 DZD, from the seller's instruction.
+- Former price: 4,000 DZD. Promotion displayed as ending 31 October 2026.
+- The end date is copy and structured metadata; catalog prices do not automatically change.
+- Repeated delivery disclaimer and delivery FAQ were removed; checkout still calculates fees.
 - Delivery is charged separately using the existing delivery integration.
 - Existing cash-on-delivery checkout, cart and tracking are retained.
 - Exact stock quantity was not supplied. `stock: null` means quantity unspecified;
@@ -36,13 +40,15 @@ No cold/flu prevention claims, invented reviews, former price or scarcity counte
 Four seller-supplied generated images are converted to WebP without changing their content.
 The printed markings inside those generated images are illustrative; the specification
 table uses the original packaging, not generated markings.
-The page is Arabic, with local Readex Pro font, Bootstrap icons and Bootstrap JS.
+The page supports Arabic (RTL), French and English (LTR), with local Readex Pro font, Bootstrap icons and Bootstrap JS.
 License files accompany the vendor assets.
 
 ## Files to upload together
 
 - `product-109.html`
 - `maxvita.css`
+- `maxvita-i18n.js`
+- `i18n.js`
 - `products.json`
 - `main.js`
 - `index.html` (homepage script cache version)
@@ -60,7 +66,8 @@ No commit, push or production deployment was performed.
 `tests/maxvita.browser.mjs` checks product metadata, gallery keyboard controls,
 3500 DZD pricing, separate delivery fees, quantity totals, cart, phone validation,
 invalid quantities, a mocked successful order, narrow layouts, sticky CTA, FAQ,
-dark theme, zero-stock guards and homepage availability.
+dark theme, zero-stock guards, homepage availability, three language layouts,
+translation completeness, former price and promotion metadata.
 All order/courier/analytics API requests are intercepted; no test order is sent to the store.
 
 Run a local HTTP server on port 8093, then run the test with Playwright available.

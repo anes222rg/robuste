@@ -516,6 +516,13 @@
     } catch (e) { /* never break the page */ }
     updateSwitcherLabel(lang);
     window.dispatchEvent(new CustomEvent("robuste:languagechange", { detail: { lang: lang } }));
+    // Checkout listeners can rebuild summary text during the language event.
+    if (window.RB_PID === 109 && walker) {
+      walker.currentNode = document.body;
+      nodes = [];
+      while ((cur = walker.nextNode())) nodes.push(cur);
+      for (var k = 0; k < nodes.length; k++) translateNode(nodes[k], lang);
+    }
     if (observer) connectObserver();
   }
 

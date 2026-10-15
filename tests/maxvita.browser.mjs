@@ -14,7 +14,8 @@ const reference={ok:true,fetchedAt:new Date().toISOString(),wilayas:[{code:19,na
 let checks=0;
 async function check(name,fn){await fn();console.log('PASS '+name);checks++;}
 try {
-  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+  const context=await browser.newContext({locale:'en-US',viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+  await context.addInitScript(()=>{if(!localStorage.getItem('site_lang'))localStorage.setItem('site_lang','ar');});
   const page=await context.newPage(),errors=[],orders=[];
   let outOfStock=false;
   page.on('pageerror',e=>errors.push(e.message));
@@ -45,7 +46,7 @@ try {
     assert.match(await page.locator('h1').innerText(),/maxVita/);
     const ld=JSON.parse(await page.locator('#product-jsonld').textContent());
     assert.equal(ld.sku,'109');assert.equal(ld.offers.price,'3500.00');assert.equal(ld.mpn,'MAXVITA 600');
-    assert.equal(await page.locator('.rb-promo,.rb-stock').count(),0);
+    assert.equal(await page.locator('.rb-stock').count(),0);assert.equal(ld.offers.priceValidUntil,'2026-10-31');assert.match(await page.locator('.old-price').last().innerText(),/4,?000/);
     assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'),'https://www.robustedz.store/product-109.html');
   });
   await check('all product assets load and the gallery changes with keyboard',async()=>{
@@ -102,6 +103,23 @@ try {
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.screenshot({path:resolve(output,'mobile-top.png')});
     await page.screenshot({path:resolve(output,'mobile-full.png'),fullPage:true});
+  });
+  await check('Arabic, French and English copy and narrow layouts',async()=>{
+    for(const lang of ['en','fr','ar']){
+      await page.click('#i18nBtn');await page.click('#i18nMenu [data-lang="'+lang+'"]');
+      await page.waitForTimeout(300);
+      assert.equal(await page.locator('html').getAttribute('lang'),lang);
+      for(const width of [320,390,1440]){
+        await page.setViewportSize({width,height:900});
+        assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'overflow '+lang+' '+width);
+      }
+      if(lang!=='ar'){
+        const remaining=await page.evaluate(()=>{let w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),n,out=[];while(n=w.nextNode()){if(/[\u0600-\u06ff]/.test(n.textContent)&&n.parentElement.getClientRects().length&&!['SCRIPT','STYLE','OPTION'].includes(n.parentElement.tagName))out.push(n.textContent.trim());}return [...new Set(out)];});
+        assert.deepEqual(remaining,[], 'Untranslated visible text in '+lang);
+      }
+      await page.setViewportSize({width:390,height:844});
+      await page.screenshot({path:resolve(output,'mobile-'+lang+'.png'),fullPage:true});
+    }
   });
   await check('no browser runtime errors',async()=>assert.deepEqual(errors,[]));
   await check('dark theme and narrow viewport remain usable',async()=>{
