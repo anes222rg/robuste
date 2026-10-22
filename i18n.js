@@ -366,7 +366,7 @@
     [`نخلّص قبل ما يوصل الطلب؟`, `Do I pay before delivery?`, `Dois-je payer avant la livraison ?`],
     [`الدفع عند الاستلام. فريقنا يتواصل معاك لتأكيد الطلب.`, `Pay on delivery. Our team will contact you to confirm the order.`, `Paiement à la livraison. Notre équipe vous contactera pour confirmer la commande.`],
     [`جاهزة تنحّي تكمشات لباسك؟`, `Ready to smooth out creases?`, `Prête à atténuer les plis ?`],
-    [`سعر AeroSteam هو 8,800 دج. اختاري ولايتك وشوفي المجموع قبل التأكيد.`, `AeroSteam costs 8,800 DA. Choose your wilaya to see the total before confirming.`, `L'AeroSteam coûte 8 800 DA. Choisissez votre wilaya pour voir le total avant de confirmer.`],
+    [`سعر AeroSteam هو 8,500 دج. اختاري ولايتك وشوفي المجموع قبل التأكيد.`, `AeroSteam costs 8,500 DA. Choose your wilaya to see the total before confirming.`, `L'AeroSteam coûte 8 500 DA. Choisissez votre wilaya pour voir le total avant de confirmer.`],
     [`اطلبي AeroSteam الآن`, `Order AeroSteam now`, `Commandez l'AeroSteam`],
     [`NOUVEAU`, `NEW`, `NOUVEAU`],
     [`الاسم الكامل`, `Full name`, `Nom complet`],
